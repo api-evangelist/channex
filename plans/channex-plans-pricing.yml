@@ -1,0 +1,105 @@
+specification: API Commons Plans
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
+provider: Channex
+providerId: channex
+created: '2026-06-25'
+modified: '2026-06-25'
+reconciled: false
+tags:
+- Hospitality
+- Channel Manager
+- Hotel Distribution
+- OTA
+- Bookings
+- Plans
+description: >-
+  Channex uses transparent per-property (and per-unit for vacation rentals)
+  monthly pricing rather than per-call API metering. A direct Standard plan is
+  offered to individual properties, and a WhiteLabel plan is offered to tech
+  providers (PMS, booking engines) who resell Channex connectivity under their
+  own brand. Published list prices vary by source and over time; treat the
+  figures below as representative and verify current pricing with Channex.
+notes: >-
+  Channex primarily sells wholesale/white-label to PMS and booking-engine
+  providers. Per-property and per-unit fees, included channel counts, and
+  white-label terms are negotiated; confirm current numbers with Channex sales.
+sources:
+- https://channex.io/
+- https://www.hotelminder.com/partner=Channex
+- https://www.capterra.com/p/10036936/Channex/
+plans:
+- id: channex-standard
+  name: Standard
+  type: subscription
+  description: >-
+    Direct per-property channel manager plan for individual properties
+    connecting their inventory to OTAs.
+  entries:
+  - label: Per Property
+    name: standard_per_property
+    type: flat
+    metric: property
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: from ~$30 per property / month (verify current pricing)
+    userMultiplied: true
+  elements:
+  - name: Properties
+  - name: Room Types
+  - name: Rate Plans
+  - name: Availability and Restrictions (ARI)
+  - name: Bookings
+  - name: Webhooks
+- id: channex-whitelabel
+  name: WhiteLabel
+  type: subscription
+  description: >-
+    White-label channel manager API for PMS and booking-engine providers who
+    resell Channex OTA connectivity under their own brand, including the full
+    Channel API.
+  entries:
+  - label: Platform Fee
+    name: whitelabel_platform
+    type: flat
+    metric: account
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: from ~$130 / month base (verify current pricing)
+    userMultiplied: false
+  - label: Hotel Property Fee
+    name: whitelabel_hotel
+    type: flat
+    metric: property
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: per-property monthly fee (volume-tiered; contact sales)
+    userMultiplied: true
+  - label: Vacation Rental Unit Fee
+    name: whitelabel_vacation_rental
+    type: flat
+    metric: unit
+    limit: -1
+    timeFrame: month
+    geo: global
+    unit: 1
+    price: per-unit monthly fee (volume-tiered; contact sales)
+    userMultiplied: true
+  elements:
+  - name: Channels
+  - name: Channel Mappings
+  - name: Properties
+  - name: Room Types
+  - name: Rate Plans
+  - name: Availability and Restrictions (ARI)
+  - name: Bookings
+  - name: Webhooks
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

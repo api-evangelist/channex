@@ -1,0 +1,177 @@
+aid: channex
+url: https://raw.githubusercontent.com/api-evangelist/channex/refs/heads/main/apis.yml
+name: Channex
+kind: company
+description: Channex is a white-label hotel channel manager API that gives Property
+  Management Systems and booking engines a single JSON-based REST integration to distribute
+  availability, rates, and restrictions (ARI) to Booking.com, Airbnb, Expedia, and
+  50+ other OTAs, and to receive bookings back in real time via webhooks.
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+tags:
+- Hospitality
+- Channel Manager
+- Hotel Distribution
+- OTA
+- Bookings
+created: '2026-06-25'
+modified: '2026-06-25'
+specificationVersion: '0.19'
+apis:
+- aid: channex:properties
+  name: Channex Properties API
+  tags:
+  - Properties
+  - Hotels
+  - Inventory
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Create, read, update, and delete properties (hotels, apartments, vacation
+    rentals) including location, currency, content, photos, facilities, and settings.
+- aid: channex:room-types
+  name: Channex Room Types API
+  tags:
+  - Room Types
+  - Inventory
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Manage room types under a property, including counts of rooms, occupancy
+    (adults, children, infants), default occupancy, room kind (room or dorm), and content.
+- aid: channex:rate-plans
+  name: Channex Rate Plans API
+  tags:
+  - Rate Plans
+  - Pricing
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Manage pricing plans for room types - sell mode (per room / per person),
+    rate mode (manual, derived, auto, cascade), occupancy price options, meal types,
+    and stay restrictions.
+- aid: channex:availability-restrictions-ari
+  name: Channex Availability and Restrictions (ARI) API
+  tags:
+  - ARI
+  - Availability
+  - Restrictions
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/ari
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/ari
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Read and push Availability, Rates, and Inventory (ARI) - update room-type
+    availability and rate-plan rates and restrictions (min/max stay, stop sell, closed
+    to arrival/departure) by date or date range.
+- aid: channex:bookings
+  name: Channex Bookings API
+  tags:
+  - Bookings
+  - Reservations
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Retrieve bookings and booking revisions, consume the revisions feed
+    for PMS sync, acknowledge revisions, and report no-show or invalid-card outcomes.
+- aid: channex:channels
+  name: Channex Channels API
+  tags:
+  - Channels
+  - OTA
+  - Distribution
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/channel-api
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/channel-api
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: List, add, configure, and remove distribution channels (OTA connections
+    such as Booking.com, Airbnb, and Expedia) including channel settings and room/rate
+    mappings. Available to white-label accounts.
+- aid: channex:webhooks
+  name: Channex Webhooks API
+  tags:
+  - Webhooks
+  - Events
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+  humanURL: https://docs.channex.io/api-v.1-documentation/webhook-collection
+  baseURL: https://secure.channex.io/api/v1
+  properties:
+  - url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+    type: Documentation
+  - url: openapi/channex-openapi.yml
+    type: OpenAPI
+  - url: collections/channex.postman_collection.json
+    type: PostmanCollection
+  - url: collections/channex.opencollection.json
+    type: OpenCollection
+  description: Register callback URLs to receive real-time event notifications (ari,
+    booking, message, sync_error, channel, and review events) filtered by event mask
+    and property, with custom headers and a test endpoint.
+common:
+- type: GitHubOrganization
+  url: https://github.com/ChannexIO
+- type: LinkedIn
+  url: https://www.linkedin.com/company/channex-io
+- type: Website
+  url: https://channex.io/
+- type: Documentation
+  url: https://docs.channex.io/
+- type: Plans
+  url: plans/channex-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/channex-rate-limits.yml
+- type: FinOps
+  url: finops/channex-finops.yml
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

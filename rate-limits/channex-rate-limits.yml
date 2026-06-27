@@ -1,0 +1,58 @@
+specification: API Commons Rate Limits
+specificationVersion: '0.1'
+schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
+provider: Channex
+providerId: channex
+created: '2026-06-25'
+modified: '2026-06-25'
+reconciled: false
+tags:
+- Hospitality
+- Channel Manager
+- Hotel Distribution
+- OTA
+- Bookings
+- Rate Limiting
+- Quotas
+- Throttling
+description: >-
+  Channex applies request rate limiting on its v1 REST API to protect platform
+  stability, and recommends batching ARI updates (availability, rates, and
+  restrictions) into a single `values` array rather than issuing many small
+  per-date requests. Specific per-account request-per-second / request-per-minute
+  thresholds are not published in the public documentation and are not reconciled
+  in this artifact.
+notes: >-
+  Verify concrete rate-limit thresholds, throttling headers, and recommended
+  batch sizes with Channex support or the white-label onboarding materials on
+  reconciliation.
+sources:
+- https://docs.channex.io/api-v.1-documentation/api-reference
+- https://docs.channex.io/api-v.1-documentation/ari
+- https://channex.io/
+responseCodes:
+  throttled: 429
+limits:
+- name: Request Rate Limit
+  scope: account
+  metric: requests
+  limit: see provider documentation
+  notes: Per-API-key request throttling; specific thresholds not publicly published.
+- name: ARI Batch Update
+  scope: account
+  metric: values
+  limit: batch updates into a single values array
+  notes: ARI updates should be sent as batched values arrays rather than many single-date requests.
+- name: Pagination Limit
+  scope: request
+  metric: records
+  limit: 100
+  notes: List endpoints are paginated; default page limit is 10, maximum 100 per page.
+policies:
+- name: Batching
+  description: Combine availability and rate/restriction changes into batched values arrays to reduce request volume.
+- name: Backoff Strategy
+  description: Clients should implement exponential backoff with jitter and honor Retry-After on HTTP 429 responses.
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

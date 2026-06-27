@@ -1,0 +1,79 @@
+aid: channex
+name: Channex
+review:
+  question: Does Channex expose a documented public WebSocket API?
+  answer: false
+  date: '2026-06-25'
+  reviewer: API Evangelist
+  asyncapiSpecCreated: false
+  asyncapiScopeNote: |
+    No AsyncAPI document was created. Channex's real-time, event-driven
+    surface is delivered as outbound HTTP webhook callbacks (the client
+    registers a callback_url and Channex POSTs event payloads to it), not as
+    a WebSocket or SSE stream the client connects to. Webhooks are modeled in
+    the OpenAPI definition as the /webhooks management endpoints; the callback
+    delivery itself is a one-way server-to-client HTTP POST.
+findings:
+  summary: |
+    Channex does not publish a documented public WebSocket API. The Channex
+    platform exposes a JSON-based REST (HTTPS) API under
+    https://secure.channex.io/api/v1 authenticated with the `user-api-key`
+    header. Real-time delivery of bookings, ARI changes, messages, and channel
+    events is handled through outbound HTTP webhooks (callback_url + event_mask)
+    rather than a bidirectional WebSocket (ws:// or wss://) connection. No
+    realtime WebSocket endpoint is documented for bookings, ARI, or messaging
+    as of the review date.
+  transports:
+    - protocol: REST
+      scheme: https
+      baseURL: https://secure.channex.io/api/v1
+      documented: true
+    - protocol: Webhook
+      scheme: https
+      note: Outbound HTTP POST callbacks to a client-registered callback_url, filtered by event_mask. One-way server-to-client; not WebSocket.
+      documented: true
+    - protocol: WebSocket
+      scheme: wss
+      documented: false
+      note: No WebSocket endpoint is documented in the Channex API v1 reference, channel API, or webhook documentation as of the review date.
+  endpointsConfirmedRest:
+    - GET    https://secure.channex.io/api/v1/properties
+    - POST   https://secure.channex.io/api/v1/properties
+    - GET    https://secure.channex.io/api/v1/properties/{id}
+    - PUT    https://secure.channex.io/api/v1/properties/{id}
+    - DELETE https://secure.channex.io/api/v1/properties/{id}
+    - GET    https://secure.channex.io/api/v1/room_types
+    - GET    https://secure.channex.io/api/v1/rate_plans
+    - GET    https://secure.channex.io/api/v1/availability
+    - POST   https://secure.channex.io/api/v1/availability
+    - GET    https://secure.channex.io/api/v1/restrictions
+    - POST   https://secure.channex.io/api/v1/restrictions
+    - GET    https://secure.channex.io/api/v1/bookings
+    - GET    https://secure.channex.io/api/v1/bookings/{id}
+    - GET    https://secure.channex.io/api/v1/booking_revisions/feed
+    - POST   https://secure.channex.io/api/v1/booking_revisions/{id}/ack
+    - GET    https://secure.channex.io/api/v1/channels
+    - GET    https://secure.channex.io/api/v1/webhooks
+    - POST   https://secure.channex.io/api/v1/webhooks
+    - POST   https://secure.channex.io/api/v1/webhooks/test
+sources:
+  - url: https://docs.channex.io/api-v.1-documentation/api-reference
+    type: APIReference
+    note: Documents REST base URL and the user-api-key header; all documented endpoints are HTTPS REST.
+  - url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+    type: Documentation
+    note: Real-time events are delivered via outbound HTTP webhook callbacks, not WebSocket.
+  - url: https://docs.channex.io/api-v.1-documentation/ari
+    type: Documentation
+    note: ARI is read and updated via REST POST to /availability and /restrictions; no WebSocket streaming.
+  - url: https://channex.io/
+    type: Website
+    note: Describes a JSON-based REST channel manager API and a Push API for real-time ARI and booking delivery; no WebSocket surface mentioned.
+actions:
+  asyncapiPath: null
+  apisYmlUpdated: true
+  reason: |
+    No WebSocket protocol surface exists, and the event-driven surface is
+    outbound HTTP webhooks rather than a client-consumable WebSocket/SSE
+    stream, so no AsyncAPI document was authored. The webhook management
+    endpoints are captured in the OpenAPI definition instead.

@@ -1,0 +1,297 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Channex API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "apikey": {
+        "key": "user-api-key",
+        "value": "{{apiKey}}",
+        "in": "header"
+      }
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Properties",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List properties", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/properties" },
+          "docs": "Retrieve a paginated list of properties associated with the user."
+        },
+        {
+          "info": { "name": "Create property", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/properties",
+            "body": { "type": "json", "data": "{\"property\":{\"title\":\"\",\"currency\":\"\"}}" }
+          },
+          "docs": "Create a new property."
+        },
+        {
+          "info": { "name": "Get property", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/properties/:id" },
+          "docs": "Retrieve a specific property by ID."
+        },
+        {
+          "info": { "name": "Update property", "type": "http" },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/properties/:id",
+            "body": { "type": "json", "data": "{\"property\":{}}" }
+          },
+          "docs": "Update property information."
+        },
+        {
+          "info": { "name": "Delete property", "type": "http" },
+          "http": { "method": "DELETE", "url": "https://secure.channex.io/api/v1/properties/:id" },
+          "docs": "Remove a property."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Room Types",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List room types", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/room_types" },
+          "docs": "List room types."
+        },
+        {
+          "info": { "name": "Create room type", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/room_types",
+            "body": { "type": "json", "data": "{\"room_type\":{\"property_id\":\"\",\"title\":\"\",\"count_of_rooms\":0,\"occ_adults\":1,\"default_occupancy\":1}}" }
+          },
+          "docs": "Create a room type."
+        },
+        {
+          "info": { "name": "Get room type", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/room_types/:id" },
+          "docs": "Get a single room type."
+        },
+        {
+          "info": { "name": "Update room type", "type": "http" },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/room_types/:id",
+            "body": { "type": "json", "data": "{\"room_type\":{}}" }
+          },
+          "docs": "Update a room type."
+        },
+        {
+          "info": { "name": "Delete room type", "type": "http" },
+          "http": { "method": "DELETE", "url": "https://secure.channex.io/api/v1/room_types/:id" },
+          "docs": "Delete a room type."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Rate Plans",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List rate plans", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/rate_plans" },
+          "docs": "List rate plans."
+        },
+        {
+          "info": { "name": "Create rate plan", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/rate_plans",
+            "body": { "type": "json", "data": "{\"rate_plan\":{\"property_id\":\"\",\"room_type_id\":\"\",\"title\":\"\"}}" }
+          },
+          "docs": "Create a rate plan."
+        },
+        {
+          "info": { "name": "Get rate plan", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/rate_plans/:id" },
+          "docs": "Get a single rate plan."
+        },
+        {
+          "info": { "name": "Update rate plan", "type": "http" },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/rate_plans/:id",
+            "body": { "type": "json", "data": "{\"rate_plan\":{}}" }
+          },
+          "docs": "Update a rate plan."
+        },
+        {
+          "info": { "name": "Delete rate plan", "type": "http" },
+          "http": { "method": "DELETE", "url": "https://secure.channex.io/api/v1/rate_plans/:id" },
+          "docs": "Delete a rate plan."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Availability and Restrictions (ARI)",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "Get availability", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/availability" },
+          "docs": "Get availability per room type for a property and date range."
+        },
+        {
+          "info": { "name": "Update availability", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/availability",
+            "body": { "type": "json", "data": "{\"values\":[{\"property_id\":\"\",\"room_type_id\":\"\",\"date\":\"\",\"availability\":0}]}" }
+          },
+          "docs": "Update room-type availability for one or more dates or date ranges."
+        },
+        {
+          "info": { "name": "Get rates and restrictions", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/restrictions" },
+          "docs": "Get rates and restrictions per rate plan for a property and date range."
+        },
+        {
+          "info": { "name": "Update rates and restrictions", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/restrictions",
+            "body": { "type": "json", "data": "{\"values\":[{\"property_id\":\"\",\"rate_plan_id\":\"\",\"date\":\"\",\"rate\":\"200.00\"}]}" }
+          },
+          "docs": "Update rate-plan rates and restrictions for one or more dates."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Bookings",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List bookings", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/bookings" },
+          "docs": "List bookings."
+        },
+        {
+          "info": { "name": "Get booking", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/bookings/:id" },
+          "docs": "Retrieve the latest revision of a booking."
+        },
+        {
+          "info": { "name": "Booking revisions feed", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/booking_revisions/feed" },
+          "docs": "Returns unacknowledged booking revisions for PMS sync."
+        },
+        {
+          "info": { "name": "Acknowledge booking revision", "type": "http" },
+          "http": { "method": "POST", "url": "https://secure.channex.io/api/v1/booking_revisions/:id/ack" },
+          "docs": "Acknowledge a booking revision."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Channels",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List channels", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/channels" },
+          "docs": "List distribution channels."
+        },
+        {
+          "info": { "name": "Add channel", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/channels",
+            "body": { "type": "json", "data": "{\"channel\":{\"property_id\":\"\",\"channel\":\"\"}}" }
+          },
+          "docs": "Add a channel (white-label accounts)."
+        },
+        {
+          "info": { "name": "Get channel", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/channels/:id" },
+          "docs": "Get a single channel."
+        },
+        {
+          "info": { "name": "Update channel", "type": "http" },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/channels/:id",
+            "body": { "type": "json", "data": "{\"channel\":{}}" }
+          },
+          "docs": "Update a channel."
+        },
+        {
+          "info": { "name": "Delete channel", "type": "http" },
+          "http": { "method": "DELETE", "url": "https://secure.channex.io/api/v1/channels/:id" },
+          "docs": "Delete a channel."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Webhooks",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": { "name": "List webhooks", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/webhooks" },
+          "docs": "List webhooks."
+        },
+        {
+          "info": { "name": "Create webhook", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/webhooks",
+            "body": { "type": "json", "data": "{\"webhook\":{\"callback_url\":\"\",\"event_mask\":\"*\"}}" }
+          },
+          "docs": "Create a webhook."
+        },
+        {
+          "info": { "name": "Get webhook", "type": "http" },
+          "http": { "method": "GET", "url": "https://secure.channex.io/api/v1/webhooks/:id" },
+          "docs": "Get a single webhook."
+        },
+        {
+          "info": { "name": "Update webhook", "type": "http" },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/webhooks/:id",
+            "body": { "type": "json", "data": "{\"webhook\":{}}" }
+          },
+          "docs": "Update a webhook."
+        },
+        {
+          "info": { "name": "Delete webhook", "type": "http" },
+          "http": { "method": "DELETE", "url": "https://secure.channex.io/api/v1/webhooks/:id" },
+          "docs": "Delete a webhook."
+        },
+        {
+          "info": { "name": "Test webhook", "type": "http" },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/webhooks/test",
+            "body": { "type": "json", "data": "{\"callback_url\":\"\"}" }
+          },
+          "docs": "Send a sample request to a callback URL to verify delivery."
+        }
+      ]
+    }
+  ]
+}

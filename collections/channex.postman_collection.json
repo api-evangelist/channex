@@ -1,0 +1,257 @@
+{
+  "info": {
+    "name": "Channex API",
+    "description": "Channex white-label hotel channel manager API (v1). JSON-based REST. Authenticate with the user-api-key header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "user-api-key", "type": "string" },
+      { "key": "value", "value": "{{apiKey}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://secure.channex.io/api/v1" },
+    { "key": "apiKey", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Properties",
+      "item": [
+        {
+          "name": "List properties",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/properties", "host": ["{{baseUrl}}"], "path": ["properties"] } }
+        },
+        {
+          "name": "Create property",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"property\": {\n    \"title\": \"\",\n    \"currency\": \"\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/properties", "host": ["{{baseUrl}}"], "path": ["properties"] }
+          }
+        },
+        {
+          "name": "Get property",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/properties/:id", "host": ["{{baseUrl}}"], "path": ["properties", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Update property",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"property\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/properties/:id", "host": ["{{baseUrl}}"], "path": ["properties", ":id"], "variable": [ { "key": "id", "value": "" } ] }
+          }
+        },
+        {
+          "name": "Delete property",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/properties/:id", "host": ["{{baseUrl}}"], "path": ["properties", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Room Types",
+      "item": [
+        {
+          "name": "List room types",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/room_types", "host": ["{{baseUrl}}"], "path": ["room_types"] } }
+        },
+        {
+          "name": "Create room type",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"room_type\": {\n    \"property_id\": \"\",\n    \"title\": \"\",\n    \"count_of_rooms\": 0,\n    \"occ_adults\": 1,\n    \"default_occupancy\": 1\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/room_types", "host": ["{{baseUrl}}"], "path": ["room_types"] }
+          }
+        },
+        {
+          "name": "Get room type",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/room_types/:id", "host": ["{{baseUrl}}"], "path": ["room_types", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Update room type",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"room_type\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/room_types/:id", "host": ["{{baseUrl}}"], "path": ["room_types", ":id"], "variable": [ { "key": "id", "value": "" } ] }
+          }
+        },
+        {
+          "name": "Delete room type",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/room_types/:id", "host": ["{{baseUrl}}"], "path": ["room_types", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Rate Plans",
+      "item": [
+        {
+          "name": "List rate plans",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/rate_plans", "host": ["{{baseUrl}}"], "path": ["rate_plans"] } }
+        },
+        {
+          "name": "Create rate plan",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"rate_plan\": {\n    \"property_id\": \"\",\n    \"room_type_id\": \"\",\n    \"title\": \"\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/rate_plans", "host": ["{{baseUrl}}"], "path": ["rate_plans"] }
+          }
+        },
+        {
+          "name": "Get rate plan",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/rate_plans/:id", "host": ["{{baseUrl}}"], "path": ["rate_plans", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Update rate plan",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"rate_plan\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/rate_plans/:id", "host": ["{{baseUrl}}"], "path": ["rate_plans", ":id"], "variable": [ { "key": "id", "value": "" } ] }
+          }
+        },
+        {
+          "name": "Delete rate plan",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/rate_plans/:id", "host": ["{{baseUrl}}"], "path": ["rate_plans", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Availability and Restrictions (ARI)",
+      "item": [
+        {
+          "name": "Get availability",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/availability", "host": ["{{baseUrl}}"], "path": ["availability"] } }
+        },
+        {
+          "name": "Update availability",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"\",\n      \"room_type_id\": \"\",\n      \"date\": \"\",\n      \"availability\": 0\n    }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/availability", "host": ["{{baseUrl}}"], "path": ["availability"] }
+          }
+        },
+        {
+          "name": "Get rates and restrictions",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/restrictions", "host": ["{{baseUrl}}"], "path": ["restrictions"] } }
+        },
+        {
+          "name": "Update rates and restrictions",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"\",\n      \"rate_plan_id\": \"\",\n      \"date\": \"\",\n      \"rate\": \"200.00\"\n    }\n  ]\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/restrictions", "host": ["{{baseUrl}}"], "path": ["restrictions"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "List bookings",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings", "host": ["{{baseUrl}}"], "path": ["bookings"] } }
+        },
+        {
+          "name": "Get booking",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/bookings/:id", "host": ["{{baseUrl}}"], "path": ["bookings", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Booking revisions feed",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/booking_revisions/feed", "host": ["{{baseUrl}}"], "path": ["booking_revisions", "feed"] } }
+        },
+        {
+          "name": "Acknowledge booking revision",
+          "request": { "method": "POST", "header": [], "url": { "raw": "{{baseUrl}}/booking_revisions/:id/ack", "host": ["{{baseUrl}}"], "path": ["booking_revisions", ":id", "ack"], "variable": [ { "key": "id", "value": "" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Channels",
+      "item": [
+        {
+          "name": "List channels",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/channels", "host": ["{{baseUrl}}"], "path": ["channels"] } }
+        },
+        {
+          "name": "Add channel",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"channel\": {\n    \"property_id\": \"\",\n    \"channel\": \"\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/channels", "host": ["{{baseUrl}}"], "path": ["channels"] }
+          }
+        },
+        {
+          "name": "Get channel",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/channels/:id", "host": ["{{baseUrl}}"], "path": ["channels", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Update channel",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"channel\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/channels/:id", "host": ["{{baseUrl}}"], "path": ["channels", ":id"], "variable": [ { "key": "id", "value": "" } ] }
+          }
+        },
+        {
+          "name": "Delete channel",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/channels/:id", "host": ["{{baseUrl}}"], "path": ["channels", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "List webhooks",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/webhooks", "host": ["{{baseUrl}}"], "path": ["webhooks"] } }
+        },
+        {
+          "name": "Create webhook",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"webhook\": {\n    \"callback_url\": \"\",\n    \"event_mask\": \"*\"\n  }\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/webhooks", "host": ["{{baseUrl}}"], "path": ["webhooks"] }
+          }
+        },
+        {
+          "name": "Get webhook",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/webhooks/:id", "host": ["{{baseUrl}}"], "path": ["webhooks", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Update webhook",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"webhook\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/webhooks/:id", "host": ["{{baseUrl}}"], "path": ["webhooks", ":id"], "variable": [ { "key": "id", "value": "" } ] }
+          }
+        },
+        {
+          "name": "Delete webhook",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{baseUrl}}/webhooks/:id", "host": ["{{baseUrl}}"], "path": ["webhooks", ":id"], "variable": [ { "key": "id", "value": "" } ] } }
+        },
+        {
+          "name": "Test webhook",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"callback_url\": \"\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/webhooks/test", "host": ["{{baseUrl}}"], "path": ["webhooks", "test"] }
+          }
+        }
+      ]
+    }
+  ]
+}
