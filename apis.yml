@@ -158,6 +158,10 @@ apis:
     booking, message, sync_error, channel, and review events) filtered by event mask
     and property, with custom headers and a test endpoint.
 common:
+- type: DomainSecurity
+  url: security/channex-domain-security.yml
+- type: Authentication
+  url: authentication/channex-authentication.yml
 - type: GitHubOrganization
   url: https://github.com/ChannexIO
 - type: LinkedIn

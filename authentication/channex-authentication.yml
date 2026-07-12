@@ -1,0 +1,17 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/channex-openapi.yml
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: userApiKey
+  type: apiKey
+  in: header
+  parameter: user-api-key
+  description: Channex API key passed in the `user-api-key` request header. Generate a key in
+    the Channex application under your account settings.
+  sources:
+  - openapi/channex-openapi.yml
