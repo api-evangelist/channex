@@ -1,0 +1,187 @@
+openapi: 3.0.1
+info:
+  title: Channex ARI Webhooks API
+  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
+  termsOfService: https://channex.io/terms-of-service/
+  contact:
+    name: Channex Support
+    email: support@channex.io
+    url: https://docs.channex.io/
+  version: '1.0'
+servers:
+- url: https://secure.channex.io/api/v1
+  description: Production
+- url: https://staging.channex.io/api/v1
+  description: Staging / sandbox
+security:
+- userApiKey: []
+tags:
+- name: Webhooks
+  description: Manage event notification callbacks.
+paths:
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      tags:
+      - Webhooks
+      summary: List webhooks
+      responses:
+        '200':
+          description: A list of webhooks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+    post:
+      operationId: createWebhook
+      tags:
+      - Webhooks
+      summary: Create a webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookWriteRequest'
+      responses:
+        '201':
+          description: The created webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+  /webhooks/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getWebhook
+      tags:
+      - Webhooks
+      summary: Get a webhook
+      responses:
+        '200':
+          description: The requested webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+    put:
+      operationId: updateWebhook
+      tags:
+      - Webhooks
+      summary: Update a webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookWriteRequest'
+      responses:
+        '200':
+          description: The updated webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+    delete:
+      operationId: deleteWebhook
+      tags:
+      - Webhooks
+      summary: Delete a webhook
+      responses:
+        '200':
+          description: Webhook deleted.
+  /webhooks/test:
+    post:
+      operationId: testWebhook
+      tags:
+      - Webhooks
+      summary: Test a webhook
+      description: Send a sample request to a callback URL to verify delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callback_url:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Test request sent.
+components:
+  schemas:
+    WebhookAttributes:
+      type: object
+      required:
+      - callback_url
+      - event_mask
+      properties:
+        callback_url:
+          type: string
+          format: uri
+        event_mask:
+          type: string
+          description: Event filter. Use `*` for all events or a semicolon-separated list (e.g. `booking;ari;message`).
+        property_id:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+        send_data:
+          type: boolean
+        headers:
+          type: object
+        request_params:
+          type: object
+        is_global:
+          type: boolean
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: webhook
+        attributes:
+          $ref: '#/components/schemas/WebhookAttributes'
+    WebhookWriteRequest:
+      type: object
+      required:
+      - webhook
+      properties:
+        webhook:
+          $ref: '#/components/schemas/WebhookAttributes'
+    WebhookList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        meta:
+          type: object
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  securitySchemes:
+    userApiKey:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.

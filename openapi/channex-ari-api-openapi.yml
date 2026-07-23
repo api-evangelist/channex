@@ -1,0 +1,216 @@
+openapi: 3.0.1
+info:
+  title: Channex ARI API
+  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
+  termsOfService: https://channex.io/terms-of-service/
+  contact:
+    name: Channex Support
+    email: support@channex.io
+    url: https://docs.channex.io/
+  version: '1.0'
+servers:
+- url: https://secure.channex.io/api/v1
+  description: Production
+- url: https://staging.channex.io/api/v1
+  description: Staging / sandbox
+security:
+- userApiKey: []
+tags:
+- name: ARI
+  description: Availability, Rates, and Inventory (restrictions).
+paths:
+  /availability:
+    get:
+      operationId: getAvailability
+      tags:
+      - ARI
+      summary: Get availability
+      description: Get availability per room type for a property and date range.
+      parameters:
+      - name: filter[property_id]
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: filter[date][gte]
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: filter[date][lte]
+        in: query
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Availability values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+    post:
+      operationId: updateAvailability
+      tags:
+      - ARI
+      summary: Update availability
+      description: Update room-type availability for one or more dates or date ranges.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityUpdateRequest'
+      responses:
+        '200':
+          description: Availability updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /restrictions:
+    get:
+      operationId: getRestrictions
+      tags:
+      - ARI
+      summary: Get rates and restrictions
+      description: Get rates and restrictions per rate plan for a property and date range.
+      parameters:
+      - name: filter[property_id]
+        in: query
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: filter[date][gte]
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: filter[date][lte]
+        in: query
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Rates and restrictions values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+    post:
+      operationId: updateRestrictions
+      tags:
+      - ARI
+      summary: Update rates and restrictions
+      description: Update rate-plan rates and restrictions (rate, min/max stay, stop sell, closed to arrival/departure) for one or more dates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestrictionsUpdateRequest'
+      responses:
+        '200':
+          description: Rates and restrictions updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+components:
+  schemas:
+    RestrictionsUpdateRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestrictionValue'
+    RestrictionValue:
+      type: object
+      required:
+      - property_id
+      - rate_plan_id
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        rate_plan_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        rate:
+          type: string
+          description: Rate as a decimal string ("200.00") or integer in the minimum currency unit (20000 for $200).
+        min_stay_arrival:
+          type: integer
+        min_stay_through:
+          type: integer
+        max_stay:
+          type: integer
+        closed_to_arrival:
+          type: boolean
+        closed_to_departure:
+          type: boolean
+        stop_sell:
+          type: boolean
+    AvailabilityValue:
+      type: object
+      required:
+      - property_id
+      - room_type_id
+      - availability
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        room_type_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        availability:
+          type: integer
+    AvailabilityUpdateRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityValue'
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
+  securitySchemes:
+    userApiKey:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.

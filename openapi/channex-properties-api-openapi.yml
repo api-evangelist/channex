@@ -1,0 +1,251 @@
+openapi: 3.0.1
+info:
+  title: Channex ARI Properties API
+  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
+  termsOfService: https://channex.io/terms-of-service/
+  contact:
+    name: Channex Support
+    email: support@channex.io
+    url: https://docs.channex.io/
+  version: '1.0'
+servers:
+- url: https://secure.channex.io/api/v1
+  description: Production
+- url: https://staging.channex.io/api/v1
+  description: Staging / sandbox
+security:
+- userApiKey: []
+tags:
+- name: Properties
+  description: Manage properties (hotels, apartments, vacation rentals).
+paths:
+  /properties:
+    get:
+      operationId: listProperties
+      tags:
+      - Properties
+      summary: List properties
+      description: Retrieve a paginated list of properties associated with the user.
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: A list of properties.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyList'
+    post:
+      operationId: createProperty
+      tags:
+      - Properties
+      summary: Create a property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyWriteRequest'
+      responses:
+        '201':
+          description: The created property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+  /properties/options:
+    get:
+      operationId: listPropertyOptions
+      tags:
+      - Properties
+      summary: List property options
+      description: Get all properties without pagination, as id/title pairs.
+      responses:
+        '200':
+          description: Property options.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsList'
+  /properties/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getProperty
+      tags:
+      - Properties
+      summary: Get a property
+      responses:
+        '200':
+          description: The requested property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+    put:
+      operationId: updateProperty
+      tags:
+      - Properties
+      summary: Update a property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyWriteRequest'
+      responses:
+        '200':
+          description: The updated property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+    delete:
+      operationId: deleteProperty
+      tags:
+      - Properties
+      summary: Delete a property
+      responses:
+        '200':
+          description: Property deleted.
+components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: property
+        attributes:
+          $ref: '#/components/schemas/PropertyAttributes'
+    PropertyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Property'
+    PropertyWriteRequest:
+      type: object
+      required:
+      - property
+      properties:
+        property:
+          $ref: '#/components/schemas/PropertyAttributes'
+    OptionsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
+    PropertyList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        meta:
+          type: object
+    PropertyAttributes:
+      type: object
+      required:
+      - title
+      - currency
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        property_type:
+          type: string
+          example: hotel
+        is_active:
+          type: boolean
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 country code.
+        zip_code:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        timezone:
+          type: string
+        content:
+          type: object
+          properties:
+            description:
+              type: string
+            photos:
+              type: array
+              items:
+                type: object
+            important_information:
+              type: string
+            logo_url:
+              type: string
+              format: uri
+            website:
+              type: string
+              format: uri
+        facilities:
+          type: array
+          items:
+            type: string
+        group_id:
+          type: string
+          format: uuid
+        settings:
+          type: object
+  securitySchemes:
+    userApiKey:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.
