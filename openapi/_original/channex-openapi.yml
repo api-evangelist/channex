@@ -1,0 +1,1324 @@
+openapi: 3.0.1
+info:
+  title: Channex API
+  description: >-
+    Channex is a white-label hotel channel manager API. This specification
+    describes the JSON-based REST API (v1) for managing properties, room types,
+    rate plans, availability and restrictions (ARI), bookings, channels, and
+    webhooks. Requests and responses use a resource envelope: response bodies
+    carry a `data` (or `meta` / `errors`) root key, and `data` objects contain
+    `type` and `attributes`. Write requests wrap their payload under a
+    resource-type key (e.g. `property`, `room_type`, `rate_plan`).
+  termsOfService: https://channex.io/terms-of-service/
+  contact:
+    name: Channex Support
+    email: support@channex.io
+    url: https://docs.channex.io/
+  version: '1.0'
+servers:
+  - url: https://secure.channex.io/api/v1
+    description: Production
+  - url: https://staging.channex.io/api/v1
+    description: Staging / sandbox
+security:
+  - userApiKey: []
+tags:
+  - name: Properties
+    description: Manage properties (hotels, apartments, vacation rentals).
+  - name: Room Types
+    description: Manage room types under a property.
+  - name: Rate Plans
+    description: Manage pricing plans for room types.
+  - name: ARI
+    description: Availability, Rates, and Inventory (restrictions).
+  - name: Bookings
+    description: Retrieve and manage bookings and booking revisions.
+  - name: Channels
+    description: Manage OTA distribution channels.
+  - name: Webhooks
+    description: Manage event notification callbacks.
+paths:
+  /properties:
+    get:
+      operationId: listProperties
+      tags:
+        - Properties
+      summary: List properties
+      description: Retrieve a paginated list of properties associated with the user.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: A list of properties.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyList'
+    post:
+      operationId: createProperty
+      tags:
+        - Properties
+      summary: Create a property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyWriteRequest'
+      responses:
+        '201':
+          description: The created property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+  /properties/options:
+    get:
+      operationId: listPropertyOptions
+      tags:
+        - Properties
+      summary: List property options
+      description: Get all properties without pagination, as id/title pairs.
+      responses:
+        '200':
+          description: Property options.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsList'
+  /properties/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getProperty
+      tags:
+        - Properties
+      summary: Get a property
+      responses:
+        '200':
+          description: The requested property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+    put:
+      operationId: updateProperty
+      tags:
+        - Properties
+      summary: Update a property
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyWriteRequest'
+      responses:
+        '200':
+          description: The updated property.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+    delete:
+      operationId: deleteProperty
+      tags:
+        - Properties
+      summary: Delete a property
+      responses:
+        '200':
+          description: Property deleted.
+  /room_types:
+    get:
+      operationId: listRoomTypes
+      tags:
+        - Room Types
+      summary: List room types
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: filter[property_id]
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of room types.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomTypeList'
+    post:
+      operationId: createRoomType
+      tags:
+        - Room Types
+      summary: Create a room type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomTypeWriteRequest'
+      responses:
+        '201':
+          description: The created room type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomTypeResponse'
+  /room_types/options:
+    get:
+      operationId: listRoomTypeOptions
+      tags:
+        - Room Types
+      summary: List room type options
+      responses:
+        '200':
+          description: Room type options.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsList'
+  /room_types/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getRoomType
+      tags:
+        - Room Types
+      summary: Get a room type
+      responses:
+        '200':
+          description: The requested room type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomTypeResponse'
+    put:
+      operationId: updateRoomType
+      tags:
+        - Room Types
+      summary: Update a room type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomTypeWriteRequest'
+      responses:
+        '200':
+          description: The updated room type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomTypeResponse'
+    delete:
+      operationId: deleteRoomType
+      tags:
+        - Room Types
+      summary: Delete a room type
+      responses:
+        '200':
+          description: Room type deleted.
+  /rate_plans:
+    get:
+      operationId: listRatePlans
+      tags:
+        - Rate Plans
+      summary: List rate plans
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: filter[property_id]
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of rate plans.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlanList'
+    post:
+      operationId: createRatePlan
+      tags:
+        - Rate Plans
+      summary: Create a rate plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatePlanWriteRequest'
+      responses:
+        '201':
+          description: The created rate plan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlanResponse'
+  /rate_plans/options:
+    get:
+      operationId: listRatePlanOptions
+      tags:
+        - Rate Plans
+      summary: List rate plan options
+      responses:
+        '200':
+          description: Rate plan options.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionsList'
+  /rate_plans/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getRatePlan
+      tags:
+        - Rate Plans
+      summary: Get a rate plan
+      responses:
+        '200':
+          description: The requested rate plan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlanResponse'
+    put:
+      operationId: updateRatePlan
+      tags:
+        - Rate Plans
+      summary: Update a rate plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatePlanWriteRequest'
+      responses:
+        '200':
+          description: The updated rate plan.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatePlanResponse'
+    delete:
+      operationId: deleteRatePlan
+      tags:
+        - Rate Plans
+      summary: Delete a rate plan
+      responses:
+        '200':
+          description: Rate plan deleted.
+  /availability:
+    get:
+      operationId: getAvailability
+      tags:
+        - ARI
+      summary: Get availability
+      description: Get availability per room type for a property and date range.
+      parameters:
+        - name: filter[property_id]
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: filter[date][gte]
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: filter[date][lte]
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Availability values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+    post:
+      operationId: updateAvailability
+      tags:
+        - ARI
+      summary: Update availability
+      description: Update room-type availability for one or more dates or date ranges.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityUpdateRequest'
+      responses:
+        '200':
+          description: Availability updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /restrictions:
+    get:
+      operationId: getRestrictions
+      tags:
+        - ARI
+      summary: Get rates and restrictions
+      description: Get rates and restrictions per rate plan for a property and date range.
+      parameters:
+        - name: filter[property_id]
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: filter[date][gte]
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: filter[date][lte]
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Rates and restrictions values.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+    post:
+      operationId: updateRestrictions
+      tags:
+        - ARI
+      summary: Update rates and restrictions
+      description: >-
+        Update rate-plan rates and restrictions (rate, min/max stay,
+        stop sell, closed to arrival/departure) for one or more dates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestrictionsUpdateRequest'
+      responses:
+        '200':
+          description: Rates and restrictions updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /bookings:
+    get:
+      operationId: listBookings
+      tags:
+        - Bookings
+      summary: List bookings
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: filter[property_id]
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of bookings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingList'
+  /bookings/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getBooking
+      tags:
+        - Bookings
+      summary: Get a booking
+      description: Retrieve the latest revision of a booking.
+      responses:
+        '200':
+          description: The requested booking.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+  /bookings/{booking_id}/no_show:
+    parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: reportNoShow
+      tags:
+        - Bookings
+      summary: Report a no-show
+      responses:
+        '200':
+          description: No-show reported.
+  /bookings/{booking_id}/invalid_card:
+    parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: reportInvalidCard
+      tags:
+        - Bookings
+      summary: Report an invalid card
+      responses:
+        '200':
+          description: Invalid card reported.
+  /bookings/{booking_id}/cancel_due_invalid_card:
+    parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: cancelDueInvalidCard
+      tags:
+        - Bookings
+      summary: Cancel a booking due to an invalid card
+      responses:
+        '200':
+          description: Booking cancelled due to invalid card.
+  /booking_revisions:
+    get:
+      operationId: listBookingRevisions
+      tags:
+        - Bookings
+      summary: List booking revisions
+      responses:
+        '200':
+          description: A list of booking revisions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /booking_revisions/feed:
+    get:
+      operationId: getBookingRevisionsFeed
+      tags:
+        - Bookings
+      summary: Booking revisions feed
+      description: >-
+        Returns unacknowledged booking revisions. Primary mechanism for
+        keeping a PMS in sync with new and modified bookings.
+      responses:
+        '200':
+          description: Unacknowledged booking revisions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /booking_revisions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getBookingRevision
+      tags:
+        - Bookings
+      summary: Get a booking revision
+      responses:
+        '200':
+          description: The requested booking revision.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+  /booking_revisions/{id}/ack:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      operationId: ackBookingRevision
+      tags:
+        - Bookings
+      summary: Acknowledge a booking revision
+      responses:
+        '200':
+          description: Revision acknowledged.
+  /channels:
+    get:
+      operationId: listChannels
+      tags:
+        - Channels
+      summary: List channels
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
+        - name: filter[property_id]
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of channels.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelList'
+    post:
+      operationId: createChannel
+      tags:
+        - Channels
+      summary: Add a channel
+      description: Connect an OTA channel. Available to white-label accounts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelWriteRequest'
+      responses:
+        '201':
+          description: The created channel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelResponse'
+  /channels/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getChannel
+      tags:
+        - Channels
+      summary: Get a channel
+      responses:
+        '200':
+          description: The requested channel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelResponse'
+    put:
+      operationId: updateChannel
+      tags:
+        - Channels
+      summary: Update a channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelWriteRequest'
+      responses:
+        '200':
+          description: The updated channel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelResponse'
+    delete:
+      operationId: deleteChannel
+      tags:
+        - Channels
+      summary: Delete a channel
+      responses:
+        '200':
+          description: Channel deleted.
+  /webhooks:
+    get:
+      operationId: listWebhooks
+      tags:
+        - Webhooks
+      summary: List webhooks
+      responses:
+        '200':
+          description: A list of webhooks.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookList'
+    post:
+      operationId: createWebhook
+      tags:
+        - Webhooks
+      summary: Create a webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookWriteRequest'
+      responses:
+        '201':
+          description: The created webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+  /webhooks/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getWebhook
+      tags:
+        - Webhooks
+      summary: Get a webhook
+      responses:
+        '200':
+          description: The requested webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+    put:
+      operationId: updateWebhook
+      tags:
+        - Webhooks
+      summary: Update a webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookWriteRequest'
+      responses:
+        '200':
+          description: The updated webhook.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookResponse'
+    delete:
+      operationId: deleteWebhook
+      tags:
+        - Webhooks
+      summary: Delete a webhook
+      responses:
+        '200':
+          description: Webhook deleted.
+  /webhooks/test:
+    post:
+      operationId: testWebhook
+      tags:
+        - Webhooks
+      summary: Test a webhook
+      description: Send a sample request to a callback URL to verify delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callback_url:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Test request sent.
+components:
+  securitySchemes:
+    userApiKey:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: >-
+        Channex API key passed in the `user-api-key` request header. Generate
+        a key in the Channex application under your account settings.
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
+    OptionsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: property
+        attributes:
+          $ref: '#/components/schemas/PropertyAttributes'
+    PropertyAttributes:
+      type: object
+      required:
+        - title
+        - currency
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        property_type:
+          type: string
+          example: hotel
+        is_active:
+          type: boolean
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 32
+        address:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2 country code.
+        zip_code:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        timezone:
+          type: string
+        content:
+          type: object
+          properties:
+            description:
+              type: string
+            photos:
+              type: array
+              items:
+                type: object
+            important_information:
+              type: string
+            logo_url:
+              type: string
+              format: uri
+            website:
+              type: string
+              format: uri
+        facilities:
+          type: array
+          items:
+            type: string
+        group_id:
+          type: string
+          format: uuid
+        settings:
+          type: object
+    PropertyWriteRequest:
+      type: object
+      required:
+        - property
+      properties:
+        property:
+          $ref: '#/components/schemas/PropertyAttributes'
+    PropertyResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Property'
+    PropertyList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        meta:
+          type: object
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: room_type
+        attributes:
+          $ref: '#/components/schemas/RoomTypeAttributes'
+    RoomTypeAttributes:
+      type: object
+      required:
+        - property_id
+        - title
+        - count_of_rooms
+        - occ_adults
+        - default_occupancy
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        count_of_rooms:
+          type: integer
+          minimum: 0
+        occ_adults:
+          type: integer
+        occ_children:
+          type: integer
+        occ_infants:
+          type: integer
+        default_occupancy:
+          type: integer
+        room_kind:
+          type: string
+          enum:
+            - room
+            - dorm
+        capacity:
+          type: integer
+        facilities:
+          type: array
+          items:
+            type: string
+        content:
+          type: object
+    RoomTypeWriteRequest:
+      type: object
+      required:
+        - room_type
+      properties:
+        room_type:
+          $ref: '#/components/schemas/RoomTypeAttributes'
+    RoomTypeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RoomType'
+    RoomTypeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomType'
+        meta:
+          type: object
+    RatePlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: rate_plan
+        attributes:
+          $ref: '#/components/schemas/RatePlanAttributes'
+    RatePlanAttributes:
+      type: object
+      required:
+        - property_id
+        - room_type_id
+        - title
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        room_type_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 255
+        sell_mode:
+          type: string
+          enum:
+            - per_room
+            - per_person
+        rate_mode:
+          type: string
+          enum:
+            - manual
+            - derived
+            - auto
+            - cascade
+        currency:
+          type: string
+          description: ISO 4217 currency code.
+        children_fee:
+          type: string
+        infant_fee:
+          type: string
+        meal_type:
+          type: string
+        max_stay:
+          type: array
+          items:
+            type: integer
+        min_stay_arrival:
+          type: array
+          items:
+            type: integer
+        min_stay_through:
+          type: array
+          items:
+            type: integer
+        closed_to_arrival:
+          type: array
+          items:
+            type: boolean
+        closed_to_departure:
+          type: array
+          items:
+            type: boolean
+        stop_sell:
+          type: array
+          items:
+            type: boolean
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              occupancy:
+                type: integer
+              is_primary:
+                type: boolean
+              rate:
+                type: integer
+        auto_rate_settings:
+          type: object
+    RatePlanWriteRequest:
+      type: object
+      required:
+        - rate_plan
+      properties:
+        rate_plan:
+          $ref: '#/components/schemas/RatePlanAttributes'
+    RatePlanResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RatePlan'
+    RatePlanList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatePlan'
+        meta:
+          type: object
+    AvailabilityValue:
+      type: object
+      required:
+        - property_id
+        - room_type_id
+        - availability
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        room_type_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        availability:
+          type: integer
+    AvailabilityUpdateRequest:
+      type: object
+      required:
+        - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityValue'
+    RestrictionValue:
+      type: object
+      required:
+        - property_id
+        - rate_plan_id
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        rate_plan_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        rate:
+          type: string
+          description: >-
+            Rate as a decimal string ("200.00") or integer in the minimum
+            currency unit (20000 for $200).
+        min_stay_arrival:
+          type: integer
+        min_stay_through:
+          type: integer
+        max_stay:
+          type: integer
+        closed_to_arrival:
+          type: boolean
+        closed_to_departure:
+          type: boolean
+        stop_sell:
+          type: boolean
+    RestrictionsUpdateRequest:
+      type: object
+      required:
+        - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestrictionValue'
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: booking
+        attributes:
+          $ref: '#/components/schemas/BookingAttributes'
+    BookingAttributes:
+      type: object
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        ota_name:
+          type: string
+        ota_reservation_code:
+          type: string
+        status:
+          type: string
+          enum:
+            - new
+            - modified
+            - cancelled
+        arrival_date:
+          type: string
+          format: date
+        departure_date:
+          type: string
+          format: date
+        currency:
+          type: string
+        amount:
+          type: string
+        occupancy:
+          type: object
+          properties:
+            adults:
+              type: integer
+            children:
+              type: integer
+            infants:
+              type: integer
+        customer:
+          type: object
+        rooms:
+          type: array
+          items:
+            type: object
+        services:
+          type: array
+          items:
+            type: object
+        notes:
+          type: string
+    BookingResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+    BookingList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        meta:
+          type: object
+    Channel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: channel
+        attributes:
+          $ref: '#/components/schemas/ChannelAttributes'
+    ChannelAttributes:
+      type: object
+      required:
+        - property_id
+        - channel
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        channel:
+          type: string
+          description: OTA channel identifier (e.g. Booking.com, Airbnb, Expedia).
+        is_active:
+          type: boolean
+        settings:
+          type: object
+        properties:
+          type: object
+          description: Channel-specific configuration and room/rate mappings.
+    ChannelWriteRequest:
+      type: object
+      required:
+        - channel
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelAttributes'
+    ChannelResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Channel'
+    ChannelList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+        meta:
+          type: object
+    Webhook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: webhook
+        attributes:
+          $ref: '#/components/schemas/WebhookAttributes'
+    WebhookAttributes:
+      type: object
+      required:
+        - callback_url
+        - event_mask
+      properties:
+        callback_url:
+          type: string
+          format: uri
+        event_mask:
+          type: string
+          description: >-
+            Event filter. Use `*` for all events or a semicolon-separated list
+            (e.g. `booking;ari;message`).
+        property_id:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+        send_data:
+          type: boolean
+        headers:
+          type: object
+        request_params:
+          type: object
+        is_global:
+          type: boolean
+    WebhookWriteRequest:
+      type: object
+      required:
+        - webhook
+      properties:
+        webhook:
+          $ref: '#/components/schemas/WebhookAttributes'
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+    WebhookList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        meta:
+          type: object

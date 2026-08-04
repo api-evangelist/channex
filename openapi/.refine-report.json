@@ -1,0 +1,26 @@
+{
+  "provider": "channex",
+  "sources": [
+    "channex-ari-api-openapi.yml",
+    "channex-bookings-api-openapi.yml",
+    "channex-channels-api-openapi.yml",
+    "channex-properties-api-openapi.yml",
+    "channex-rate-plans-api-openapi.yml",
+    "channex-room-types-api-openapi.yml",
+    "channex-webhooks-api-openapi.yml"
+  ],
+  "outputs": [
+    "channex-ari-api-openapi.yml",
+    "channex-bookings-api-openapi.yml",
+    "channex-channels-api-openapi.yml",
+    "channex-properties-api-openapi.yml",
+    "channex-rate-plans-api-openapi.yml",
+    "channex-room-types-api-openapi.yml",
+    "channex-webhooks-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
