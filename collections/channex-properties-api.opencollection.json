@@ -1,0 +1,133 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Channex ARI Properties API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "user-api-key",
+      "value": "{{user-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Properties",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List properties",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/properties",
+            "params": [
+              {
+                "name": "page",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Retrieve a paginated list of properties associated with the user."
+        },
+        {
+          "info": {
+            "name": "Create a property",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/properties",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a property"
+        },
+        {
+          "info": {
+            "name": "List property options",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/properties/options"
+          },
+          "docs": "Get all properties without pagination, as id/title pairs."
+        },
+        {
+          "info": {
+            "name": "Get a property",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/properties/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get a property"
+        },
+        {
+          "info": {
+            "name": "Update a property",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/properties/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update a property"
+        },
+        {
+          "info": {
+            "name": "Delete a property",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://secure.channex.io/api/v1/properties/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Delete a property"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

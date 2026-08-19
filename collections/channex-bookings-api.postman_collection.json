@@ -1,0 +1,837 @@
+{
+  "item": [
+    {
+      "id": "8e8300ca-b8b2-4cdd-a1d9-e3207b3b2ca0",
+      "name": "Bookings",
+      "description": {
+        "content": "Retrieve and manage bookings and booking revisions.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "c1179cd8-6e3a-4389-bf6f-6ed6e7fa14bb",
+          "name": "List bookings",
+          "request": {
+            "name": "List bookings",
+            "description": {},
+            "url": {
+              "path": [
+                "bookings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "9e57f145-b097-4037-a019-69a11e0fd65f",
+              "name": "A list of bookings.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "bookings"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"ad969f2a-f84d-f2d9-05f0-f6233465d94f\",\n      \"type\": \"booking\",\n      \"attributes\": {\n        \"property_id\": \"d1d908db-0ebf-7bcd-1b64-2ad6b84c0de8\",\n        \"ota_name\": \"string\",\n        \"ota_reservation_code\": \"string\",\n        \"status\": \"cancelled\",\n        \"arrival_date\": \"1970-03-25\",\n        \"departure_date\": \"1966-03-25\",\n        \"currency\": \"string\",\n        \"amount\": \"string\",\n        \"occupancy\": {\n          \"adults\": 1717,\n          \"children\": 4217,\n          \"infants\": 459\n        },\n        \"customer\": {},\n        \"notes\": \"string\"\n      }\n    },\n    {\n      \"id\": \"425cb457-bedf-3a83-ae8a-fdbba0f3fbf8\",\n      \"type\": \"booking\",\n      \"attributes\": {\n        \"property_id\": \"72255691-2f73-4fe9-a706-ceb9d452afc9\",\n        \"ota_name\": \"string\",\n        \"ota_reservation_code\": \"string\",\n        \"status\": \"new\",\n        \"arrival_date\": \"1968-04-02\",\n        \"departure_date\": \"2024-08-13\",\n        \"currency\": \"string\",\n        \"amount\": \"string\",\n        \"occupancy\": {\n          \"adults\": 9110,\n          \"children\": 6932,\n          \"infants\": 8050\n        },\n        \"customer\": {},\n        \"notes\": \"string\"\n      }\n    }\n  ],\n  \"meta\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "3c1006c0-a5a3-41d0-813b-f79d9f1bb9ca",
+          "name": "Get a booking",
+          "request": {
+            "name": "Get a booking",
+            "description": {
+              "content": "Retrieve the latest revision of a booking.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "bookings",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "fc8057dd-77ba-450e-9e15-e1774168f198",
+              "name": "The requested booking.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "bookings",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"6f84290b-4fa7-d3e2-9e6c-c34133089263\",\n    \"type\": \"booking\",\n    \"attributes\": {\n      \"property_id\": \"f99e5036-cf53-3121-0d74-51e03a2ab446\",\n      \"ota_name\": \"string\",\n      \"ota_reservation_code\": \"string\",\n      \"status\": \"new\",\n      \"arrival_date\": \"1974-11-30\",\n      \"departure_date\": \"1982-05-19\",\n      \"currency\": \"string\",\n      \"amount\": \"string\",\n      \"occupancy\": {\n        \"adults\": 3949,\n        \"children\": 2150,\n        \"infants\": 7343\n      },\n      \"customer\": {},\n      \"notes\": \"string\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "7cb11279-afd2-47f1-80b5-43a4d02ef70d",
+          "name": "Report a no-show",
+          "request": {
+            "name": "Report a no-show",
+            "description": {},
+            "url": {
+              "path": [
+                "bookings",
+                ":booking_id",
+                "no_show"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "booking_id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "2329070f-a85d-44be-9530-167dcf5ae97e",
+              "name": "No-show reported.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "bookings",
+                    ":booking_id",
+                    "no_show"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "booking_id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "1efc61b5-e3ff-4d50-b72c-55f5a334af74",
+          "name": "Report an invalid card",
+          "request": {
+            "name": "Report an invalid card",
+            "description": {},
+            "url": {
+              "path": [
+                "bookings",
+                ":booking_id",
+                "invalid_card"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "booking_id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "fd463c8c-32f7-4d7a-8e01-33a86050b0ea",
+              "name": "Invalid card reported.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "bookings",
+                    ":booking_id",
+                    "invalid_card"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "booking_id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "7396b59d-92c6-4dab-8522-8ca2efb4b891",
+          "name": "Cancel a booking due to an invalid card",
+          "request": {
+            "name": "Cancel a booking due to an invalid card",
+            "description": {},
+            "url": {
+              "path": [
+                "bookings",
+                ":booking_id",
+                "cancel_due_invalid_card"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "booking_id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "4c042b31-1b47-4a71-b27e-8b56041bfdc5",
+              "name": "Booking cancelled due to invalid card.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "bookings",
+                    ":booking_id",
+                    "cancel_due_invalid_card"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "booking_id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "7c10b556-20cd-4967-8366-6ca07635880c",
+          "name": "List booking revisions",
+          "request": {
+            "name": "List booking revisions",
+            "description": {},
+            "url": {
+              "path": [
+                "booking_revisions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "15c48378-f34f-430d-aaeb-b85d8dc4886e",
+              "name": "A list of booking revisions.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "booking_revisions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "81f6bcd9-7bc2-4f7a-8cca-b45a53b7cc11",
+          "name": "Booking revisions feed",
+          "request": {
+            "name": "Booking revisions feed",
+            "description": {
+              "content": "Returns unacknowledged booking revisions. Primary mechanism for keeping a PMS in sync with new and modified bookings.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "booking_revisions",
+                "feed"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "89730008-a36c-4c6c-8f51-46268932467e",
+              "name": "Unacknowledged booking revisions.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "booking_revisions",
+                    "feed"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "45d42c1a-d293-4fb0-ba07-7890f04e9dcb",
+          "name": "Get a booking revision",
+          "request": {
+            "name": "Get a booking revision",
+            "description": {},
+            "url": {
+              "path": [
+                "booking_revisions",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "58cd722d-4f51-42b0-887f-d8cda1637ccf",
+              "name": "The requested booking revision.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "booking_revisions",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "2c8a223e-df21-45e7-add5-d6cf592a2752",
+          "name": "Acknowledge a booking revision",
+          "request": {
+            "name": "Acknowledge a booking revision",
+            "description": {},
+            "url": {
+              "path": [
+                "booking_revisions",
+                ":id",
+                "ack"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "POST",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "5b5fb899-321c-4f77-91ef-0b9c312eacad",
+              "name": "Revision acknowledged.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "booking_revisions",
+                    ":id",
+                    "ack"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "f0afb6f4-8bf8-43b9-8ef5-f59112cab33c",
+    "name": "Channex ARI Bookings API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

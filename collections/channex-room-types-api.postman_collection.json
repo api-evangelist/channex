@@ -1,0 +1,616 @@
+{
+  "item": [
+    {
+      "id": "4dc98d67-3850-4ecc-b8dd-98d2c392c305",
+      "name": "Room Types",
+      "description": {
+        "content": "Manage room types under a property.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "dea9971c-3bba-478b-9458-15fe5f518e21",
+          "name": "List room types",
+          "request": {
+            "name": "List room types",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "cbe37bb9-0130-43d7-8bb5-f0570a9bf127",
+              "name": "A list of room types.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"3fc62349-b31e-fc75-04e1-46e28a774baf\",\n      \"type\": \"room_type\",\n      \"attributes\": {\n        \"property_id\": \"a9cdcc2b-c253-8ffb-718a-2d825aef50fa\",\n        \"title\": \"string\",\n        \"count_of_rooms\": 8884,\n        \"occ_adults\": 7204,\n        \"default_occupancy\": 8012,\n        \"occ_children\": 4009,\n        \"occ_infants\": 8570,\n        \"room_kind\": \"dorm\",\n        \"capacity\": 6902,\n        \"facilities\": [\n          \"string\",\n          \"string\"\n        ],\n        \"content\": {}\n      }\n    },\n    {\n      \"id\": \"b77c3f36-8e21-e14d-bb39-6bb99081f067\",\n      \"type\": \"room_type\",\n      \"attributes\": {\n        \"property_id\": \"3af6048e-3a13-e2d7-51ee-945b408a4d8e\",\n        \"title\": \"string\",\n        \"count_of_rooms\": 4010,\n        \"occ_adults\": 6523,\n        \"default_occupancy\": 5485,\n        \"occ_children\": 1656,\n        \"occ_infants\": 200,\n        \"room_kind\": \"room\",\n        \"capacity\": 8370,\n        \"facilities\": [\n          \"string\",\n          \"string\"\n        ],\n        \"content\": {}\n      }\n    }\n  ],\n  \"meta\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "572e596f-353f-4f1d-87b7-33c013992f7b",
+          "name": "Create a room type",
+          "request": {
+            "name": "Create a room type",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_type\": {\n    \"property_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"count_of_rooms\": \"<integer>\",\n    \"occ_adults\": \"<integer>\",\n    \"default_occupancy\": \"<integer>\",\n    \"occ_children\": \"<integer>\",\n    \"occ_infants\": \"<integer>\",\n    \"room_kind\": \"<string>\",\n    \"capacity\": \"<integer>\",\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"content\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "c3dd6bf9-dcfb-49b2-947a-9d53cb1ff4f2",
+              "name": "The created room type.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"room_type\": {\n    \"property_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"count_of_rooms\": \"<integer>\",\n    \"occ_adults\": \"<integer>\",\n    \"default_occupancy\": \"<integer>\",\n    \"occ_children\": \"<integer>\",\n    \"occ_infants\": \"<integer>\",\n    \"room_kind\": \"<string>\",\n    \"capacity\": \"<integer>\",\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"content\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"9bc20d2b-5907-01ee-f964-24daca8ee585\",\n    \"type\": \"room_type\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"count_of_rooms\": \"<integer>\",\n      \"occ_adults\": \"<integer>\",\n      \"default_occupancy\": \"<integer>\",\n      \"occ_children\": \"<integer>\",\n      \"occ_infants\": \"<integer>\",\n      \"room_kind\": \"<string>\",\n      \"capacity\": \"<integer>\",\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"content\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f52b9673-a420-496e-a460-bf763c057254",
+          "name": "List room type options",
+          "request": {
+            "name": "List room type options",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types",
+                "options"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "90a9ede4-84f2-414d-90b6-7959922adabf",
+              "name": "Room type options.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types",
+                    "options"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    [\n      \"string\",\n      \"string\"\n    ],\n    [\n      \"string\",\n      \"string\"\n    ]\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c0229ae9-381e-40cf-8595-44045113ce79",
+          "name": "Get a room type",
+          "request": {
+            "name": "Get a room type",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "92ef9518-13a5-4b8d-800a-17012b0af2a6",
+              "name": "The requested room type.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"9bc20d2b-5907-01ee-f964-24daca8ee585\",\n    \"type\": \"room_type\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"count_of_rooms\": \"<integer>\",\n      \"occ_adults\": \"<integer>\",\n      \"default_occupancy\": \"<integer>\",\n      \"occ_children\": \"<integer>\",\n      \"occ_infants\": \"<integer>\",\n      \"room_kind\": \"<string>\",\n      \"capacity\": \"<integer>\",\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"content\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5ae1ac37-140d-4370-a133-bbe130bf9d00",
+          "name": "Update a room type",
+          "request": {
+            "name": "Update a room type",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_type\": {\n    \"property_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"count_of_rooms\": \"<integer>\",\n    \"occ_adults\": \"<integer>\",\n    \"default_occupancy\": \"<integer>\",\n    \"occ_children\": \"<integer>\",\n    \"occ_infants\": \"<integer>\",\n    \"room_kind\": \"<string>\",\n    \"capacity\": \"<integer>\",\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"content\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "5ac78881-6063-4e69-bf81-b723584f2ae1",
+              "name": "The updated room type.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"room_type\": {\n    \"property_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"count_of_rooms\": \"<integer>\",\n    \"occ_adults\": \"<integer>\",\n    \"default_occupancy\": \"<integer>\",\n    \"occ_children\": \"<integer>\",\n    \"occ_infants\": \"<integer>\",\n    \"room_kind\": \"<string>\",\n    \"capacity\": \"<integer>\",\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"content\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"9bc20d2b-5907-01ee-f964-24daca8ee585\",\n    \"type\": \"room_type\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"count_of_rooms\": \"<integer>\",\n      \"occ_adults\": \"<integer>\",\n      \"default_occupancy\": \"<integer>\",\n      \"occ_children\": \"<integer>\",\n      \"occ_infants\": \"<integer>\",\n      \"room_kind\": \"<string>\",\n      \"capacity\": \"<integer>\",\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"content\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b06c4ade-a0fc-40f0-a8a4-c51df6af6038",
+          "name": "Delete a room type",
+          "request": {
+            "name": "Delete a room type",
+            "description": {},
+            "url": {
+              "path": [
+                "room_types",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "74cbdb29-5c9d-4c2d-954a-0ab36acdca7a",
+              "name": "Room type deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "room_types",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "cac2f9c6-dd26-456f-a053-da91147e4aef",
+    "name": "Channex ARI Room Types API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

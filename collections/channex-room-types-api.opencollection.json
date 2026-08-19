@@ -1,0 +1,138 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Channex ARI Room Types API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "user-api-key",
+      "value": "{{user-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Room Types",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List room types",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/room_types",
+            "params": [
+              {
+                "name": "page",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[property_id]",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "List room types"
+        },
+        {
+          "info": {
+            "name": "Create a room type",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/room_types",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a room type"
+        },
+        {
+          "info": {
+            "name": "List room type options",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/room_types/options"
+          },
+          "docs": "List room type options"
+        },
+        {
+          "info": {
+            "name": "Get a room type",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/room_types/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get a room type"
+        },
+        {
+          "info": {
+            "name": "Update a room type",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/room_types/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update a room type"
+        },
+        {
+          "info": {
+            "name": "Delete a room type",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://secure.channex.io/api/v1/room_types/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Delete a room type"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,542 @@
+{
+  "item": [
+    {
+      "id": "80b313b4-acd9-4a7e-958b-5d9df9c3ed4f",
+      "name": "Channels",
+      "description": {
+        "content": "Manage OTA distribution channels.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "7c6063c3-9ab0-4c26-b8a2-42cc1dcc003f",
+          "name": "List channels",
+          "request": {
+            "name": "List channels",
+            "description": {},
+            "url": {
+              "path": [
+                "channels"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "7d5a1d52-63df-4196-9fec-c8ef67acf839",
+              "name": "A list of channels.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "channels"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"43b0cfba-909f-392a-87ed-42b7f9a88862\",\n      \"type\": \"channel\",\n      \"attributes\": {\n        \"property_id\": \"633ca0a0-459b-2dea-677f-09de98e59904\",\n        \"channel\": \"string\",\n        \"title\": \"string\",\n        \"is_active\": true,\n        \"settings\": {},\n        \"properties\": {}\n      }\n    },\n    {\n      \"id\": \"be842ce8-7fd3-4a70-181a-1c12b4b826fc\",\n      \"type\": \"channel\",\n      \"attributes\": {\n        \"property_id\": \"65bab778-85f8-630c-5034-bc76ca408df1\",\n        \"channel\": \"string\",\n        \"title\": \"string\",\n        \"is_active\": true,\n        \"settings\": {},\n        \"properties\": {}\n      }\n    }\n  ],\n  \"meta\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "923e7f8a-e6a7-48f2-8d34-e4ba8f4cc7a4",
+          "name": "Add a channel",
+          "request": {
+            "name": "Add a channel",
+            "description": {
+              "content": "Connect an OTA channel. Available to white-label accounts.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "channels"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": {\n    \"property_id\": \"<uuid>\",\n    \"channel\": \"<string>\",\n    \"title\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"settings\": \"<object>\",\n    \"properties\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8cf57655-6c5e-4c17-96da-2aa3cd8a4aaa",
+              "name": "The created channel.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "channels"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": {\n    \"property_id\": \"<uuid>\",\n    \"channel\": \"<string>\",\n    \"title\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"settings\": \"<object>\",\n    \"properties\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"3e28e131-d2a6-611a-e01e-5243a6138fdf\",\n    \"type\": \"channel\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"channel\": \"<string>\",\n      \"title\": \"<string>\",\n      \"is_active\": \"<boolean>\",\n      \"settings\": \"<object>\",\n      \"properties\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e7a56285-c0e9-438f-b0de-6b2159333d54",
+          "name": "Get a channel",
+          "request": {
+            "name": "Get a channel",
+            "description": {},
+            "url": {
+              "path": [
+                "channels",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "60643774-9fe2-40ca-b48e-22d49f91052c",
+              "name": "The requested channel.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "channels",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"3e28e131-d2a6-611a-e01e-5243a6138fdf\",\n    \"type\": \"channel\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"channel\": \"<string>\",\n      \"title\": \"<string>\",\n      \"is_active\": \"<boolean>\",\n      \"settings\": \"<object>\",\n      \"properties\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "9626b715-e5e7-4fbb-9da3-6365b79e7dc5",
+          "name": "Update a channel",
+          "request": {
+            "name": "Update a channel",
+            "description": {},
+            "url": {
+              "path": [
+                "channels",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": {\n    \"property_id\": \"<uuid>\",\n    \"channel\": \"<string>\",\n    \"title\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"settings\": \"<object>\",\n    \"properties\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8a4451d6-281c-4ea1-a2e2-35eab7df919d",
+              "name": "The updated channel.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "channels",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": {\n    \"property_id\": \"<uuid>\",\n    \"channel\": \"<string>\",\n    \"title\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"settings\": \"<object>\",\n    \"properties\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"3e28e131-d2a6-611a-e01e-5243a6138fdf\",\n    \"type\": \"channel\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"channel\": \"<string>\",\n      \"title\": \"<string>\",\n      \"is_active\": \"<boolean>\",\n      \"settings\": \"<object>\",\n      \"properties\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a07723fc-0231-4a8e-bc56-680ac1186aaf",
+          "name": "Delete a channel",
+          "request": {
+            "name": "Delete a channel",
+            "description": {},
+            "url": {
+              "path": [
+                "channels",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "b03dcab6-186e-4fd9-9da3-8e81c241c1f3",
+              "name": "Channel deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "channels",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "f7188be3-3aae-47c2-a4ee-b922cbe2abe6",
+    "name": "Channex ARI Channels API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

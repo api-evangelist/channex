@@ -1,0 +1,616 @@
+{
+  "item": [
+    {
+      "id": "2ca5ea3d-10aa-4a83-8854-d67292911bb2",
+      "name": "Rate Plans",
+      "description": {
+        "content": "Manage pricing plans for room types.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "95ebcaa0-3f79-45d5-81af-e32bb08a3cc9",
+          "name": "List rate plans",
+          "request": {
+            "name": "List rate plans",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "ec4e5447-98c4-46e8-82f2-a04cf4964101",
+              "name": "A list of rate plans.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    },
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"623b6ac6-e4de-942b-d99e-b4eddbb209c7\",\n      \"type\": \"rate_plan\",\n      \"attributes\": {\n        \"property_id\": \"eba90190-986e-b3d2-8e04-6eb7b12acb27\",\n        \"room_type_id\": \"38a271a2-bea1-64c7-8f48-ad0d48f2b944\",\n        \"title\": \"string\",\n        \"sell_mode\": \"per_person\",\n        \"rate_mode\": \"manual\",\n        \"currency\": \"string\",\n        \"children_fee\": \"string\",\n        \"infant_fee\": \"string\",\n        \"meal_type\": \"string\",\n        \"max_stay\": [\n          3645,\n          5713\n        ],\n        \"min_stay_arrival\": [\n          9679,\n          6338\n        ],\n        \"min_stay_through\": [\n          3979,\n          7372\n        ],\n        \"closed_to_arrival\": [\n          false,\n          false\n        ],\n        \"closed_to_departure\": [\n          false,\n          true\n        ],\n        \"stop_sell\": [\n          false,\n          false\n        ],\n        \"options\": [\n          {\n            \"occupancy\": 2586,\n            \"is_primary\": false,\n            \"rate\": 4150\n          },\n          {\n            \"occupancy\": 9612,\n            \"is_primary\": true,\n            \"rate\": 6413\n          }\n        ],\n        \"auto_rate_settings\": {}\n      }\n    },\n    {\n      \"id\": \"e6ca42de-ffe0-fc6e-092d-6ee73e4be09c\",\n      \"type\": \"rate_plan\",\n      \"attributes\": {\n        \"property_id\": \"2dc4b921-b8a3-cc0b-a03e-30f0864d519b\",\n        \"room_type_id\": \"8b6ad4be-8483-ef38-a3b2-5a24cdaed9c1\",\n        \"title\": \"string\",\n        \"sell_mode\": \"per_person\",\n        \"rate_mode\": \"auto\",\n        \"currency\": \"string\",\n        \"children_fee\": \"string\",\n        \"infant_fee\": \"string\",\n        \"meal_type\": \"string\",\n        \"max_stay\": [\n          4753,\n          6544\n        ],\n        \"min_stay_arrival\": [\n          4098,\n          2596\n        ],\n        \"min_stay_through\": [\n          5437,\n          4206\n        ],\n        \"closed_to_arrival\": [\n          true,\n          false\n        ],\n        \"closed_to_departure\": [\n          false,\n          false\n        ],\n        \"stop_sell\": [\n          false,\n          true\n        ],\n        \"options\": [\n          {\n            \"occupancy\": 5365,\n            \"is_primary\": true,\n            \"rate\": 8272\n          },\n          {\n            \"occupancy\": 5858,\n            \"is_primary\": false,\n            \"rate\": 2775\n          }\n        ],\n        \"auto_rate_settings\": {}\n      }\n    }\n  ],\n  \"meta\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "b4429cc8-58fe-4755-bd0b-6e958807f593",
+          "name": "Create a rate plan",
+          "request": {
+            "name": "Create a rate plan",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate_plan\": {\n    \"property_id\": \"<uuid>\",\n    \"room_type_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"sell_mode\": \"<string>\",\n    \"rate_mode\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"children_fee\": \"<string>\",\n    \"infant_fee\": \"<string>\",\n    \"meal_type\": \"<string>\",\n    \"max_stay\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_arrival\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_through\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"closed_to_arrival\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"closed_to_departure\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"stop_sell\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"options\": [\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      },\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      }\n    ],\n    \"auto_rate_settings\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "e4ef7c64-2ae2-4212-934f-690ee2163c7d",
+              "name": "The created rate plan.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate_plan\": {\n    \"property_id\": \"<uuid>\",\n    \"room_type_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"sell_mode\": \"<string>\",\n    \"rate_mode\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"children_fee\": \"<string>\",\n    \"infant_fee\": \"<string>\",\n    \"meal_type\": \"<string>\",\n    \"max_stay\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_arrival\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_through\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"closed_to_arrival\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"closed_to_departure\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"stop_sell\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"options\": [\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      },\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      }\n    ],\n    \"auto_rate_settings\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"4e7ba582-0855-3660-681a-d1f4fc71db4f\",\n    \"type\": \"rate_plan\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"sell_mode\": \"<string>\",\n      \"rate_mode\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"children_fee\": \"<string>\",\n      \"infant_fee\": \"<string>\",\n      \"meal_type\": \"<string>\",\n      \"max_stay\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_arrival\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_through\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"closed_to_arrival\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"closed_to_departure\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"stop_sell\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"options\": [\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        },\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        }\n      ],\n      \"auto_rate_settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "611fe7de-8cab-47f6-9fa9-e50dd5f05c4b",
+          "name": "List rate plan options",
+          "request": {
+            "name": "List rate plan options",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans",
+                "options"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "1a6ebc90-c9c9-4b4f-8be3-a20dee1e5467",
+              "name": "Rate plan options.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans",
+                    "options"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    [\n      \"string\",\n      \"string\"\n    ],\n    [\n      \"string\",\n      \"string\"\n    ]\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "4e73e140-013c-4f67-8d11-a7d67ab79831",
+          "name": "Get a rate plan",
+          "request": {
+            "name": "Get a rate plan",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "d211da33-1907-4f81-b9ef-bb7df642c093",
+              "name": "The requested rate plan.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"4e7ba582-0855-3660-681a-d1f4fc71db4f\",\n    \"type\": \"rate_plan\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"sell_mode\": \"<string>\",\n      \"rate_mode\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"children_fee\": \"<string>\",\n      \"infant_fee\": \"<string>\",\n      \"meal_type\": \"<string>\",\n      \"max_stay\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_arrival\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_through\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"closed_to_arrival\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"closed_to_departure\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"stop_sell\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"options\": [\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        },\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        }\n      ],\n      \"auto_rate_settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "65b89d42-0ae7-4ecc-acee-67fbcbc328e4",
+          "name": "Update a rate plan",
+          "request": {
+            "name": "Update a rate plan",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate_plan\": {\n    \"property_id\": \"<uuid>\",\n    \"room_type_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"sell_mode\": \"<string>\",\n    \"rate_mode\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"children_fee\": \"<string>\",\n    \"infant_fee\": \"<string>\",\n    \"meal_type\": \"<string>\",\n    \"max_stay\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_arrival\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_through\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"closed_to_arrival\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"closed_to_departure\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"stop_sell\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"options\": [\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      },\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      }\n    ],\n    \"auto_rate_settings\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "50182d07-7189-43e0-afe5-bd45febdbc68",
+              "name": "The updated rate plan.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rate_plan\": {\n    \"property_id\": \"<uuid>\",\n    \"room_type_id\": \"<uuid>\",\n    \"title\": \"<string>\",\n    \"sell_mode\": \"<string>\",\n    \"rate_mode\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"children_fee\": \"<string>\",\n    \"infant_fee\": \"<string>\",\n    \"meal_type\": \"<string>\",\n    \"max_stay\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_arrival\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"min_stay_through\": [\n      \"<integer>\",\n      \"<integer>\"\n    ],\n    \"closed_to_arrival\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"closed_to_departure\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"stop_sell\": [\n      \"<boolean>\",\n      \"<boolean>\"\n    ],\n    \"options\": [\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      },\n      {\n        \"occupancy\": \"<integer>\",\n        \"is_primary\": \"<boolean>\",\n        \"rate\": \"<integer>\"\n      }\n    ],\n    \"auto_rate_settings\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"4e7ba582-0855-3660-681a-d1f4fc71db4f\",\n    \"type\": \"rate_plan\",\n    \"attributes\": {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"title\": \"<string>\",\n      \"sell_mode\": \"<string>\",\n      \"rate_mode\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"children_fee\": \"<string>\",\n      \"infant_fee\": \"<string>\",\n      \"meal_type\": \"<string>\",\n      \"max_stay\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_arrival\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"min_stay_through\": [\n        \"<integer>\",\n        \"<integer>\"\n      ],\n      \"closed_to_arrival\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"closed_to_departure\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"stop_sell\": [\n        \"<boolean>\",\n        \"<boolean>\"\n      ],\n      \"options\": [\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        },\n        {\n          \"occupancy\": \"<integer>\",\n          \"is_primary\": \"<boolean>\",\n          \"rate\": \"<integer>\"\n        }\n      ],\n      \"auto_rate_settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "2c30fa89-5754-4788-b57e-c34bebc0baf4",
+          "name": "Delete a rate plan",
+          "request": {
+            "name": "Delete a rate plan",
+            "description": {},
+            "url": {
+              "path": [
+                "rate_plans",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "f0fe5380-bbfd-49eb-9a74-01ed40350105",
+              "name": "Rate plan deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "rate_plans",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "c9b90027-0898-4332-b889-de7675e91d35",
+    "name": "Channex ARI Rate Plans API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

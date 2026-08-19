@@ -1,0 +1,613 @@
+{
+  "item": [
+    {
+      "id": "e25efc29-d265-4b1e-97b3-0a90f1bed063",
+      "name": "Properties",
+      "description": {
+        "content": "Manage properties (hotels, apartments, vacation rentals).",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "adf53cd0-70d1-44ce-bcb2-cd5856446ce3",
+          "name": "List properties",
+          "request": {
+            "name": "List properties",
+            "description": {
+              "content": "Retrieve a paginated list of properties associated with the user.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "properties"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "disabled": false,
+                  "key": "limit",
+                  "value": "10"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "70d7aecd-828b-4c0d-91bf-7dc9b05adcf5",
+              "name": "A list of properties.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"fcff9703-cdf1-a0f1-a623-7a079be4235e\",\n      \"type\": \"property\",\n      \"attributes\": {\n        \"title\": \"string\",\n        \"currency\": \"string\",\n        \"property_type\": \"hotel\",\n        \"is_active\": true,\n        \"email\": \"u4dnzHZztIeXM@rhnfKJhbQSsLWxHXPPGaY.su\",\n        \"phone\": \"string\",\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"state\": \"string\",\n        \"country\": \"string\",\n        \"zip_code\": \"string\",\n        \"latitude\": 8143.831049513158,\n        \"longitude\": 2991.806441546713,\n        \"timezone\": \"string\",\n        \"content\": {\n          \"description\": \"string\",\n          \"important_information\": \"string\",\n          \"logo_url\": \"https://AonWXQKGiL.isgR5IZlR6+jcAWaWoZG9dpytxOWvxftnb\",\n          \"website\": \"http://DjjgLqeZbMiEGbNyO.jbxN79e.NJtiUjKvmAkYCtUpZrWJymvl0.UWnPEQAToneEQ4rdTrf\"\n        },\n        \"facilities\": [\n          \"string\",\n          \"string\"\n        ],\n        \"group_id\": \"3121fa89-2cd8-fa90-8b4d-a59121293be1\",\n        \"settings\": {}\n      }\n    },\n    {\n      \"id\": \"28431fdd-da0e-f0b6-2477-ead168a3d01e\",\n      \"type\": \"property\",\n      \"attributes\": {\n        \"title\": \"string\",\n        \"currency\": \"string\",\n        \"property_type\": \"hotel\",\n        \"is_active\": true,\n        \"email\": \"OSGzf8Tgk@RMzjnS.depo\",\n        \"phone\": \"string\",\n        \"address\": \"string\",\n        \"city\": \"string\",\n        \"state\": \"string\",\n        \"country\": \"string\",\n        \"zip_code\": \"string\",\n        \"latitude\": 687.6290335220725,\n        \"longitude\": 156.12294063508614,\n        \"timezone\": \"string\",\n        \"content\": {\n          \"description\": \"string\",\n          \"important_information\": \"string\",\n          \"logo_url\": \"https://trpDSvmAODDZJxdvWnxJWgTxQIhuT.tinVMErxfqoJGx3Rq4hWmwJLkirZmm2bJu.QJgaitd8+KDGLLZRGzx9U\",\n          \"website\": \"http://S.cyfsvj2uVItZVrnp8bX4vq24E1SmC3om3,uHkYcY29KDDDDHmPh-FMxGZNj\"\n        },\n        \"facilities\": [\n          \"string\",\n          \"string\"\n        ],\n        \"group_id\": \"010eb2ff-3c47-1c11-afd5-8667dc88aadb\",\n        \"settings\": {}\n      }\n    }\n  ],\n  \"meta\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "4426b1ae-dedd-4cfd-92ea-aadacfeaa9de",
+          "name": "Create a property",
+          "request": {
+            "name": "Create a property",
+            "description": {},
+            "url": {
+              "path": [
+                "properties"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"property\": {\n    \"title\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"property_type\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"email\": \"<email>\",\n    \"phone\": \"<string>\",\n    \"address\": \"<string>\",\n    \"city\": \"<string>\",\n    \"state\": \"<string>\",\n    \"country\": \"<string>\",\n    \"zip_code\": \"<string>\",\n    \"latitude\": \"<number>\",\n    \"longitude\": \"<number>\",\n    \"timezone\": \"<string>\",\n    \"content\": {\n      \"description\": \"<string>\",\n      \"photos\": [\n        \"<object>\",\n        \"<object>\"\n      ],\n      \"important_information\": \"<string>\",\n      \"logo_url\": \"<uri>\",\n      \"website\": \"<uri>\"\n    },\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"group_id\": \"<uuid>\",\n    \"settings\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "947fa976-dab0-4740-8fea-f26d2f6009f0",
+              "name": "The created property.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"property\": {\n    \"title\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"property_type\": \"hotel\",\n    \"is_active\": \"<boolean>\",\n    \"email\": \"<email>\",\n    \"phone\": \"<string>\",\n    \"address\": \"<string>\",\n    \"city\": \"<string>\",\n    \"state\": \"<string>\",\n    \"country\": \"<string>\",\n    \"zip_code\": \"<string>\",\n    \"latitude\": \"<number>\",\n    \"longitude\": \"<number>\",\n    \"timezone\": \"<string>\",\n    \"content\": {\n      \"description\": \"<string>\",\n      \"photos\": [\n        \"<object>\",\n        \"<object>\"\n      ],\n      \"important_information\": \"<string>\",\n      \"logo_url\": \"<uri>\",\n      \"website\": \"<uri>\"\n    },\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"group_id\": \"<uuid>\",\n    \"settings\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"71d17dd0-6c45-1eb7-4248-069509369d67\",\n    \"type\": \"property\",\n    \"attributes\": {\n      \"title\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"property_type\": \"hotel\",\n      \"is_active\": \"<boolean>\",\n      \"email\": \"<email>\",\n      \"phone\": \"<string>\",\n      \"address\": \"<string>\",\n      \"city\": \"<string>\",\n      \"state\": \"<string>\",\n      \"country\": \"<string>\",\n      \"zip_code\": \"<string>\",\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"timezone\": \"<string>\",\n      \"content\": {\n        \"description\": \"<string>\",\n        \"photos\": [\n          \"<object>\",\n          \"<object>\"\n        ],\n        \"important_information\": \"<string>\",\n        \"logo_url\": \"<uri>\",\n        \"website\": \"<uri>\"\n      },\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"group_id\": \"<uuid>\",\n      \"settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "cdae74ad-8216-4145-8aed-cc092aba83aa",
+          "name": "List property options",
+          "request": {
+            "name": "List property options",
+            "description": {
+              "content": "Get all properties without pagination, as id/title pairs.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "properties",
+                "options"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "92f5efd6-6b2e-470a-a2ca-cea4a52c4419",
+              "name": "Property options.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties",
+                    "options"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    [\n      \"string\",\n      \"string\"\n    ],\n    [\n      \"string\",\n      \"string\"\n    ]\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "c9e5d67c-9db5-47fc-9650-2691a2f86c6d",
+          "name": "Get a property",
+          "request": {
+            "name": "Get a property",
+            "description": {},
+            "url": {
+              "path": [
+                "properties",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "78fbcfb6-65c3-42b5-a0e7-079c779740a1",
+              "name": "The requested property.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"71d17dd0-6c45-1eb7-4248-069509369d67\",\n    \"type\": \"property\",\n    \"attributes\": {\n      \"title\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"property_type\": \"hotel\",\n      \"is_active\": \"<boolean>\",\n      \"email\": \"<email>\",\n      \"phone\": \"<string>\",\n      \"address\": \"<string>\",\n      \"city\": \"<string>\",\n      \"state\": \"<string>\",\n      \"country\": \"<string>\",\n      \"zip_code\": \"<string>\",\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"timezone\": \"<string>\",\n      \"content\": {\n        \"description\": \"<string>\",\n        \"photos\": [\n          \"<object>\",\n          \"<object>\"\n        ],\n        \"important_information\": \"<string>\",\n        \"logo_url\": \"<uri>\",\n        \"website\": \"<uri>\"\n      },\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"group_id\": \"<uuid>\",\n      \"settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "f0af88c0-6b81-491a-adf6-870a75fdb8d6",
+          "name": "Update a property",
+          "request": {
+            "name": "Update a property",
+            "description": {},
+            "url": {
+              "path": [
+                "properties",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"property\": {\n    \"title\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"property_type\": \"<string>\",\n    \"is_active\": \"<boolean>\",\n    \"email\": \"<email>\",\n    \"phone\": \"<string>\",\n    \"address\": \"<string>\",\n    \"city\": \"<string>\",\n    \"state\": \"<string>\",\n    \"country\": \"<string>\",\n    \"zip_code\": \"<string>\",\n    \"latitude\": \"<number>\",\n    \"longitude\": \"<number>\",\n    \"timezone\": \"<string>\",\n    \"content\": {\n      \"description\": \"<string>\",\n      \"photos\": [\n        \"<object>\",\n        \"<object>\"\n      ],\n      \"important_information\": \"<string>\",\n      \"logo_url\": \"<uri>\",\n      \"website\": \"<uri>\"\n    },\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"group_id\": \"<uuid>\",\n    \"settings\": \"<object>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "bf2318fa-5346-4686-a852-3531a7b93bc6",
+              "name": "The updated property.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"property\": {\n    \"title\": \"<string>\",\n    \"currency\": \"<string>\",\n    \"property_type\": \"hotel\",\n    \"is_active\": \"<boolean>\",\n    \"email\": \"<email>\",\n    \"phone\": \"<string>\",\n    \"address\": \"<string>\",\n    \"city\": \"<string>\",\n    \"state\": \"<string>\",\n    \"country\": \"<string>\",\n    \"zip_code\": \"<string>\",\n    \"latitude\": \"<number>\",\n    \"longitude\": \"<number>\",\n    \"timezone\": \"<string>\",\n    \"content\": {\n      \"description\": \"<string>\",\n      \"photos\": [\n        \"<object>\",\n        \"<object>\"\n      ],\n      \"important_information\": \"<string>\",\n      \"logo_url\": \"<uri>\",\n      \"website\": \"<uri>\"\n    },\n    \"facilities\": [\n      \"<string>\",\n      \"<string>\"\n    ],\n    \"group_id\": \"<uuid>\",\n    \"settings\": \"<object>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"71d17dd0-6c45-1eb7-4248-069509369d67\",\n    \"type\": \"property\",\n    \"attributes\": {\n      \"title\": \"<string>\",\n      \"currency\": \"<string>\",\n      \"property_type\": \"hotel\",\n      \"is_active\": \"<boolean>\",\n      \"email\": \"<email>\",\n      \"phone\": \"<string>\",\n      \"address\": \"<string>\",\n      \"city\": \"<string>\",\n      \"state\": \"<string>\",\n      \"country\": \"<string>\",\n      \"zip_code\": \"<string>\",\n      \"latitude\": \"<number>\",\n      \"longitude\": \"<number>\",\n      \"timezone\": \"<string>\",\n      \"content\": {\n        \"description\": \"<string>\",\n        \"photos\": [\n          \"<object>\",\n          \"<object>\"\n        ],\n        \"important_information\": \"<string>\",\n        \"logo_url\": \"<uri>\",\n        \"website\": \"<uri>\"\n      },\n      \"facilities\": [\n        \"<string>\",\n        \"<string>\"\n      ],\n      \"group_id\": \"<uuid>\",\n      \"settings\": \"<object>\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e1f1fddd-7524-437a-a1ac-c22bbf295013",
+          "name": "Delete a property",
+          "request": {
+            "name": "Delete a property",
+            "description": {},
+            "url": {
+              "path": [
+                "properties",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "4536923c-aa34-4494-a427-65def4aca697",
+              "name": "Property deleted.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "properties",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "id",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "text/plain"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "6d699f07-bed0-4bcf-be9a-b5f37ce4d93e",
+    "name": "Channex ARI Properties API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

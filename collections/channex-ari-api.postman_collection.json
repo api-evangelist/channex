@@ -1,0 +1,463 @@
+{
+  "item": [
+    {
+      "id": "d7e2299d-fd34-49e6-8e21-2475d7b49424",
+      "name": "ARI",
+      "description": {
+        "content": "Availability, Rates, and Inventory (restrictions).",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "4ba4dbb2-1ce8-4f68-a346-e632082da331",
+          "name": "Get availability",
+          "request": {
+            "name": "Get availability",
+            "description": {
+              "content": "Get availability per room type for a property and date range.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "availability"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>",
+                  "description": "(Required) "
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[date][gte]",
+                  "value": "<date>"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[date][lte]",
+                  "value": "<date>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "ff7ab27c-3ee3-4495-9b5e-dac95b8c0132",
+              "name": "Availability values.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "availability"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "filter[date][gte]",
+                      "value": "<date>"
+                    },
+                    {
+                      "key": "filter[date][lte]",
+                      "value": "<date>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5cee4f1e-6057-4a38-857d-482317bd2d0d",
+          "name": "Update availability",
+          "request": {
+            "name": "Update availability",
+            "description": {
+              "content": "Update room-type availability for one or more dates or date ranges.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "availability"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"availability\": \"<integer>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\"\n    },\n    {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"availability\": \"<integer>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7926377d-6518-49f2-9035-f019f69403a6",
+              "name": "Availability updated.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "availability"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"availability\": \"<integer>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\"\n    },\n    {\n      \"property_id\": \"<uuid>\",\n      \"room_type_id\": \"<uuid>\",\n      \"availability\": \"<integer>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "289a205a-f94c-404f-9ac8-ae895fb052d8",
+          "name": "Get rates and restrictions",
+          "request": {
+            "name": "Get rates and restrictions",
+            "description": {
+              "content": "Get rates and restrictions per rate plan for a property and date range.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "restrictions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "filter[property_id]",
+                  "value": "<uuid>",
+                  "description": "(Required) "
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[date][gte]",
+                  "value": "<date>"
+                },
+                {
+                  "disabled": false,
+                  "key": "filter[date][lte]",
+                  "value": "<date>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "c7329be8-ec36-4e54-8d83-8892a7fb10ce",
+              "name": "Rates and restrictions values.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "restrictions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "filter[property_id]",
+                      "value": "<uuid>"
+                    },
+                    {
+                      "key": "filter[date][gte]",
+                      "value": "<date>"
+                    },
+                    {
+                      "key": "filter[date][lte]",
+                      "value": "<date>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "06294d2b-a4d0-40f1-b8f2-54621caa72d3",
+          "name": "Update rates and restrictions",
+          "request": {
+            "name": "Update rates and restrictions",
+            "description": {
+              "content": "Update rate-plan rates and restrictions (rate, min/max stay, stop sell, closed to arrival/departure) for one or more dates.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "restrictions"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"<uuid>\",\n      \"rate_plan_id\": \"<uuid>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\",\n      \"rate\": \"<string>\",\n      \"min_stay_arrival\": \"<integer>\",\n      \"min_stay_through\": \"<integer>\",\n      \"max_stay\": \"<integer>\",\n      \"closed_to_arrival\": \"<boolean>\",\n      \"closed_to_departure\": \"<boolean>\",\n      \"stop_sell\": \"<boolean>\"\n    },\n    {\n      \"property_id\": \"<uuid>\",\n      \"rate_plan_id\": \"<uuid>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\",\n      \"rate\": \"<string>\",\n      \"min_stay_arrival\": \"<integer>\",\n      \"min_stay_through\": \"<integer>\",\n      \"max_stay\": \"<integer>\",\n      \"closed_to_arrival\": \"<boolean>\",\n      \"closed_to_departure\": \"<boolean>\",\n      \"stop_sell\": \"<boolean>\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "fa478efd-bfed-4626-a05c-162098907691",
+              "name": "Rates and restrictions updated.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "restrictions"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: apikey",
+                      "type": "text/plain"
+                    },
+                    "key": "user-api-key",
+                    "value": "<API Key>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"values\": [\n    {\n      \"property_id\": \"<uuid>\",\n      \"rate_plan_id\": \"<uuid>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\",\n      \"rate\": \"<string>\",\n      \"min_stay_arrival\": \"<integer>\",\n      \"min_stay_through\": \"<integer>\",\n      \"max_stay\": \"<integer>\",\n      \"closed_to_arrival\": \"<boolean>\",\n      \"closed_to_departure\": \"<boolean>\",\n      \"stop_sell\": \"<boolean>\"\n    },\n    {\n      \"property_id\": \"<uuid>\",\n      \"rate_plan_id\": \"<uuid>\",\n      \"date\": \"<date>\",\n      \"date_from\": \"<date>\",\n      \"date_to\": \"<date>\",\n      \"rate\": \"<string>\",\n      \"min_stay_arrival\": \"<integer>\",\n      \"min_stay_through\": \"<integer>\",\n      \"max_stay\": \"<integer>\",\n      \"closed_to_arrival\": \"<boolean>\",\n      \"closed_to_departure\": \"<boolean>\",\n      \"stop_sell\": \"<boolean>\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {},\n  \"meta\": {},\n  \"errors\": {}\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://secure.channex.io/api/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "user-api-key"
+      },
+      {
+        "key": "value",
+        "value": "{{apiKey}}"
+      },
+      {
+        "key": "in",
+        "value": "header"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "dc5165fb-597f-4e45-8570-e08c7db87217",
+    "name": "Channex ARI API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).\n\nContact Support:\n Name: Channex Support\n Email: support@channex.io",
+      "type": "text/plain"
+    }
+  }
+}

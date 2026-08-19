@@ -1,0 +1,112 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Channex ARI API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "user-api-key",
+      "value": "{{user-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "ARI",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Get availability",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/availability",
+            "params": [
+              {
+                "name": "filter[property_id]",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[date][gte]",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[date][lte]",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get availability per room type for a property and date range."
+        },
+        {
+          "info": {
+            "name": "Update availability",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/availability",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update room-type availability for one or more dates or date ranges."
+        },
+        {
+          "info": {
+            "name": "Get rates and restrictions",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/restrictions",
+            "params": [
+              {
+                "name": "filter[property_id]",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[date][gte]",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[date][lte]",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "Get rates and restrictions per rate plan for a property and date range."
+        },
+        {
+          "info": {
+            "name": "Update rates and restrictions",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/restrictions",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update rate-plan rates and restrictions (rate, min/max stay, stop sell, closed to arrival/departure) for one or more dates."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

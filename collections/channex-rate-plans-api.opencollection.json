@@ -1,0 +1,138 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Channex ARI Rate Plans API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "apikey",
+      "key": "user-api-key",
+      "value": "{{user-api-key}}",
+      "placement": "header"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Rate Plans",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "List rate plans",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/rate_plans",
+            "params": [
+              {
+                "name": "page",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query"
+              },
+              {
+                "name": "filter[property_id]",
+                "value": "",
+                "type": "query"
+              }
+            ]
+          },
+          "docs": "List rate plans"
+        },
+        {
+          "info": {
+            "name": "Create a rate plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://secure.channex.io/api/v1/rate_plans",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Create a rate plan"
+        },
+        {
+          "info": {
+            "name": "List rate plan options",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/rate_plans/options"
+          },
+          "docs": "List rate plan options"
+        },
+        {
+          "info": {
+            "name": "Get a rate plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://secure.channex.io/api/v1/rate_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Get a rate plan"
+        },
+        {
+          "info": {
+            "name": "Update a rate plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "https://secure.channex.io/api/v1/rate_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Update a rate plan"
+        },
+        {
+          "info": {
+            "name": "Delete a rate plan",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "https://secure.channex.io/api/v1/rate_plans/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path"
+              }
+            ]
+          },
+          "docs": "Delete a rate plan"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
