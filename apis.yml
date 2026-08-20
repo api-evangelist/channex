@@ -204,6 +204,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
