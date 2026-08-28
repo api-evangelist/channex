@@ -6,6 +6,18 @@ description: Channex is a white-label hotel channel manager API that gives Prope
   Management Systems and booking engines a single JSON-based REST integration to distribute
   availability, rates, and restrictions (ARI) to Booking.com, Airbnb, Expedia, and
   50+ other OTAs, and to receive bookings back in real time via webhooks.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: paid
   onboarding: self-serve
