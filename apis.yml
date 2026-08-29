@@ -241,6 +241,9 @@ apis:
   - type: Documentation
     url: https://docs.channex.io/api-v.1-documentation/webhook-collection
 common:
+- type: CapabilityMap
+  url: capabilities/channex-capability-edges.yml
+  name: Channex Business Capability Map
 - type: AgenticAccess
   url: agentic-access/channex-agentic-access.yml
 - type: DomainSecurity

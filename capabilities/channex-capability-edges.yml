@@ -1,0 +1,83 @@
+slug: channex
+provider: Channex
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Travel & Hospitality
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 7
+edges:
+- tag: Room Types
+  spec_file: channex-room-types-api-openapi.yml
+  capability_id: BC-4000.10
+  capability_id_l1: BC-4000
+  capability_name: Lodging Product Management
+  confidence: 0.9
+  evidence: POST /room_types createRoomType, schema RoomTypeAttributes — 'managing properties, room types,
+    rate plans'
+  reason: Room type master definition is the canonical example of Lodging Product Management.
+- tag: ARI
+  spec_file: channex-ari-api-openapi.yml
+  capability_id: BC-4010.50
+  capability_id_l1: BC-4010
+  capability_name: Channel Manager Operations
+  confidence: 0.85
+  evidence: GET /availability, POST /availability updateAvailability, GET /restrictions getRatesAndRestrictions
+    — 'white-label hotel channel manager API'
+  reason: 'Core channel-manager ARI push: synchronising availability, rates and restrictions across distribution
+    channels, which is exactly Channel Manager Operations.'
+- tag: Bookings
+  spec_file: channex-bookings-api-openapi.yml
+  capability_id: BC-4020
+  capability_id_l1: BC-4020
+  capability_name: Reservation & Booking Management
+  confidence: 0.85
+  evidence: GET /bookings listBookings, POST /bookings/{booking_id}/no_show reportNoShow, POST /bookings/{booking_id}/cancel_due_invalid_card
+  reason: Operations manage hotel reservations received from OTAs including retrieval, revisions, no-show
+    and cancellation — reservation lifecycle. Sub-capability split between capture and modification/cancellation,
+    so L1 only.
+- tag: Rate Plans
+  spec_file: channex-rate-plans-api-openapi.yml
+  capability_id: BC-4000.10
+  capability_id_l1: BC-4000
+  capability_name: Lodging Product Management
+  confidence: 0.85
+  evidence: POST /rate_plans createRatePlan, schema RatePlanAttributes — 'managing properties, room types,
+    rate plans'
+  reason: Rate plan definition is explicitly part of Lodging Product Management (room types, rate plans,
+    package codes), not pricing decisioning.
+- tag: Channels
+  spec_file: channex-channels-api-openapi.yml
+  capability_id: BC-4010.50
+  capability_id_l1: BC-4010
+  capability_name: Channel Manager Operations
+  confidence: 0.8
+  evidence: POST /channels createChannel, PUT /channels/{id} updateChannel — 'distribute availability,
+    rates, and restrictions (ARI) to Booking.com, Airbnb, Expedia, and 50+ other OTAs'
+  reason: Managing OTA channel connections in a channel manager is distribution channel connectivity/channel-manager
+    operation.
+- tag: Webhooks
+  spec_file: channex-webhooks-api-openapi.yml
+  capability_id: BC-4270.80
+  capability_id_l1: BC-4270
+  capability_name: Webhook & Event Subscription Management
+  confidence: 0.8
+  evidence: POST /webhooks createWebhook, POST /webhooks/test testWebhook, schema WebhookWriteRequest
+  reason: 'Pure integration plumbing: lifecycle of outbound webhook subscriptions for event delivery,
+    matching Webhook & Event Subscription Management.'
+- tag: Properties
+  spec_file: channex-properties-api-openapi.yml
+  capability_id: BC-4000.10
+  capability_id_l1: BC-4000
+  capability_name: Lodging Product Management
+  confidence: 0.75
+  evidence: POST /properties createProperty, GET /properties/options listPropertyOptions, schemas PropertyAttributes,
+    Property
+  reason: Property master records underpin the lodging product definition distributed to channels; closest
+    fit is Lodging Product Management, though it is master data setup for the channel manager.
