@@ -38,6 +38,12 @@ tags:
 - Channel Manager
 - Hotel Distribution
 - OTA
+- Booking
+tags_raw:
+- Hospitality
+- Channel Manager
+- Hotel Distribution
+- OTA
 - Bookings
 created: '2026-06-25'
 modified: '2026-06-25'
@@ -77,6 +83,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Booking
+  tags_raw:
   - Bookings
   properties:
   - type: OpenAPI
