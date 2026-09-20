@@ -1,58 +1,33 @@
-specification: API Commons Rate Limits
-specificationVersion: '0.1'
-schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/RateLimits
-provider: Channex
-providerId: channex
-created: '2026-06-25'
-modified: '2026-06-25'
-reconciled: false
-tags:
-- Hospitality
-- Channel Manager
-- Hotel Distribution
-- OTA
-- Bookings
-- Rate Limiting
-- Quotas
-- Throttling
-description: >-
-  Channex applies request rate limiting on its v1 REST API to protect platform
-  stability, and recommends batching ARI updates (availability, rates, and
-  restrictions) into a single `values` array rather than issuing many small
-  per-date requests. Specific per-account request-per-second / request-per-minute
-  thresholds are not published in the public documentation and are not reconciled
-  in this artifact.
-notes: >-
-  Verify concrete rate-limit thresholds, throttling headers, and recommended
-  batch sizes with Channex support or the white-label onboarding materials on
-  reconciliation.
+# Rate limits transcribed from the provider's own documentation — see provenance. Quoted, not derived.
+generated: '2026-09-20'
+method: searched
+source: https://docs.channex.io/api-v.1-documentation/rate-limits
 sources:
-- https://docs.channex.io/api-v.1-documentation/api-reference
-- https://docs.channex.io/api-v.1-documentation/ari
-- https://channex.io/
-responseCodes:
-  throttled: 429
+- https://docs.channex.io/api-v.1-documentation/rate-limits
+provenance:
+  tool: planning/api-economics/harvest_ratelimits.py
+  run: 20260920T133210
+  grounding: every limit_text was found verbatim in the fetched page text
+published: true
+note: Limits are per property; page documents 429 error body with code http_too_many_requests. No rate-limit
+  headers documented.
+limit_count: 3
 limits:
-- name: Request Rate Limit
-  scope: account
-  metric: requests
-  limit: see provider documentation
-  notes: Per-API-key request throttling; specific thresholds not publicly published.
-- name: ARI Batch Update
-  scope: account
-  metric: values
-  limit: batch updates into a single values array
-  notes: ARI updates should be sent as batched values arrays rather than many single-date requests.
-- name: Pagination Limit
-  scope: request
-  metric: records
-  limit: 100
-  notes: List endpoints are paginated; default page limit is 10, maximum 100 per page.
-policies:
-- name: Batching
-  description: Combine availability and rate/restriction changes into batched values arrays to reduce request volume.
-- name: Backoff Strategy
-  description: Clients should implement exponential backoff with jitter and honor Retry-After on HTTP 429 responses.
-maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+- name: Total ARI requests
+  limit_text: 20 ARI total per minute
+  limit: 20
+  window: minute
+  scope: unclear
+- name: Restrictions & Price requests
+  limit_text: 10 Restrictions & Price Requests per minute per property
+  limit: 10
+  window: minute
+  scope: unclear
+  endpoint: Restrictions & Price
+- name: Availability requests
+  limit_text: 10 Availability Requests per minute per property
+  limit: 10
+  window: minute
+  scope: unclear
+  endpoint: Availability
+exceeded_status: 429
