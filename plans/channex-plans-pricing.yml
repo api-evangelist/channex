@@ -1,105 +1,125 @@
-specification: API Commons Plans
-specificationVersion: '0.1'
-schema: https://raw.githubusercontent.com/api-evangelist/interface-research/main/schema/api-commons.yml#/$defs/Plans
-provider: Channex
-providerId: channex
-created: '2026-06-25'
-modified: '2026-06-25'
-reconciled: false
-tags:
-- Hospitality
-- Channel Manager
-- Hotel Distribution
-- OTA
-- Bookings
-- Plans
-description: >-
-  Channex uses transparent per-property (and per-unit for vacation rentals)
-  monthly pricing rather than per-call API metering. A direct Standard plan is
-  offered to individual properties, and a WhiteLabel plan is offered to tech
-  providers (PMS, booking engines) who resell Channex connectivity under their
-  own brand. Published list prices vary by source and over time; treat the
-  figures below as representative and verify current pricing with Channex.
-notes: >-
-  Channex primarily sells wholesale/white-label to PMS and booking-engine
-  providers. Per-property and per-unit fees, included channel counts, and
-  white-label terms are negotiated; confirm current numbers with Channex sales.
+# Pricing transcribed from the provider's own page — see provenance. Numbers are quoted, not derived.
+generated: '2026-09-20'
+method: searched
+source: https://channex.io/pricing
 sources:
-- https://channex.io/
-- https://www.hotelminder.com/partner=Channex
-- https://www.capterra.com/p/10036936/Channex/
+- https://channex.io/pricing
+provenance:
+  tool: planning/api-economics/harvest_pricing.py
+  run: 20260920T124425
+  grounding: every price_text was found verbatim in the fetched page text
+audience: developer-api
+pricing_basis: flat-platform
+published: true
+note: 'Single white-label plan: flat $130/month platform fee plus per-property/unit charges, with automatic
+  volume discounts, usage add-ons and overage. All prices exclude VAT.'
+plan_count: 15
+currency: USD
 plans:
-- id: channex-standard
-  name: Standard
-  type: subscription
-  description: >-
-    Direct per-property channel manager plan for individual properties
-    connecting their inventory to OTAs.
-  entries:
-  - label: Per Property
-    name: standard_per_property
-    type: flat
-    metric: property
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: from ~$30 per property / month (verify current pricing)
-    userMultiplied: true
-  elements:
-  - name: Properties
-  - name: Room Types
-  - name: Rate Plans
-  - name: Availability and Restrictions (ARI)
-  - name: Bookings
-  - name: Webhooks
-- id: channex-whitelabel
-  name: WhiteLabel
-  type: subscription
-  description: >-
-    White-label channel manager API for PMS and booking-engine providers who
-    resell Channex OTA connectivity under their own brand, including the full
-    Channel API.
-  entries:
-  - label: Platform Fee
-    name: whitelabel_platform
-    type: flat
-    metric: account
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: from ~$130 / month base (verify current pricing)
-    userMultiplied: false
-  - label: Hotel Property Fee
-    name: whitelabel_hotel
-    type: flat
-    metric: property
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: per-property monthly fee (volume-tiered; contact sales)
-    userMultiplied: true
-  - label: Vacation Rental Unit Fee
-    name: whitelabel_vacation_rental
-    type: flat
-    metric: unit
-    limit: -1
-    timeFrame: month
-    geo: global
-    unit: 1
-    price: per-unit monthly fee (volume-tiered; contact sales)
-    userMultiplied: true
-  elements:
-  - name: Channels
-  - name: Channel Mappings
-  - name: Properties
-  - name: Room Types
-  - name: Rate Plans
-  - name: Availability and Restrictions (ARI)
-  - name: Bookings
-  - name: Webhooks
-maintainers:
-- FN: Kin Lane
-  email: kin@apievangelist.com
+- name: WhiteLabel
+  price_text: Platform fee, from $130 per Month
+  price: 130
+  currency: USD
+  period: month
+  unit: platform fee + per connected property
+  included_quota: API Access, White-label solution, Mapping API, Tech Support, Dashboard, unlimited users,
+    onboarding
+  overage: Per-property fees billed on top
+- name: Channel Manager — Hotels
+  price_text: $ 7 / property
+  price: 7
+  currency: USD
+  period: month
+  unit: property
+  included_quota: 20 room types, 200 rate plans per property
+  overage: Hotel — each room type over 20 — capped at $7 per property $1; each rate plan over 200 $0.10
+- name: Channel Manager — Vacation Rentals
+  price_text: $0.50 / unit
+  price: 0.5
+  currency: USD
+  period: month
+  unit: unit
+  included_quota: 50 room types, 10 rate plans per room type
+  overage: Vacation rental — each rate plan over 10 per room type $0.10
+- name: Chat & Reviews add-on (Hotels)
+  price_text: $ 7 / property
+  price: 7
+  currency: USD
+  period: month
+  unit: property
+  included_quota: guest messaging and review management
+- name: Chat & Reviews add-on (VR)
+  price_text: $0.50 / unit
+  price: 0.5
+  currency: USD
+  period: month
+  unit: unit
+  included_quota: guest messaging and review management
+- name: Volume discount — Hotels 500+
+  price_text: $6.00
+  price: 6
+  currency: USD
+  period: month
+  unit: property
+  included_quota: 500 + properties
+- name: Volume discount — Hotels 1,000+
+  price_text: $5.00
+  price: 5
+  currency: USD
+  period: month
+  unit: property
+  included_quota: 1,000 + properties
+- name: Volume discount — Hotels 2,000+
+  price_text: $4.00
+  price: 4
+  currency: USD
+  period: month
+  unit: property
+  included_quota: 2,000 + properties
+- name: Volume discount — VR 2,000+
+  price_text: $0.45
+  price: 0.45
+  currency: USD
+  period: month
+  unit: unit
+  included_quota: 2,000 + units
+- name: Volume discount — VR 4,000+
+  price_text: $0.40
+  price: 0.4
+  currency: USD
+  period: month
+  unit: unit
+  included_quota: 4,000 + units
+- name: Volume discount — VR 7,000+
+  price_text: $0.30
+  price: 0.3
+  currency: USD
+  period: month
+  unit: unit
+  included_quota: 7,000 + units
+- name: Duplicate channel connection
+  price_text: $1 / month
+  price: 1
+  currency: USD
+  period: month
+  unit: duplicate connection
+  included_quota: First connection to each channel is included
+- name: Stripe tokenisation
+  price_text: $0.02 / transaction
+  price: 0.02
+  currency: USD
+  period: per-use
+  unit: transaction
+- name: Custom terms / security review fee
+  price_text: $1,500 review fee
+  price: 1500
+  currency: USD
+  period: one-time
+  unit: review
+- name: Staging sandbox
+  price_text: The staging server is free
+  period: none
+  included_quota: Full API to test against
+rate_limit_statements:
+- Hotel 20 room types, 200 rate plans per property
+- Vacation rental 50 room types, 10 rate plans per room type

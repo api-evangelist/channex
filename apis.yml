@@ -250,6 +250,8 @@ apis:
   - type: Documentation
     url: https://docs.channex.io/api-v.1-documentation/webhook-collection
 common:
+- type: Pricing
+  url: https://channex.io/pricing
 - type: CapabilityMap
   url: capabilities/channex-capability-edges.yml
   name: Channex Business Capability Map
