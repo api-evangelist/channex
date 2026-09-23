@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
   title: Channex ARI API
   description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
@@ -130,6 +130,39 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RestrictionValue'
+    AvailabilityUpdateRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityValue'
+    AvailabilityValue:
+      type: object
+      required:
+      - property_id
+      - room_type_id
+      - availability
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        room_type_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        availability:
+          type: integer
     RestrictionValue:
       type: object
       required:
@@ -166,39 +199,6 @@ components:
           type: boolean
         stop_sell:
           type: boolean
-    AvailabilityValue:
-      type: object
-      required:
-      - property_id
-      - room_type_id
-      - availability
-      properties:
-        property_id:
-          type: string
-          format: uuid
-        room_type_id:
-          type: string
-          format: uuid
-        date:
-          type: string
-          format: date
-        date_from:
-          type: string
-          format: date
-        date_to:
-          type: string
-          format: date
-        availability:
-          type: integer
-    AvailabilityUpdateRequest:
-      type: object
-      required:
-      - values
-      properties:
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/AvailabilityValue'
     Envelope:
       type: object
       properties:

@@ -1,6 +1,6 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
-  title: Channex ARI Room Types API
+  title: Channex Room Types API
   description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
   termsOfService: https://channex.io/terms-of-service/
   contact:
@@ -113,30 +113,40 @@ paths:
         '200':
           description: Room type deleted.
 components:
-  parameters:
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
   schemas:
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: room_type
+        attributes:
+          $ref: '#/components/schemas/RoomTypeAttributes'
+    RoomTypeWriteRequest:
+      type: object
+      required:
+      - room_type
+      properties:
+        room_type:
+          $ref: '#/components/schemas/RoomTypeAttributes'
+    OptionsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
+    RoomTypeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RoomType'
     RoomTypeList:
       type: object
       properties:
@@ -146,18 +156,6 @@ components:
             $ref: '#/components/schemas/RoomType'
         meta:
           type: object
-    RoomTypeWriteRequest:
-      type: object
-      required:
-      - room_type
-      properties:
-        room_type:
-          $ref: '#/components/schemas/RoomTypeAttributes'
-    RoomTypeResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RoomType'
     RoomTypeAttributes:
       type: object
       required:
@@ -197,27 +195,29 @@ components:
             type: string
         content:
           type: object
-    OptionsList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-            description: A two-element [title, id] pair.
-    RoomType:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: room_type
-        attributes:
-          $ref: '#/components/schemas/RoomTypeAttributes'
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   securitySchemes:
     userApiKey:
       type: apiKey

@@ -1,6 +1,6 @@
-openapi: 3.0.1
+openapi: 3.2.0
 info:
-  title: Channex ARI Rate Plans API
+  title: Channex Rate Plans API
   description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
   termsOfService: https://channex.io/terms-of-service/
   contact:
@@ -113,30 +113,38 @@ paths:
         '200':
           description: Rate plan deleted.
 components:
-  parameters:
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
   schemas:
+    RatePlanResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RatePlan'
+    RatePlanWriteRequest:
+      type: object
+      required:
+      - rate_plan
+      properties:
+        rate_plan:
+          $ref: '#/components/schemas/RatePlanAttributes'
+    OptionsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
+    RatePlanList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RatePlan'
+        meta:
+          type: object
     RatePlan:
       type: object
       properties:
@@ -148,20 +156,6 @@ components:
           example: rate_plan
         attributes:
           $ref: '#/components/schemas/RatePlanAttributes'
-    RatePlanResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RatePlan'
-    RatePlanList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RatePlan'
-        meta:
-          type: object
     RatePlanAttributes:
       type: object
       required:
@@ -236,23 +230,29 @@ components:
                 type: integer
         auto_rate_settings:
           type: object
-    OptionsList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-            description: A two-element [title, id] pair.
-    RatePlanWriteRequest:
-      type: object
-      required:
-      - rate_plan
-      properties:
-        rate_plan:
-          $ref: '#/components/schemas/RatePlanAttributes'
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   securitySchemes:
     userApiKey:
       type: apiKey
