@@ -113,29 +113,30 @@ paths:
         '200':
           description: Rate plan deleted.
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
   schemas:
-    RatePlanResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/RatePlan'
-    RatePlanWriteRequest:
-      type: object
-      required:
-      - rate_plan
-      properties:
-        rate_plan:
-          $ref: '#/components/schemas/RatePlanAttributes'
-    OptionsList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-            description: A two-element [title, id] pair.
     RatePlanList:
       type: object
       properties:
@@ -145,6 +146,13 @@ components:
             $ref: '#/components/schemas/RatePlan'
         meta:
           type: object
+    RatePlanWriteRequest:
+      type: object
+      required:
+      - rate_plan
+      properties:
+        rate_plan:
+          $ref: '#/components/schemas/RatePlanAttributes'
     RatePlan:
       type: object
       properties:
@@ -156,6 +164,21 @@ components:
           example: rate_plan
         attributes:
           $ref: '#/components/schemas/RatePlanAttributes'
+    RatePlanResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RatePlan'
+    OptionsList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
     RatePlanAttributes:
       type: object
       required:
@@ -230,29 +253,6 @@ components:
                 type: integer
         auto_rate_settings:
           type: object
-  parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
   securitySchemes:
     userApiKey:
       type: apiKey

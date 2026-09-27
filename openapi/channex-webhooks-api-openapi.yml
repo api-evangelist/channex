@@ -113,6 +113,27 @@ paths:
           description: Test request sent.
 components:
   schemas:
+    WebhookWriteRequest:
+      type: object
+      required:
+      - webhook
+      properties:
+        webhook:
+          $ref: '#/components/schemas/WebhookAttributes'
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
+    WebhookList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhook'
+        meta:
+          type: object
     WebhookAttributes:
       type: object
       required:
@@ -140,20 +161,6 @@ components:
           type: object
         is_global:
           type: boolean
-    WebhookList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Webhook'
-        meta:
-          type: object
-    WebhookResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
     Webhook:
       type: object
       properties:
@@ -164,13 +171,6 @@ components:
           type: string
           example: webhook
         attributes:
-          $ref: '#/components/schemas/WebhookAttributes'
-    WebhookWriteRequest:
-      type: object
-      required:
-      - webhook
-      properties:
-        webhook:
           $ref: '#/components/schemas/WebhookAttributes'
   parameters:
     Id:

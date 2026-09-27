@@ -121,24 +121,6 @@ paths:
                 $ref: '#/components/schemas/Envelope'
 components:
   schemas:
-    RestrictionsUpdateRequest:
-      type: object
-      required:
-      - values
-      properties:
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/RestrictionValue'
-    AvailabilityUpdateRequest:
-      type: object
-      required:
-      - values
-      properties:
-        values:
-          type: array
-          items:
-            $ref: '#/components/schemas/AvailabilityValue'
     AvailabilityValue:
       type: object
       required:
@@ -163,6 +145,33 @@ components:
           format: date
         availability:
           type: integer
+    RestrictionsUpdateRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/RestrictionValue'
+    AvailabilityUpdateRequest:
+      type: object
+      required:
+      - values
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityValue'
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
     RestrictionValue:
       type: object
       required:
@@ -199,15 +208,6 @@ components:
           type: boolean
         stop_sell:
           type: boolean
-    Envelope:
-      type: object
-      properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
-        errors:
-          type: object
   securitySchemes:
     userApiKey:
       type: apiKey

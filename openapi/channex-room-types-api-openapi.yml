@@ -113,18 +113,30 @@ paths:
         '200':
           description: Room type deleted.
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
   schemas:
-    RoomType:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: room_type
-        attributes:
-          $ref: '#/components/schemas/RoomTypeAttributes'
     RoomTypeWriteRequest:
       type: object
       required:
@@ -147,15 +159,6 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/RoomType'
-    RoomTypeList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RoomType'
-        meta:
-          type: object
     RoomTypeAttributes:
       type: object
       required:
@@ -195,29 +198,26 @@ components:
             type: string
         content:
           type: object
-  parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
+    RoomTypeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomType'
+        meta:
+          type: object
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: room_type
+        attributes:
+          $ref: '#/components/schemas/RoomTypeAttributes'
   securitySchemes:
     userApiKey:
       type: apiKey

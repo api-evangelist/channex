@@ -102,21 +102,21 @@ paths:
           description: Channel deleted.
 components:
   schemas:
-    ChannelList:
+    ChannelResponse:
       type: object
       properties:
         data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Channel'
-        meta:
-          type: object
-    ChannelWriteRequest:
+          $ref: '#/components/schemas/Channel'
+    Channel:
       type: object
-      required:
-      - channel
       properties:
-        channel:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: channel
+        attributes:
           $ref: '#/components/schemas/ChannelAttributes'
     ChannelAttributes:
       type: object
@@ -139,30 +139,23 @@ components:
         properties:
           type: object
           description: Channel-specific configuration and room/rate mappings.
-    Channel:
+    ChannelWriteRequest:
       type: object
+      required:
+      - channel
       properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: channel
-        attributes:
+        channel:
           $ref: '#/components/schemas/ChannelAttributes'
-    ChannelResponse:
+    ChannelList:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/Channel'
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+        meta:
+          type: object
   parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
     Id:
       name: id
       in: path
@@ -178,6 +171,13 @@ components:
         minimum: 1
         maximum: 100
         default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
   securitySchemes:
     userApiKey:
       type: apiKey
