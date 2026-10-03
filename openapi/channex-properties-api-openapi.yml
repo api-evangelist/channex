@@ -110,6 +110,29 @@ paths:
         '200':
           description: Property deleted.
 components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
     Property:
       type: object
@@ -121,6 +144,22 @@ components:
           type: string
           example: property
         attributes:
+          $ref: '#/components/schemas/PropertyAttributes'
+    PropertyList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+        meta:
+          type: object
+    PropertyWriteRequest:
+      type: object
+      required:
+      - property
+      properties:
+        property:
           $ref: '#/components/schemas/PropertyAttributes'
     PropertyAttributes:
       type: object
@@ -194,22 +233,6 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Property'
-    PropertyWriteRequest:
-      type: object
-      required:
-      - property
-      properties:
-        property:
-          $ref: '#/components/schemas/PropertyAttributes'
-    PropertyList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Property'
-        meta:
-          type: object
     OptionsList:
       type: object
       properties:
@@ -220,29 +243,6 @@ components:
             items:
               type: string
             description: A two-element [title, id] pair.
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
   securitySchemes:
     userApiKey:
       type: apiKey

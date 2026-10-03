@@ -158,30 +158,25 @@ paths:
         '200':
           description: Revision acknowledged.
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
   schemas:
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
+    BookingList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        meta:
+          type: object
     BookingResponse:
       type: object
       properties:
@@ -234,15 +229,6 @@ components:
             type: object
         notes:
           type: string
-    Envelope:
-      type: object
-      properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
-        errors:
-          type: object
     Booking:
       type: object
       properties:
@@ -254,15 +240,29 @@ components:
           example: booking
         attributes:
           $ref: '#/components/schemas/BookingAttributes'
-    BookingList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Booking'
-        meta:
-          type: object
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   securitySchemes:
     userApiKey:
       type: apiKey

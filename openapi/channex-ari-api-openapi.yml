@@ -121,6 +121,51 @@ paths:
                 $ref: '#/components/schemas/Envelope'
 components:
   schemas:
+    RestrictionValue:
+      type: object
+      required:
+      - property_id
+      - rate_plan_id
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        rate_plan_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        rate:
+          type: string
+          description: Rate as a decimal string ("200.00") or integer in the minimum currency unit (20000 for $200).
+        min_stay_arrival:
+          type: integer
+        min_stay_through:
+          type: integer
+        max_stay:
+          type: integer
+        closed_to_arrival:
+          type: boolean
+        closed_to_departure:
+          type: boolean
+        stop_sell:
+          type: boolean
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
     AvailabilityValue:
       type: object
       required:
@@ -163,51 +208,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AvailabilityValue'
-    Envelope:
-      type: object
-      properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
-        errors:
-          type: object
-    RestrictionValue:
-      type: object
-      required:
-      - property_id
-      - rate_plan_id
-      properties:
-        property_id:
-          type: string
-          format: uuid
-        rate_plan_id:
-          type: string
-          format: uuid
-        date:
-          type: string
-          format: date
-        date_from:
-          type: string
-          format: date
-        date_to:
-          type: string
-          format: date
-        rate:
-          type: string
-          description: Rate as a decimal string ("200.00") or integer in the minimum currency unit (20000 for $200).
-        min_stay_arrival:
-          type: integer
-        min_stay_through:
-          type: integer
-        max_stay:
-          type: integer
-        closed_to_arrival:
-          type: boolean
-        closed_to_departure:
-          type: boolean
-        stop_sell:
-          type: boolean
   securitySchemes:
     userApiKey:
       type: apiKey
