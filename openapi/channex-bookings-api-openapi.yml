@@ -159,6 +159,17 @@ paths:
           description: Revision acknowledged.
 components:
   schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: booking
+        attributes:
+          $ref: '#/components/schemas/BookingAttributes'
     Envelope:
       type: object
       properties:
@@ -168,6 +179,11 @@ components:
           type: object
         errors:
           type: object
+    BookingResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
     BookingList:
       type: object
       properties:
@@ -177,11 +193,6 @@ components:
             $ref: '#/components/schemas/Booking'
         meta:
           type: object
-    BookingResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Booking'
     BookingAttributes:
       type: object
       properties:
@@ -229,18 +240,14 @@ components:
             type: object
         notes:
           type: string
-    Booking:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: booking
-        attributes:
-          $ref: '#/components/schemas/BookingAttributes'
   parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
     Limit:
       name: limit
       in: query
@@ -249,13 +256,6 @@ components:
         minimum: 1
         maximum: 100
         default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
     Id:
       name: id
       in: path

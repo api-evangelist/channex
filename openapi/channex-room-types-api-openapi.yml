@@ -113,39 +113,35 @@ paths:
         '200':
           description: Room type deleted.
 components:
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
-    RoomType:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: room_type
-        attributes:
-          $ref: '#/components/schemas/RoomTypeAttributes'
-    RoomTypeList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RoomType'
-        meta:
-          type: object
     RoomTypeResponse:
       type: object
       properties:
         data:
           $ref: '#/components/schemas/RoomType'
-    RoomTypeWriteRequest:
-      type: object
-      required:
-      - room_type
-      properties:
-        room_type:
-          $ref: '#/components/schemas/RoomTypeAttributes'
     RoomTypeAttributes:
       type: object
       required:
@@ -185,6 +181,24 @@ components:
             type: string
         content:
           type: object
+    RoomTypeWriteRequest:
+      type: object
+      required:
+      - room_type
+      properties:
+        room_type:
+          $ref: '#/components/schemas/RoomTypeAttributes'
+    RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: room_type
+        attributes:
+          $ref: '#/components/schemas/RoomTypeAttributes'
     OptionsList:
       type: object
       properties:
@@ -195,29 +209,15 @@ components:
             items:
               type: string
             description: A two-element [title, id] pair.
-  parameters:
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+    RoomTypeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomType'
+        meta:
+          type: object
   securitySchemes:
     userApiKey:
       type: apiKey
