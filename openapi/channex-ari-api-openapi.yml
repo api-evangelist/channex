@@ -121,6 +121,30 @@ paths:
                 $ref: '#/components/schemas/Envelope'
 components:
   schemas:
+    AvailabilityValue:
+      type: object
+      required:
+      - property_id
+      - room_type_id
+      - availability
+      properties:
+        property_id:
+          type: string
+          format: uuid
+        room_type_id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        availability:
+          type: integer
     RestrictionsUpdateRequest:
       type: object
       required:
@@ -148,30 +172,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AvailabilityValue'
-    AvailabilityValue:
-      type: object
-      required:
-      - property_id
-      - room_type_id
-      - availability
-      properties:
-        property_id:
-          type: string
-          format: uuid
-        room_type_id:
-          type: string
-          format: uuid
-        date:
-          type: string
-          format: date
-        date_from:
-          type: string
-          format: date
-        date_to:
-          type: string
-          format: date
-        availability:
-          type: integer
     RestrictionValue:
       type: object
       required:

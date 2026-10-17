@@ -101,32 +101,42 @@ paths:
         '200':
           description: Channel deleted.
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   schemas:
+    ChannelWriteRequest:
+      type: object
+      required:
+      - channel
+      properties:
+        channel:
+          $ref: '#/components/schemas/ChannelAttributes'
     ChannelResponse:
       type: object
       properties:
         data:
           $ref: '#/components/schemas/Channel'
-    Channel:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: channel
-        attributes:
-          $ref: '#/components/schemas/ChannelAttributes'
-    ChannelList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Channel'
-        meta:
-          type: object
     ChannelAttributes:
       type: object
       required:
@@ -148,36 +158,26 @@ components:
         properties:
           type: object
           description: Channel-specific configuration and room/rate mappings.
-    ChannelWriteRequest:
+    Channel:
       type: object
-      required:
-      - channel
       properties:
-        channel:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: channel
+        attributes:
           $ref: '#/components/schemas/ChannelAttributes'
-  parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+    ChannelList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+        meta:
+          type: object
   securitySchemes:
     userApiKey:
       type: apiKey

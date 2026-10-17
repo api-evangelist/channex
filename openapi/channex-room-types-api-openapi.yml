@@ -114,6 +114,13 @@ paths:
           description: Room type deleted.
 components:
   parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     Page:
       name: page
       in: query
@@ -129,19 +136,14 @@ components:
         minimum: 1
         maximum: 100
         default: 10
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
   schemas:
-    RoomTypeResponse:
+    RoomTypeWriteRequest:
       type: object
+      required:
+      - room_type
       properties:
-        data:
-          $ref: '#/components/schemas/RoomType'
+        room_type:
+          $ref: '#/components/schemas/RoomTypeAttributes'
     RoomTypeAttributes:
       type: object
       required:
@@ -181,13 +183,21 @@ components:
             type: string
         content:
           type: object
-    RoomTypeWriteRequest:
+    OptionsList:
       type: object
-      required:
-      - room_type
       properties:
-        room_type:
-          $ref: '#/components/schemas/RoomTypeAttributes'
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+            description: A two-element [title, id] pair.
+    RoomTypeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/RoomType'
     RoomType:
       type: object
       properties:
@@ -199,16 +209,6 @@ components:
           example: room_type
         attributes:
           $ref: '#/components/schemas/RoomTypeAttributes'
-    OptionsList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: array
-            items:
-              type: string
-            description: A two-element [title, id] pair.
     RoomTypeList:
       type: object
       properties:

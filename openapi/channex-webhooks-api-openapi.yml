@@ -112,14 +112,15 @@ paths:
         '200':
           description: Test request sent.
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
-    WebhookWriteRequest:
-      type: object
-      required:
-      - webhook
-      properties:
-        webhook:
-          $ref: '#/components/schemas/WebhookAttributes'
     WebhookAttributes:
       type: object
       required:
@@ -158,11 +159,13 @@ components:
           example: webhook
         attributes:
           $ref: '#/components/schemas/WebhookAttributes'
-    WebhookResponse:
+    WebhookWriteRequest:
       type: object
+      required:
+      - webhook
       properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
+        webhook:
+          $ref: '#/components/schemas/WebhookAttributes'
     WebhookList:
       type: object
       properties:
@@ -172,14 +175,11 @@ components:
             $ref: '#/components/schemas/Webhook'
         meta:
           type: object
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
+    WebhookResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Webhook'
   securitySchemes:
     userApiKey:
       type: apiKey

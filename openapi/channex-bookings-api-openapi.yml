@@ -158,7 +158,44 @@ paths:
         '200':
           description: Revision acknowledged.
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
   schemas:
+    BookingResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+    Envelope:
+      type: object
+      properties:
+        data:
+          description: Resource object or array of resource objects.
+        meta:
+          type: object
+        errors:
+          type: object
     Booking:
       type: object
       properties:
@@ -170,20 +207,6 @@ components:
           example: booking
         attributes:
           $ref: '#/components/schemas/BookingAttributes'
-    Envelope:
-      type: object
-      properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
-        errors:
-          type: object
-    BookingResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Booking'
     BookingList:
       type: object
       properties:
@@ -240,29 +263,6 @@ components:
             type: object
         notes:
           type: string
-  parameters:
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
   securitySchemes:
     userApiKey:
       type: apiKey
