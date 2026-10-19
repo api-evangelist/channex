@@ -1,0 +1,1324 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Webhook Signing Keys API
+  version: 0.0.0
+  description: 'HMAC keys that sign webhook deliveries, so that a receiving endpoint can tell that a
+
+    callback came from Channex and that its body was not altered on the way.
+
+
+    A key is a shared secret: Channex holds it and so do you. It is not an API credential
+
+    — it authenticates nothing against this API and grants no access. It is used in one
+
+    direction only, on the callbacks Channex sends to you.
+
+
+    A key belongs to a billing account and holds up to two secret versions — the current
+
+    one plus an optional pending one, which is what makes rotation zero-downtime. To turn
+
+    signing on, point a webhook at the key with `signing_key_id` and set `is_signed`.
+
+
+    ## What is signed
+
+
+    Every delivery of a signed webhook — the `POST` Channex makes to the webhook''s
+
+    `callback_url` — carries three headers:
+
+
+    - `x-hmac-timestamp` — Unix timestamp (seconds) taken when the delivery was signed.
+
+    - `x-hmac-signature-256` — comma-separated lowercase-hex HMAC-SHA256 signatures, one
+
+    per secret version of the key, the current version first.
+
+    - `x-hmac-keys-256` — comma-separated version labels (`...` followed by each secret''s
+
+    last 6 characters), in the same order as the signatures.
+
+
+    Each signature is computed over the string `{timestamp}.{raw request body}`: the value
+
+    of `x-hmac-timestamp`, a dot, and the exact bytes of that delivery''s body. Nothing else
+
+    enters it — neither the callback URL nor the webhook''s `request_params` and `headers`.
+
+
+    ## Verifying a delivery
+
+
+    Recompute HMAC-SHA256 over `{timestamp}.{raw body}` with your stored secret, then
+
+    compare it against the signature at the position whose label in `x-hmac-keys-256` ends
+
+    with your secret''s last 6 characters.
+
+
+    ## Rotating a key
+
+
+    `generate` adds a pending secret version beside the current one, and deliveries are
+
+    then signed with both — so verification against the current secret keeps working while
+
+    the new secret is stored on your side. `rotate` promotes the newest version to be the
+
+    sole current version, after which deliveries carry its signature alone.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Webhook Signing Keys
+  description: 'HMAC keys that sign webhook deliveries, so that a receiving endpoint can tell that a
+
+    callback came from Channex and that its body was not altered on the way.
+
+
+    A key is a shared secret: Channex holds it and so do you. It is not an API credential
+
+    — it authenticates nothing against this API and grants no access. It is used in one
+
+    direction only, on the callbacks Channex sends to you.
+
+
+    A key belongs to a billing account and holds up to two secret versions — the current
+
+    one plus an optional pending one, which is what makes rotation zero-downtime. To turn
+
+    signing on, point a webhook at the key with `signing_key_id` and set `is_signed`.
+
+
+    ## What is signed
+
+
+    Every delivery of a signed webhook — the `POST` Channex makes to the webhook''s
+
+    `callback_url` — carries three headers:
+
+
+    - `x-hmac-timestamp` — Unix timestamp (seconds) taken when the delivery was signed.
+
+    - `x-hmac-signature-256` — comma-separated lowercase-hex HMAC-SHA256 signatures, one
+
+    per secret version of the key, the current version first.
+
+    - `x-hmac-keys-256` — comma-separated version labels (`...` followed by each secret''s
+
+    last 6 characters), in the same order as the signatures.
+
+
+    Each signature is computed over the string `{timestamp}.{raw request body}`: the value
+
+    of `x-hmac-timestamp`, a dot, and the exact bytes of that delivery''s body. Nothing else
+
+    enters it — neither the callback URL nor the webhook''s `request_params` and `headers`.
+
+
+    ## Verifying a delivery
+
+
+    Recompute HMAC-SHA256 over `{timestamp}.{raw body}` with your stored secret, then
+
+    compare it against the signature at the position whose label in `x-hmac-keys-256` ends
+
+    with your secret''s last 6 characters.
+
+
+    ## Rotating a key
+
+
+    `generate` adds a pending secret version beside the current one, and deliveries are
+
+    then signed with both — so verification against the current secret keeps working while
+
+    the new secret is stored on your side. `rotate` promotes the newest version to be the
+
+    sole current version, after which deliveries carry its signature alone.'
+paths:
+  /signing_keys:
+    get:
+      operationId: SigningKeys_list
+      summary: List signing keys
+      description: 'List signing keys, their version secrets masked. Results are
+
+        paginated and ordered by creation time, newest first.'
+      parameters:
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyListParams.billingAccountId'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyListParams.filterId'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyListParams.title'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyListParams.orderTitle'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SigningKeys.SigningKeyResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+    post:
+      operationId: SigningKeys_create
+      summary: Create a signing key
+      description: 'Create a signing key owned by the billing account named in `billing_account_id`. The
+
+        key is created together with its first, current secret version, and the response is
+
+        the only unmasked rendering of that version''s `secret`.'
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SigningKeys.SigningKeyWithSecretResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigningKeys.SigningKeyCreateRequest'
+  /signing_keys/options:
+    get:
+      operationId: SigningKeys_options
+      summary: List signing key options
+      description: 'List signing keys as lightweight options (id, title, masked active key) for
+
+        selectors. Not paginated, ordered by title; `filter[billing_account_id]` is required
+
+        unless the caller is an administrator, the same as for the list.'
+      parameters:
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyOptionsParams.billingAccountId'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyOptionsParams.filterId'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyOptionsParams.title'
+      - $ref: '#/components/parameters/SigningKeys.SigningKeyOptionsParams.orderTitle'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SigningKeys.SigningKeyOption'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+  /signing_keys/{id}:
+    get:
+      operationId: SigningKeys_read
+      summary: Retrieve a signing key
+      description: Retrieve a signing key by its identifier, its version secrets masked.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SigningKeys.SigningKeyResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Webhook Signing Keys
+    put:
+      operationId: SigningKeys_update
+      summary: Update a signing key
+      description: 'Update a signing key''s title. The title is required — an empty body is refused — and
+
+        the owning billing account cannot be changed.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SigningKeys.SigningKeyResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigningKeys.SigningKeyUpdateRequest'
+    delete:
+      operationId: SigningKeys_delete
+      summary: Delete a signing key
+      description: 'Delete a signing key. A key a webhook still signs with cannot be deleted: the request
+
+        answers `422` naming the key. Re-point or delete those webhooks first.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+  /signing_keys/{id}/generate:
+    post:
+      operationId: SigningKeys_generate
+      summary: Generate a secret version
+      description: 'Generate a new secret version for the key.
+
+
+        The new version is created pending, not current, so consumers keep verifying against
+
+        the current secret — deliveries are signed with both until the key is rotated.
+
+        Generating again before rotating replaces the unused pending version with a fresh
+
+        one. On a key with no versions the new version is created as the current one.
+
+
+        The response is the only unmasked rendering of the new version''s `secret`.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SigningKeys.SigningKeyWithSecretResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+  /signing_keys/{id}/rotate:
+    post:
+      operationId: SigningKeys_rotate
+      summary: Rotate a signing key
+      description: 'Rotate the key: promote the pending secret version to be the sole current version and
+
+        retire the others. Afterwards deliveries are signed with the promoted secret only, so
+
+        switch verification to it — announced by its masked label in the `x-hmac-keys-256`
+
+        header — before rotating. No new secret is created and none is revealed: the response
+
+        masks the version secrets. A successful rotation stamps the
+
+        key''s `rotated_at`. A key with no pending version cannot be rotated — generate one
+
+        first.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SigningKeys.SigningKeyResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhook Signing Keys
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    SigningKeys.SigningKey:
+      type: object
+      required:
+      - id
+      - inserted_at
+      - updated_at
+      - rotated_at
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique signing key identifier. Mirrors the top-level resource `id`.
+          examples:
+          - f2b45efc-9917-44f5-b6ac-3c26468bdb47
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the key was created (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        updated_at:
+          type: string
+          format: date-time
+          description: When the key was last updated (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        rotated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: date-time
+          description: When the key was last rotated (ISO 8601, no timezone offset). Null until the first rotation.
+          examples:
+          - '2026-09-17T09:05:12.331907'
+        title:
+          type: string
+          description: Human-readable name of the key.
+          examples:
+          - Production signing key
+      description: 'An HMAC signing key for webhook deliveries. The secrets live in the key''s
+
+        versions and are masked to `...` + last 6 everywhere except the create
+
+        and generate responses.'
+    SigningKeys.SigningKeyVersion:
+      type: object
+      required:
+      - id
+      - is_current
+      - secret
+      - inserted_at
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique version identifier. Mirrors the resource `id`.
+          examples:
+          - 058457e7-b76c-4654-9228-ec8395b0121b
+        is_current:
+          type: boolean
+          description: 'Whether this is the key''s current version. A key has one current version and at most
+
+            one pending version awaiting rotation.'
+          examples:
+          - true
+        secret:
+          type: string
+          description: 'The version''s secret masked to `...` plus its last 6 characters — the label
+
+            identifying the version in the `x-hmac-keys-256` delivery header and in API
+
+            responses. The full secret is never rendered here.'
+          examples:
+          - '...i_rH1w'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the version was created (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+      description: A secret version of a signing key.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    SigningKeys.SigningKeyWebhookResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyWebhook'
+      description: A webhook that signs its deliveries with the key.
+    SigningKeys.SigningKeyUpdate:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          description: Human-readable name of the key.
+          examples:
+          - Production signing key
+      description: Attributes accepted when updating a signing key. Only the title can be changed.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    SigningKeys.SigningKeyCreate:
+      type: object
+      required:
+      - title
+      - billing_account_id
+      properties:
+        title:
+          type: string
+          description: Human-readable name of the key.
+          examples:
+          - Production signing key
+        billing_account_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the billing account that owns the key. The caller must be an owner of that account; naming another answers `403`.
+          examples:
+          - 716305c4-561a-4561-a187-7f5b8aeb5920
+      description: Attributes accepted when creating a signing key.
+    SigningKeys.SigningKeyUpdateRequest:
+      type: object
+      required:
+      - signing_key
+      properties:
+        signing_key:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyUpdate'
+      description: Request body accepted when updating a signing key.
+    SigningKeys.SigningKeyWebhook:
+      type: object
+      required:
+      - id
+      - callback_url
+      - event_mask
+      - is_global
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique webhook identifier. Mirrors the resource `id`.
+          examples:
+          - 59f4e1a9-b158-42c6-9130-6f0a08c1ec41
+        callback_url:
+          type: string
+          format: uri
+          description: URL the webhook delivers to.
+          examples:
+          - https://your-website.com/api/push_message
+        event_mask:
+          type: string
+          description: 'Events the webhook subscribes to: `*` for every event, or a semicolon-separated list of event names.'
+          examples:
+          - booking_new;booking_modification;booking_cancellation
+        is_global:
+          type: boolean
+          description: Whether the webhook covers every property of its billing account rather than one.
+          examples:
+          - false
+      description: A webhook using the signing key, reduced to its identifying attributes.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    SigningKeys.SigningKeyOption:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyOptionAttributes'
+      description: 'A signing key `/options` item: no relationships, attributes only.'
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    SigningKeys.SigningKeyRelationships:
+      type: object
+      required:
+      - signing_key_versions
+      - webhooks
+      properties:
+        signing_key_versions:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SigningKeys.SigningKeyVersionResource'
+          required:
+          - data
+          description: The key's secret versions — the current one first, then oldest first. Secrets are masked to `...` plus their last 6 characters.
+        webhooks:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SigningKeys.SigningKeyWebhookResource'
+          required:
+          - data
+          description: The webhooks that sign their deliveries with the key, oldest first. Empty when no webhook uses it.
+      description: 'Relationships of a signing key: its secret versions and the webhooks using it.'
+    SigningKeys.SigningKeyVersionResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key_version
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyVersion'
+      description: A secret version of a signing key. Carries no relationships.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    SigningKeys.SigningKeyResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKey'
+        relationships:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyRelationships'
+      description: A signing key resource with its masked versions.
+    SigningKeys.SigningKeyWithSecret:
+      type: object
+      required:
+      - id
+      - inserted_at
+      - updated_at
+      - rotated_at
+      - title
+      - secret
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique signing key identifier. Mirrors the top-level resource `id`.
+          examples:
+          - f2b45efc-9917-44f5-b6ac-3c26468bdb47
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the key was created (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        updated_at:
+          type: string
+          format: date-time
+          description: When the key was last updated (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        rotated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: date-time
+          description: When the key was last rotated (ISO 8601, no timezone offset). Null until the first rotation.
+          examples:
+          - '2026-09-17T09:05:12.331907'
+        title:
+          type: string
+          description: Human-readable name of the key.
+          examples:
+          - Production signing key
+        secret:
+          type: string
+          description: 'The full secret of the version the operation created. Exposed only in this
+
+            response — store it now; every other rendering masks version secrets to
+
+            `...` plus their last 6 characters.'
+          examples:
+          - 2Rq0veIkKgmOG3vGZ9pZ0He4gCzC4wUJa8O0zi_rH1w
+      description: A signing key as returned by create and generate — the only responses carrying an unmasked `secret`.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    SigningKeys.SigningKeyOptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      - secret
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          examples:
+          - f2b45efc-9917-44f5-b6ac-3c26468bdb47
+        title:
+          type: string
+          examples:
+          - Production signing key
+        secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'The current version''s secret masked to `...` plus its last 6 characters. Null for a
+
+            key without a current version.'
+          examples:
+          - '...i_rH1w'
+      description: 'Attributes of a signing key `/options` item: identifier, title and the masked active key.'
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    SigningKeys.SigningKeyCreateRequest:
+      type: object
+      required:
+      - signing_key
+      properties:
+        signing_key:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyCreate'
+      description: Request body accepted when creating a signing key.
+    SigningKeys.SigningKeyWithSecretResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyWithSecret'
+        relationships:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyRelationships'
+      description: A signing key resource carrying the secret of the version just created or promoted.
+  parameters:
+    SigningKeys.SigningKeyListParams.billingAccountId:
+      name: filter[billing_account_id]
+      in: query
+      required: false
+      description: Return only keys owned by this billing account. Required unless the caller is an administrator.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    SigningKeys.SigningKeyListParams.title:
+      name: filter[title]
+      in: query
+      required: false
+      description: Return only keys with exactly this title.
+      schema:
+        type: string
+      explode: false
+    SigningKeys.SigningKeyOptionsParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order keys by title. Applied by default, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    SigningKeys.SigningKeyOptionsParams.title:
+      name: filter[title]
+      in: query
+      required: false
+      description: Return only keys with exactly this title.
+      schema:
+        type: string
+      explode: false
+    SigningKeys.SigningKeyListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order keys by title.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    SigningKeys.SigningKeyListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order keys by creation time. Applied by default, descending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    SigningKeys.SigningKeyOptionsParams.billingAccountId:
+      name: filter[billing_account_id]
+      in: query
+      required: false
+      description: Return only keys owned by this billing account. Required unless the caller is an administrator.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    SigningKeys.SigningKeyListParams.filterId:
+      name: filter[id]
+      in: query
+      required: false
+      description: Return only the key with this identifier.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    SigningKeys.SigningKeyOptionsParams.filterId:
+      name: filter[id]
+      in: query
+      required: false
+      description: Return only the key with this identifier.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

@@ -1,0 +1,922 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Groups API
+  version: 0.0.0
+  description: Manage Groups — sets of Properties you manage together, and the users who may reach them. Every Property belongs to at least one Group and may belong to several; a Group that still holds a Property cannot be deleted.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Groups
+  description: Manage Groups — sets of Properties you manage together, and the users who may reach them. Every Property belongs to at least one Group and may belong to several; a Group that still holds a Property cannot be deleted.
+paths:
+  /groups:
+    get:
+      operationId: Groups_list
+      summary: List groups
+      description: List groups. Results are paginated; the `meta` block carries the page, limit, total and ordering.
+      parameters:
+      - $ref: '#/components/parameters/Groups.GroupListParams.title'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Groups.GroupListParams.orderTitle'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Groups.GroupResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Groups
+    post:
+      operationId: Groups_create
+      summary: Create a group
+      description: Create a group. The created group is returned with `201 Created`.
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Groups.GroupResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Groups.GroupCreateRequest'
+  /groups/options:
+    get:
+      operationId: Groups_options
+      summary: List group options
+      description: List groups as lightweight `id` + `title` items for selectors. Not paginated.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - type
+                      - id
+                      - attributes
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - group
+                        id:
+                          $ref: '#/components/schemas/Common.Scalars.id'
+                        attributes:
+                          $ref: '#/components/schemas/Common.JsonApi.OptionAttributes'
+                      description: A lightweight JSON:API resource returned by `/options` endpoints — id + title only, no relationships or pagination.
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Groups
+  /groups/{id}:
+    get:
+      operationId: Groups_read
+      summary: Retrieve a group
+      description: Retrieve a group by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Groups.GroupResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Groups
+    put:
+      operationId: Groups_update
+      summary: Update a group
+      description: Update a group by its identifier. Attributes absent from the request are left unchanged. The updated group is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Groups.GroupResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Groups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Groups.GroupUpdateRequest'
+    delete:
+      operationId: Groups_delete
+      summary: Delete a group
+      description: Delete a group by its identifier. A group that still holds properties is not deleted; remove them from the group first.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request cannot be processed in the current state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Groups
+  /groups/{id}/properties/{property_id}:
+    post:
+      operationId: GroupPropertyMembership_addProperty
+      summary: Add a property to a group
+      description: Associate a property with the group. A property may belong to several groups at once; a property already in this group is refused.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Groups
+    delete:
+      operationId: GroupPropertyMembership_dropProperty
+      summary: Remove a property from a group
+      description: Remove a property from the group. A property must belong to at least one group, so a property that belongs to only one is not removed.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - name: property_id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request could not be processed in the current state; `details` explains why.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequestWithReason'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Groups
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Groups.GroupResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - group
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Groups.Group'
+        relationships:
+          $ref: '#/components/schemas/Groups.GroupRelationships'
+      description: A group as returned in responses.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Groups.EmbeddedProperty:
+      type: object
+      required:
+      - id
+      - type
+      - attributes
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - property
+        attributes:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            title:
+              type: string
+              examples:
+              - Property 1
+          required:
+          - id
+          - title
+      description: A property as it appears among a group's relationships.
+    Groups.Group:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique group identifier.
+          examples:
+          - f71f6a62-d49a-4f2f-ae90-4f81d347ff67
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Group title.
+          examples:
+          - User Group
+      description: A group — a set of properties and the users who may reach them — as returned in responses.
+    Authentication.EmbeddedUser:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Authentication.EmbeddedUserAttributes'
+      description: A user embedded in another resource's relationships, carrying identifier, name and email.
+    Groups.GroupRelationships:
+      type: object
+      required:
+      - properties
+      - users
+      properties:
+        properties:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Groups.EmbeddedProperty'
+          required:
+          - data
+          description: Properties in the group.
+        users:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Authentication.EmbeddedUser'
+          required:
+          - data
+          description: Users with access to the group.
+      description: 'Relationships of a group resource: the properties it holds and the users who may reach them.'
+    Common.Errors.BadRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - bad_request
+            title:
+              type: string
+              enum:
+              - Bad Request
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The request cannot be processed in the current state.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Groups.GroupUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Group title.
+          examples:
+          - User Group
+      description: Group attributes accepted when updating a group. Every attribute is optional; attributes absent from the request are left unchanged.
+    Authentication.EmbeddedUserAttributes:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: User identifier. Mirrors the resource id.
+        name:
+          type: string
+          description: Display name of the user.
+          examples:
+          - Channex User
+        email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: Email address the account is registered with.
+          examples:
+          - user@channex.io
+      description: Identifier, display name and email address of an embedded user.
+    Groups.GroupUpdateRequest:
+      type: object
+      required:
+      - group
+      properties:
+        group:
+          $ref: '#/components/schemas/Groups.GroupUpdate'
+      description: Request body accepted when updating a group.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Scalars.email:
+      type: string
+      format: email
+    Common.Errors.BadRequestReasonObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: string
+          description: Human-readable reason the request could not be processed.
+          examples:
+          - User already invited
+      description: Error object for a bad request, adding a single human-readable reason.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Groups.GroupCreateRequest:
+      type: object
+      required:
+      - group
+      properties:
+        group:
+          $ref: '#/components/schemas/Groups.GroupCreate'
+      description: Request body accepted when creating a group.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.BadRequestWithReason:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.BadRequestReasonObject'
+      description: The request could not be processed in the current state; `details` explains why.
+    Common.JsonApi.OptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        title:
+          type: string
+          examples:
+          - My Hotel
+      description: 'Attributes of a lightweight `/options` item: identifier and display title.'
+    Groups.GroupCreate:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Group title.
+          examples:
+          - User Group
+      description: Group attributes accepted when creating a group.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    Groups.GroupListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order groups by title.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Groups.GroupListParams.title:
+      name: filter[title]
+      in: query
+      required: false
+      description: Return only groups with exactly this title.
+      schema:
+        type: string
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

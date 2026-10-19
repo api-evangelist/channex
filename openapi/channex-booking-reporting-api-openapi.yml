@@ -1,0 +1,873 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Booking Reporting API
+  version: 0.0.0
+  description: 'Reports sent back to the OTA about what happened with a booking: a guest no-show, invalid credit card details, a cancellation caused by them, a change of stay, and guest misconduct. Supported for Booking.com bookings; no-shows for Expedia as well.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Booking Reporting
+  description: 'Reports sent back to the OTA about what happened with a booking: a guest no-show, invalid credit card details, a cancellation caused by them, a change of stay, and guest misconduct. Supported for Booking.com bookings; no-shows for Expedia as well.'
+paths:
+  /bookings/{id}/cancel_due_invalid_card:
+    post:
+      operationId: BookingOtaReports_cancelDueInvalidCard
+      summary: Cancel a booking over invalid card details
+      description: 'Cancel the booking because of invalid credit card details. Available when the guest has not provided valid card details within the allowed update window after an invalid-card report: usually 24 hours; 12 hours or until 3 pm (whichever is earlier) for bookings made within 48 hours of check-in; always at least 2 hours. Supported for Booking.com bookings. Takes an empty request body.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Reporting API.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.MethodNotSupported'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Reporting
+  /bookings/{id}/guest_misconduct:
+    post:
+      operationId: BookingOtaReports_guestMisconduct
+      summary: Report guest misconduct
+      description: Report guest misconduct to the OTA — for example a payment issue or damage caused by the guest. The available categories and subcategories, and the additional damage fields some categories accept, are listed by `GET /channels/{channel_id}/action/misconduct_categories`. Booking.com accepts misconduct reports from the check-in date up to 7 days after check-out; errors reported by Booking.com are relayed as validation errors. Supported for Booking.com bookings.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Reporting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bookings.GuestMisconductRequest'
+  /bookings/{id}/invalid_card:
+    post:
+      operationId: BookingOtaReports_invalidCard
+      summary: Report an invalid credit card
+      description: Report the booking's credit card as invalid to the OTA. Available immediately after the reservation is made, up until midnight (00:00) on the day of check-in, in the property's local timezone. Supported for Booking.com bookings. Takes an empty request body.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Reporting API.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.MethodNotSupported'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Reporting
+  /bookings/{id}/no_show:
+    post:
+      operationId: BookingOtaReports_noShow
+      summary: Report a guest no-show
+      description: Report a guest no-show to the OTA. Available from 00:00 (midnight, property-local time) on the planned check-in date, up to 48 hours later, provided the reservation's status allows modifications and the reservation is not overbooked. Supported for Booking.com and Expedia bookings.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Reporting API.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.MethodNotSupported'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Reporting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bookings.NoShowReportRequest'
+  /bookings/{id}/stay_change:
+    post:
+      operationId: BookingOtaReports_stayChange
+      summary: Report a change of stay
+      description: Report stay changes for the rooms of a booking to the OTA — a new checkout date, a new price, or both, per room. Values omitted from a report keep the room's current values; the check-in date cannot be changed. Errors reported by the OTA are relayed as validation errors. Supported for Booking.com bookings.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Reporting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bookings.StayChangeRequest'
+  /channels/{channel_id}/action/misconduct_categories:
+    get:
+      operationId: GuestMisconductCategories_list
+      summary: List guest misconduct categories
+      description: 'List the guest misconduct categories of a channel: for each category its identifier, title, subcategories, and the additional damage fields a report in that category accepts, with their allowed values. The category and subcategory identifiers are used to report guest misconduct on a booking — see `POST /bookings/{booking_id}/guest_misconduct`. The categories are requested from Booking.com; a fault reported by Booking.com is relayed with status `422`. Supported for Booking.com channels; other channels receive `400 Bad Request`.'
+      parameters:
+      - name: channel_id
+        in: path
+        required: true
+        description: Channel ID.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.MisconductCategories'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request has missing or invalid arguments; `details` lists the reasons.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequestWithReasons'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The OTA rejected the request; `errors` relays the OTA's fault.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channels.OtaFault'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Reporting
+components:
+  schemas:
+    Channels.OtaFaultObject:
+      type: object
+      required:
+      - fault_code
+      - message
+      properties:
+        fault_code:
+          type: integer
+          format: int32
+          description: Numeric fault code assigned by the OTA.
+          examples:
+          - 404
+        message:
+          type: string
+          description: Human-readable fault message from the OTA.
+      description: Error object relaying a fault reported by the channel's OTA.
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Bookings.GuestMisconductRequest:
+      type: object
+      required:
+      - guest_misconduct_report
+      properties:
+        guest_misconduct_report:
+          $ref: '#/components/schemas/Bookings.GuestMisconductReport'
+      description: Request body for `POST /bookings/{id}/guest_misconduct`.
+    Bookings.MisconductAdditionalFields:
+      type: object
+      required:
+      - damage_type_id
+      - damage_cost
+      - damage_unavailable
+      properties:
+        damage_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Bookings.MisconductChoiceFieldDescriptor'
+          - type: 'null'
+          description: Descriptor of the report's `damage_type_id` field.
+        damage_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Bookings.MisconductFieldDescriptor'
+          - type: 'null'
+          description: Descriptor of the report's `damage_cost` field.
+        damage_unavailable:
+          anyOf:
+          - $ref: '#/components/schemas/Bookings.MisconductChoiceFieldDescriptor'
+          - type: 'null'
+          description: Descriptor of the report's `damage_unavailable` field.
+      description: Descriptors of the additional damage fields a misconduct category accepts on a guest misconduct report. A field the category does not accept is `null`.
+    Bookings.MisconductCategories:
+      type: object
+      required:
+      - categories
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.MisconductCategory'
+      description: The guest misconduct categories a channel supports.
+    Bookings.GuestMisconductReport:
+      type: object
+      required:
+      - category_id
+      - details_text
+      - escalate_report
+      - rebooking_allowed
+      properties:
+        category_id:
+          type: string
+          description: Identifier of the misconduct category.
+          examples:
+          - '1'
+        subcategory_id:
+          type: string
+          description: Identifier of the misconduct subcategory within the category.
+          examples:
+          - '111'
+        details_text:
+          type: string
+          maxLength: 240
+          description: Free-form description of the misconduct. Up to 240 characters.
+          examples:
+          - The guest damaged the room door
+        escalate_report:
+          type: boolean
+          description: Whether to escalate the report to Booking.com.
+        rebooking_allowed:
+          type: boolean
+          description: Whether the guest may book the property again.
+        damage_type_id:
+          type: integer
+          format: int32
+          description: Type of the damage. The allowed values are listed in the category's `damage_type_id` field descriptor.
+          examples:
+          - 3
+        damage_cost:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: string
+          description: 'Cost of the damage, in the property''s currency: an integer or a numeric string. Use a string for fractional amounts.'
+          examples:
+          - 150
+        damage_unavailable:
+          type: boolean
+          description: Whether the damage prevents the property from accommodating its next reservation.
+      description: A guest misconduct report. The categories, subcategories, and damage fields the channel accepts are listed by `GET /channels/{channel_id}/action/misconduct_categories`.
+    Bookings.StayChangeRequest:
+      type: object
+      required:
+      - stay_change_reports
+      properties:
+        stay_change_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.StayChangeReport'
+          minItems: 1
+          description: Stay change reports, one per booking room.
+      description: Request body for `POST /bookings/{id}/stay_change`.
+    Bookings.MisconductFieldDescriptor:
+      type: object
+      required:
+      - type
+      - description
+      properties:
+        type:
+          type: string
+          description: Value type of the field.
+          examples:
+          - double
+        description:
+          type: string
+          description: Human-readable purpose of the field.
+          examples:
+          - Cost of damage (in hotel currency)
+      description: 'Describes an additional report field: its value type and purpose.'
+    Common.Errors.ServiceUnavailable:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - service_unavailable
+            title:
+              type: string
+              enum:
+              - Service Temporary Unavailable
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: A backing service is temporarily unavailable; retry the request later.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Bookings.MisconductCategory:
+      type: object
+      required:
+      - id
+      - title
+      - additional_fields
+      - subcategories
+      properties:
+        id:
+          type: string
+          description: Category identifier — the `category_id` of a guest misconduct report. See `POST /bookings/{booking_id}/guest_misconduct`.
+          examples:
+          - '1'
+        title:
+          type: string
+          description: Human-readable category title.
+          examples:
+          - Payment issue
+        additional_fields:
+          anyOf:
+          - $ref: '#/components/schemas/Bookings.MisconductAdditionalFields'
+          - type: 'null'
+          description: Descriptors of the additional damage fields a report in this category accepts. `null` when the category accepts none.
+        subcategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.MisconductSubcategory'
+          description: The category's subcategories. Empty when it has none.
+      description: A guest misconduct category.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Bookings.StayChangeReport:
+      type: object
+      required:
+      - booking_room_id
+      properties:
+        booking_room_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: The `booking_room_id` of the room the report applies to. Reports referencing a room that does not belong to the booking are ignored; when no report matches, the request fails with a validation error.
+        checkout_date:
+          type: string
+          format: date
+          description: The room's new checkout date. The check-in date cannot be changed.
+        amount:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: string
+          description: 'The room''s new price, in the booking''s currency: an integer is an amount in minor currency units (cents); a decimal string is an amount in major units.'
+          examples:
+          - 10000
+      description: A stay change report for one room of a booking. At least one of `checkout_date` and `amount` must be provided; an omitted field keeps the room's current value.
+    Bookings.MisconductChoiceFieldDescriptor:
+      type: object
+      required:
+      - type
+      - description
+      - possible_values
+      properties:
+        type:
+          type: string
+          description: Value type of the field.
+          examples:
+          - double
+        description:
+          type: string
+          description: Human-readable purpose of the field.
+          examples:
+          - Cost of damage (in hotel currency)
+        possible_values:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.MisconductFieldValue'
+          description: The values the field accepts.
+      description: Describes an additional report field restricted to a fixed set of values.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Channels.OtaFault:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Channels.OtaFaultObject'
+      description: The OTA rejected the request; `errors` relays the OTA's fault.
+    Bookings.NoShowReportRequest:
+      type: object
+      required:
+      - no_show_report
+      properties:
+        no_show_report:
+          type: object
+          properties:
+            waived_fees:
+              type: boolean
+              description: Whether the property waives the no-show fees.
+            penalty_amount:
+              type: string
+              description: Penalty amount as a decimal string. Applicable to Expedia bookings only.
+              examples:
+              - '10.00'
+          required:
+          - waived_fees
+      description: Request body for `POST /bookings/{id}/no_show`.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.Errors.BadRequestWithReasons:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.BadRequestReasonsObject'
+      description: The request has missing or invalid arguments; `details` lists the reasons.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Bookings.MisconductSubcategory:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          type: string
+          description: Subcategory identifier — the `subcategory_id` of a guest misconduct report. See `POST /bookings/{booking_id}/guest_misconduct`.
+          examples:
+          - '110'
+        title:
+          type: string
+          description: Human-readable subcategory title.
+          examples:
+          - Didn't pay reservation amount
+      description: A subcategory of a guest misconduct category.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.BadRequestReasonsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: array
+          items:
+            type: string
+          description: Human-readable reasons the request could not be processed.
+          examples:
+          - - restrictions is required
+      description: Error object for a bad request, adding a list of human-readable reasons.
+    Common.Errors.MethodNotSupported:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - method_not_supported
+            title:
+              type: string
+              enum:
+              - Method Not Supported
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Reporting API.
+    Bookings.MisconductFieldValue:
+      type: object
+      required:
+      - value
+      - description
+      properties:
+        value:
+          type: integer
+          format: int32
+          examples:
+          - 3
+        description:
+          type: string
+          description: Human-readable meaning of the value.
+          examples:
+          - Door/window/wall
+      description: One allowed value of an additional report field.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

@@ -1,0 +1,532 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Facilities API
+  version: 0.0.0
+  description: 'Read-only dictionary of property- and room-type-level facilities (amenities).
+
+    Channex maintains both dictionaries; they cannot be added to through the API.
+
+    Contact Channex to have a missing facility added.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Facilities
+  description: 'Read-only dictionary of property- and room-type-level facilities (amenities).
+
+    Channex maintains both dictionaries; they cannot be added to through the API.
+
+    Contact Channex to have a missing facility added.'
+paths:
+  /property_facilities:
+    get:
+      operationId: Facilities_listPropertyFacilities
+      summary: List property facilities
+      description: 'List property facilities — the amenities that can be attached to a property.
+
+        Send the identifiers of the ones a property offers in its `facilities` field
+
+        on create or update; they come back under the property''s `facilities`
+
+        relationship.
+
+
+        Results are paginated, ten per page by default, ordered by title ascending;
+
+        the `meta` block carries the page, limit, total and ordering.
+
+
+        The categories of this dictionary are `activites`, `food_and_drink`,
+
+        `general`, `outdoors`, `parking`, `pets`, `safety_and_security`, `services`
+
+        and `sustainable_practice`.'
+      parameters:
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.filterCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderTitle'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facilities.FacilityResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Facilities
+  /property_facilities/options:
+    get:
+      operationId: Facilities_propertyFacilityOptions
+      summary: List property facility options
+      description: 'List the whole property facility dictionary in one flat collection, without
+
+        pagination — useful for populating selectors. The resources and their
+
+        categories are those of the paginated list; `pagination[…]` is accepted and
+
+        has no effect.'
+      parameters:
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.filterCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderTitle'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facilities.FacilityResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Facilities
+  /room_facilities:
+    get:
+      operationId: RoomFacilities_listRoomFacilities
+      summary: List room type facilities
+      description: 'List room type facilities — the amenities that can be attached to a room
+
+        type. Send the identifiers of the ones a room type offers in its
+
+        `facilities` field on create or update; they come back under the room
+
+        type''s `facilities` relationship.
+
+
+        Results are paginated, ten per page by default, ordered by title
+
+        ascending; the `meta` block carries the page, limit, total and ordering.
+
+
+        The categories of this dictionary are `bathroom`, `general`, `in_room`,
+
+        `kitchen`, `outside`, `security` and `view`.'
+      parameters:
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.filterCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderTitle'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facilities.FacilityResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Facilities
+  /room_facilities/options:
+    get:
+      operationId: RoomFacilities_roomFacilityOptions
+      summary: List room type facility options
+      description: 'List the whole room type facility dictionary in one flat collection, without
+
+        pagination — useful for populating selectors. The resources and their
+
+        categories are those of the paginated list; `pagination[…]` is accepted and
+
+        has no effect.'
+      parameters:
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.filterCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderTitle'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderCategory'
+      - $ref: '#/components/parameters/Facilities.FacilityOptionsParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facilities.FacilityResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Facilities
+components:
+  parameters:
+    Facilities.FacilityOptionsParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order facilities by title. This is the default ordering, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Facilities.FacilityOptionsParams.orderCategory:
+      name: order[category]
+      in: query
+      required: false
+      description: Order facilities by category.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Facilities.FacilityOptionsParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order facilities by the time they were added to the dictionary.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Facilities.FacilityListParams.filterCategory:
+      name: filter[category]
+      in: query
+      required: false
+      description: Return only facilities in this category. The value must be one of the categories of the dictionary being queried.
+      schema:
+        type: string
+      explode: false
+    Facilities.FacilityListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order facilities by title. This is the default ordering, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Facilities.FacilityListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order facilities by the time they were added to the dictionary.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Facilities.FacilityOptionsParams.filterCategory:
+      name: filter[category]
+      in: query
+      required: false
+      description: Return only facilities in this category. The value must be one of the categories of the dictionary being queried.
+      schema:
+        type: string
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    Facilities.FacilityListParams.orderCategory:
+      name: order[category]
+      in: query
+      required: false
+      description: Order facilities by category.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+  schemas:
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Facilities.FacilityResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - facility
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Facilities.Facility'
+      description: A facility resource object (JSON:API), returned by both list and options endpoints.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Facilities.Facility:
+      type: object
+      required:
+      - id
+      - category
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique facility identifier. Mirrors the resource `id`.
+          examples:
+          - 864d91a6-3a40-4098-a880-84b841e11adb
+        category:
+          type: string
+          description: 'Grouping code the facility belongs to, in lower snake case. The property and
+
+            room type dictionaries have separate vocabularies: a code valid for one is
+
+            rejected by the other. `filter[category]` takes this value.'
+          examples:
+          - general
+        title:
+          type: string
+          description: Human-readable facility name.
+          examples:
+          - 24-hour front desk
+      description: Attributes of a facility (amenity) available at a property or room type.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

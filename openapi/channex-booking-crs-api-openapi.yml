@@ -1,0 +1,813 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Booking CRS API
+  version: 0.0.0
+  description: Creating and updating bookings from your own system rather than receiving them from a channel, including bookings that originated at an OTA. Requires the Booking CRS application installed on the Property; the API is in beta and may change.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Booking CRS
+  description: Creating and updating bookings from your own system rather than receiving them from a channel, including bookings that originated at an OTA. Requires the Booking CRS application installed on the Property; the API is in beta and may change.
+paths:
+  /bookings:
+    post:
+      operationId: BookingCrs_create
+      summary: Create a booking
+      description: 'Create a booking. Requires the Booking CRS application installed on the Property; the Booking CRS API is in beta and may change. The operation is asynchronous: a request for the booking immediately after the response can return `404 Not Found`. Creation follows the regular booking pipeline and triggers the associated webhooks and availability changes, depending on the Property settings.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingShortResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Booking CRS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bookings.BookingCreateRequest'
+  /bookings/{id}:
+    put:
+      operationId: BookingCrs_update
+      summary: Update a booking
+      description: 'Update a booking — including bookings that originated at an OTA. Requires the Booking CRS application installed on the Property; the Booking CRS API is in beta and may change. Once a booking has revisions created through this API, later OTA modifications are applied diff-based: only the fields the OTA actually changed overwrite your values. Triggers the associated webhooks and availability changes, depending on the Property settings.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingShortResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Booking CRS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bookings.BookingUpdateRequest'
+components:
+  schemas:
+    Bookings.BookingCustomerWrite:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        mail:
+          $ref: '#/components/schemas/Common.Scalars.email'
+        phone:
+          type: string
+        country:
+          $ref: '#/components/schemas/Common.Scalars.country'
+        city:
+          type: string
+        address:
+          type: string
+        zip:
+          type: string
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Free-form custom meta-information to exchange with integrated partners.
+      description: Customer of a booking being created or updated.
+    Bookings.BookingCreate:
+      type: object
+      required:
+      - property_id
+      - arrival_date
+      - departure_date
+      - ota_name
+      - currency
+      - customer
+      - rooms
+      properties:
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the booking belongs to.
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Arrival date (`YYYY-MM-DD`).
+        departure_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Departure date (`YYYY-MM-DD`).
+        ota_name:
+          type: string
+          description: Name of the booking source.
+          examples:
+          - Booking.com
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Booking currency code.
+        customer:
+          $ref: '#/components/schemas/Bookings.BookingCustomerWrite'
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingRoomWrite'
+          description: Booking rooms.
+        ota_reservation_code:
+          type: string
+          description: Original reservation code at the platform where the guest created the booking.
+          examples:
+          - '113'
+        arrival_hour:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Arrival time in `HH:MM` (24h) format.
+          examples:
+          - '10:00'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at booking level.
+        payment_collect:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentCollect'
+          - type: 'null'
+        payment_type:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentType'
+          - type: 'null'
+        ota_commission:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Commission amount charged by the OTA, as a decimal string. Currently available for Booking.com and Airbnb channels.
+          examples:
+          - '10.00'
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Customer notes for the booking.
+        meta:
+          type: object
+          unevaluatedProperties: {}
+          description: Free-form custom meta-information to exchange with integrated partners.
+        deposits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingDepositWrite'
+          description: Deposits associated with the booking.
+      description: Booking attributes accepted when creating a booking.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Bookings.BookingUpdateRequest:
+      type: object
+      required:
+      - booking
+      properties:
+        booking:
+          $ref: '#/components/schemas/Bookings.BookingUpdate'
+      description: Request body for `PUT /bookings/{id}`.
+    BookingRevisions.PaymentType:
+      type: string
+      enum:
+      - credit_card
+      - bank_transfer
+      description: 'How the payment is collected: a credit card associated with the booking, or a bank transfer from the OTA.'
+    BookingRevisions.BookingRoomTax:
+      type: object
+      required:
+      - name
+      - type
+      - total_price
+      - is_inclusive
+      properties:
+        name:
+          type: string
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Tax type, as a display name.
+          examples:
+          - City Tax
+        total_price:
+          type: string
+          description: Total price of the tax as a decimal string.
+          examples:
+          - '2.92'
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price.
+        price_per_unit:
+          type: string
+          description: Price per unit as a decimal string.
+        price_mode:
+          type: string
+          description: How the tax is applied (e.g. `Per booking`).
+        nights:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of nights the tax applies to.
+        persons:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of persons the tax applies to.
+        version:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Tax record version.
+      description: A tax associated with a booking room.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Bookings.BookingUpdate:
+      type: object
+      required:
+      - property_id
+      - arrival_date
+      - departure_date
+      - ota_name
+      - currency
+      - customer
+      - rooms
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingRevisionStatus'
+          description: Status of the booking, matching its latest revision.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the booking belongs to.
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Arrival date (`YYYY-MM-DD`).
+        departure_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Departure date (`YYYY-MM-DD`).
+        ota_name:
+          type: string
+          description: Name of the booking source.
+          examples:
+          - Booking.com
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Booking currency code.
+        customer:
+          $ref: '#/components/schemas/Bookings.BookingCustomerWrite'
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingRoomWrite'
+          description: Booking rooms.
+        ota_reservation_code:
+          type: string
+          description: Original reservation code at the platform where the guest created the booking.
+          examples:
+          - '113'
+        arrival_hour:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Arrival time in `HH:MM` (24h) format.
+          examples:
+          - '10:00'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at booking level.
+        payment_collect:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentCollect'
+          - type: 'null'
+        payment_type:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentType'
+          - type: 'null'
+        ota_commission:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Commission amount charged by the OTA, as a decimal string. Currently available for Booking.com and Airbnb channels.
+          examples:
+          - '10.00'
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Customer notes for the booking.
+        meta:
+          type: object
+          unevaluatedProperties: {}
+          description: Free-form custom meta-information to exchange with integrated partners.
+        deposits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingDepositWrite'
+          description: Deposits associated with the booking.
+      description: 'Booking attributes accepted when updating a booking. The booking is sent in full: the attributes `POST /bookings` requires are required here too. Set `status` to `cancelled` to cancel the booking.'
+    Common.Scalars.country:
+      type: string
+      minLength: 2
+      maxLength: 2
+      description: ISO 3166-1 alpha-2 country code.
+      examples:
+      - GB
+    BookingRevisions.BookingRevisionStatus:
+      type: string
+      enum:
+      - new
+      - modified
+      - cancelled
+      description: Status of a booking revision.
+    BookingRevisions.BookingService:
+      type: object
+      required:
+      - name
+      - type
+      - price_mode
+      - price_per_unit
+      - total_price
+      - nights
+      - persons
+      - is_inclusive
+      properties:
+        name:
+          type: string
+          description: Service name in English.
+          examples:
+          - Cancellation Fee
+        type:
+          type: string
+          description: Kind of service, e.g. `Breakfast`, `Internet`, `Parking`. Free-form OTA-provided value.
+          examples:
+          - Breakfast
+        price_mode:
+          type: string
+          description: How the price is applied. Free-form OTA-provided value with inconsistent casing (e.g. `Per stay`, `per_booking`).
+          examples:
+          - Per stay
+        price_per_unit:
+          type: string
+          description: Price per unit as a decimal string.
+          examples:
+          - '1500.00'
+        total_price:
+          type: string
+          description: Total calculated price as a decimal string.
+          examples:
+          - '1500.00'
+        nights:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of nights the service is booked for.
+        persons:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of persons the service is booked for.
+        is_inclusive:
+          type: boolean
+          description: Whether the service price is included in the booking price.
+        service_rph:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Service RPH reference.
+      description: A service (extra charge) attached to a booking or a booking room.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Scalars.email:
+      type: string
+      format: email
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    BookingRevisions.BookingGuest:
+      type: object
+      required:
+      - name
+      - surname
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+      description: A guest of a booking room. Name and surname are provided when the OTA exposes them.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Bookings.BookingCreateRequest:
+      type: object
+      required:
+      - booking
+      properties:
+        booking:
+          $ref: '#/components/schemas/Bookings.BookingCreate'
+      description: Request body for `POST /bookings`.
+    Bookings.BookingShortAttributes:
+      type: object
+      required:
+      - id
+      - status
+      - booking_id
+      - unique_id
+      - revision_id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking identifier.
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingRevisionStatus'
+          description: Status of the booking after the operation.
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking identifier (same as `id`).
+        unique_id:
+          type: string
+          description: Unique booking identifier combined from the OTA code and the OTA reservation code.
+          examples:
+          - OFL-113
+        revision_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking revision produced by the operation.
+      description: Attributes of an abbreviated booking resource, as returned by the create and update operations.
+    Bookings.BookingRoomWrite:
+      type: object
+      required:
+      - room_type_id
+      - rate_plan_id
+      - days
+      - occupancy
+      properties:
+        room_type_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Room Type to book.
+        rate_plan_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Rate Plan to book.
+        days:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: 'Price breakdown per stay date: `YYYY-MM-DD` → decimal string amount.'
+        occupancy:
+          $ref: '#/components/schemas/BookingRevisions.BookingOccupancy'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at room level.
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingRoomTax'
+          description: Taxes of the room.
+        guests:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingGuest'
+          description: Guests of the room.
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Free-form custom meta-information to exchange with integrated partners.
+      description: A room of a booking being created or updated.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Bookings.BookingDepositWrite:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: string
+          description: Deposit amount as a decimal string.
+          examples:
+          - '100.00'
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Deposit currency code.
+        charget_at:
+          type: string
+          description: When the deposit was charged (ISO 8601, no timezone offset).
+          examples:
+          - '2019-05-05T19:20:32.001023'
+        type:
+          type: string
+          description: Kind of deposit.
+          examples:
+          - credit_card
+        notes:
+          type: string
+          description: Free-form notes about the deposit.
+          examples:
+          - Card ending 1234
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Free-form deposit meta-information.
+      description: A deposit associated with a booking being created or updated.
+    Bookings.BookingShortResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - booking
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Bookings.BookingShortAttributes'
+      description: An abbreviated booking resource, as returned by the create and update operations.
+    BookingRevisions.PaymentCollect:
+      type: string
+      enum:
+      - property
+      - ota
+      description: 'Who collects the payment: the property or the OTA (guest already paid at the OTA). `null` usually means the property collects it.'
+    BookingRevisions.BookingOccupancy:
+      type: object
+      required:
+      - adults
+      - children
+      - infants
+      properties:
+        adults:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        children:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        infants:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        ages:
+          anyOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          description: Ages of the children, when `children` is not 0. Can be `null` in room occupancies.
+      description: Occupancy breakdown by guest kind.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

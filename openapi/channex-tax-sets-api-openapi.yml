@@ -1,0 +1,1136 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Tax Sets API
+  version: 0.0.0
+  description: Manage Tax Sets — named groups of Taxes applied to Rate Plans, with the order the taxes are calculated in. The first set of a Property becomes its default and is applied to every new Rate Plan of the Property automatically; a Rate Plan detached from a set falls back to it. See `default_tax_set_id` on Properties and `tax_set_id` on Rate Plans.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Tax Sets
+  description: Manage Tax Sets — named groups of Taxes applied to Rate Plans, with the order the taxes are calculated in. The first set of a Property becomes its default and is applied to every new Rate Plan of the Property automatically; a Rate Plan detached from a set falls back to it. See `default_tax_set_id` on Properties and `tax_set_id` on Rate Plans.
+paths:
+  /tax_sets:
+    get:
+      operationId: TaxSets_list
+      summary: List tax sets
+      description: List tax sets. Results are paginated; the `meta` block carries the page, limit, total and ordering.
+      parameters:
+      - $ref: '#/components/parameters/TaxSets.TaxSetListParams.propertyId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/TaxSets.TaxSetListParams.orderTitle'
+      - $ref: '#/components/parameters/TaxSets.TaxSetListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaxSets.TaxSetResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Tax Sets
+    post:
+      operationId: TaxSets_create
+      summary: Create a tax set
+      description: Create a tax set for a property. The created tax set is returned with `201 Created`; the first set of a property becomes its default.
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaxSets.TaxSetResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Tax Sets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxSets.TaxSetCreateRequest'
+  /tax_sets/options:
+    get:
+      operationId: TaxSets_options
+      summary: List tax set options
+      description: List tax sets as lightweight items (`id`, `title`, `currency`) for selectors. Not paginated; accepts the same property filter as the list.
+      parameters:
+      - $ref: '#/components/parameters/TaxSets.TaxSetOptionsParams'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TaxSets.TaxSetOption'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Tax Sets
+  /tax_sets/test:
+    post:
+      operationId: TaxSetCalculationPreview_test
+      summary: Preview a tax calculation
+      description: 'Preview a tax calculation without persisting anything: given taxes (by id) and a stay priced per night, returns the calculated amount per tax plus the total and net prices. A tax id that does not exist answers `404`.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaxSets.TaxSetTestResultsResource'
+                description: JSON:API document wrapping a single resource.
+              examples:
+                Two levels:
+                  summary: Two levels
+                  description: 'A per-night Cleaning Fee at level 1 and a 20% VAT added on top at level 0, on one night at 100.00: the fee is calculated first, the VAT on 100.00 + 10.00.'
+                  value:
+                    data:
+                      type: tax_set_test_results
+                      attributes:
+                        taxes:
+                          Cleaning Fee: '10.00'
+                          VAT 20%: '22.00'
+                        total_price: '132.00'
+                        net_price: '100.00'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Tax Sets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxSets.TaxSetTestRequest'
+            examples:
+              Two levels:
+                summary: Two levels
+                description: 'A per-night Cleaning Fee at level 1 and a 20% VAT added on top at level 0, on one night at 100.00: the fee is calculated first, the VAT on 100.00 + 10.00.'
+                value:
+                  test:
+                    taxes:
+                    - id: c1fb94b3-ce95-4233-be0e-2748b3728715
+                      level: 1
+                    - id: a3c4f3c8-841c-4492-b5ff-ce9ca92c1c83
+                      level: 0
+                    currency: GBP
+                    date: '2026-07-01'
+                    days:
+                    - '100.00'
+  /tax_sets/{id}:
+    get:
+      operationId: TaxSets_read
+      summary: Retrieve a tax set
+      description: Retrieve a tax set by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaxSets.TaxSetResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Tax Sets
+    put:
+      operationId: TaxSets_update
+      summary: Update a tax set
+      description: Update a tax set by its identifier. `taxes` must be sent on every update; other attributes absent from the request are left unchanged. The updated tax set is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TaxSets.TaxSetResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Tax Sets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxSets.TaxSetUpdateRequest'
+    delete:
+      operationId: TaxSets_delete
+      summary: Delete a tax set
+      description: Delete a tax set by its identifier. A set a property uses as its default cannot be deleted.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Tax Sets
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    TaxSets.TaxSetTestCalculation:
+      type: object
+      required:
+      - taxes
+      - currency
+      - date
+      - days
+      properties:
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTestTax'
+          description: Taxes to calculate, by reference to persisted taxes. A tax whose `applicable_date_ranges` do not cover the stay is left out of the result.
+          examples:
+          - - id: d719deab-53d7-465a-85d2-bea74f7add47
+              level: 0
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Price currency (ISO 4217).
+        date:
+          type: string
+          format: date
+          description: Stay start date (ISO 8601 `YYYY-MM-DD`); the nights in `days` follow it.
+        days:
+          type: array
+          items:
+            type: string
+          description: Per-night prices as decimal strings, one entry per stay night. Numbers are refused.
+          examples:
+          - - '100.00'
+      description: 'The calculation a preview describes: taxes (by reference to persisted taxes) applied to a stay priced per night.'
+    TaxSets.TaxSetTax:
+      type: object
+      required:
+      - id
+      - title
+      - logic
+      - type
+      - is_inclusive
+      - currency
+      - skip_nights
+      - max_nights
+      - applicable_after
+      - applicable_before
+      - rate
+      - applicable_date_ranges
+      - taxes
+      - level
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique tax identifier.
+          examples:
+          - 6d30137e-74a1-41f6-aa96-2c0371e94dbf
+        title:
+          type: string
+          maxLength: 255
+          description: Tax title.
+          examples:
+          - 10% VAT
+        logic:
+          $ref: '#/components/schemas/Taxes.TaxLogic'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/Taxes.TaxType'
+          description: Kind of charge the tax represents. Defaults to `tax`.
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price (`true`) or added on top (`false`). Defaults to `true`.
+        currency:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          - type: 'null'
+          description: Tax amount currency (ISO 4217). Required unless `logic` is `percent` — also when an update changes `logic` to a fixed amount — and null when it is.
+        skip_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Count of nights skipped at tax calculation — for long-stay taxes applied from the Nth night. `null` when not set.
+        max_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Maximum count of nights used as the taxable base — for taxes applied only to the first N nights. `null` when not set.
+        applicable_after:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy start date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        applicable_before:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy end date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        rate:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          description: Tax amount. A percentage greater than 0 and at most 100 when `logic` is `percent`; a fixed amount greater than 0 in `currency` otherwise.
+          examples:
+          - '20.00'
+        applicable_date_ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Taxes.TaxApplicableDateRange'
+          maxItems: 20
+          description: Stay-date ranges the tax applies within (up to 20). Empty when the tax applies on every date.
+        taxes:
+          description: Sub-taxes calculated on deeper levels underneath this tax. Empty when the taxes were listed flat.
+          examples:
+          - []
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTax'
+        level:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Calculation-order level. Levels are processed from the deepest (highest number) to the top (`0`); a tax is calculated on the night price plus every amount from the levels deeper than its own.
+          examples:
+          - 0
+      description: 'A tax embedded in a Tax Set response: the tax read attributes plus nesting and calculation order.'
+    TaxSets.TaxSetOptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      - currency
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        title:
+          type: string
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Tax set currency (ISO 4217).
+      description: 'Attributes of a tax set `/options` item: identifier, display title, and currency.'
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    TaxSets.TaxSetCreateRequest:
+      type: object
+      required:
+      - tax_set
+      properties:
+        tax_set:
+          $ref: '#/components/schemas/TaxSets.TaxSetCreate'
+      description: Request body accepted when creating a tax set.
+    TaxSets.TaxSetTestResults:
+      type: object
+      required:
+      - taxes
+      - total_price
+      - net_price
+      properties:
+        taxes:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Calculated tax amounts (decimal strings) keyed by tax title — only the taxes that applied to the stay.
+          examples:
+          - 20% VAT: '16.67'
+        total_price:
+          type: string
+          description: Price including inclusive taxes and every tax added on top.
+          examples:
+          - '100.00'
+        net_price:
+          type: string
+          description: Price with all taxes excluded.
+          examples:
+          - '83.33'
+      description: Attributes of a tax calculation preview result.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    TaxSets.TaxSetUpdate:
+      type: object
+      required:
+      - taxes
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Tax set title.
+          examples:
+          - Tax Set Title
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Tax set currency (ISO 4217). An unknown code answers 422.
+        associated_rate_plan_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Rate Plans the set applies to. On write, each listed Rate Plan gets this set as its `tax_set_id` — a Rate Plan has one set at a time, so it leaves the set it had; `[]` detaches every Rate Plan, and a detached Rate Plan falls back to the property's default set. Every response carries the current list, `[]` when none.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the tax set belongs to. The first Tax Set created for a Property automatically becomes its default tax set. On update, a different Property moves the set to it.
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTaxWrite'
+          description: Taxes the set holds after the update, by reference. Required. Send an empty list to leave the set without taxes.
+      description: Tax Set attributes accepted when updating a tax set. `taxes` must be sent on every update — it replaces the set's taxes. Every other attribute is optional and left unchanged when absent.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    TaxSets.TaxSetTestTax:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of a persisted tax to include.
+        level:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Calculation-order level, `0` when omitted. Levels are processed from the deepest (highest number) to the top (`0`).
+          default: 0
+        taxes:
+          description: Sub-taxes to calculate on a deeper level underneath this tax.
+          examples:
+          - []
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTestTax'
+      description: A reference to a persisted tax to include in a test calculation, with its calculation-order level and sub-taxes.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    TaxSets.TaxSetOption:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - tax_set
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/TaxSets.TaxSetOptionAttributes'
+      description: A lightweight tax set option for selectors — id, title, and currency, no relationships or pagination.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Scalars.decimalString:
+      type: string
+      description: A decimal number as a string, e.g. `100.00`. Every monetary amount the API returns takes this form.
+      examples:
+      - '100.00'
+    TaxSets.TaxSetTestRequest:
+      type: object
+      required:
+      - test
+      properties:
+        test:
+          $ref: '#/components/schemas/TaxSets.TaxSetTestCalculation'
+      description: Request body accepted by the tax calculation preview.
+    TaxSets.TaxSetResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - tax_set
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/TaxSets.TaxSet'
+        relationships:
+          $ref: '#/components/schemas/TaxSets.TaxSetRelationships'
+      description: A tax set as returned in responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    TaxSets.TaxSetTaxWrite:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Tax UUID.
+        level:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: 'Calculation-order level, `0` when omitted. Levels are processed from the deepest (highest number) to the top (`0`): a tax at level 0 is calculated on the night price plus every amount from levels 1 and deeper, and so on. Taxes on the same level are calculated on the same base.'
+        taxes:
+          description: 'Sub-taxes to calculate on a deeper level underneath this tax. An alternative to listing every tax flat with its `level`: both forms calculate the same, and the response keeps the form sent.'
+          examples:
+          - []
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTaxWrite'
+      description: A tax reference within a Tax Set create/update request.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Taxes.TaxApplicableDateRange:
+      type: object
+      required:
+      - after
+      - before
+      properties:
+        after:
+          type: string
+          format: date
+          description: First date the tax applies.
+        before:
+          type: string
+          format: date
+          description: Last date the tax applies.
+      description: A range of stay dates the tax applies within (inclusive ISO 8601 `YYYY-MM-DD` bounds).
+    TaxSets.TaxSetRelationships:
+      type: object
+      required:
+      - property
+      properties:
+        property:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - property
+              required:
+              - id
+              - type
+          required:
+          - data
+          description: Property the tax set belongs to.
+      description: Relationships of a tax set resource.
+    TaxSets.TaxSetTestResultsResource:
+      type: object
+      required:
+      - type
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - tax_set_test_results
+        attributes:
+          $ref: '#/components/schemas/TaxSets.TaxSetTestResults'
+      description: Result of a tax calculation preview. Carries attributes only — no `id` or relationships.
+    Taxes.TaxType:
+      type: string
+      enum:
+      - tax
+      - fee
+      - city_tax
+      description: Kind of charge the tax represents.
+    TaxSets.TaxSet:
+      type: object
+      required:
+      - id
+      - title
+      - currency
+      - associated_rate_plan_ids
+      - taxes
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique tax set identifier.
+          examples:
+          - b70b756d-0b81-431d-a35c-f3dee28a00a7
+        title:
+          type: string
+          maxLength: 255
+          description: Tax set title.
+          examples:
+          - Tax Set Title
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Tax set currency (ISO 4217). An unknown code answers 422.
+        associated_rate_plan_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Rate Plans the set applies to. On write, each listed Rate Plan gets this set as its `tax_set_id` — a Rate Plan has one set at a time, so it leaves the set it had; `[]` detaches every Rate Plan, and a detached Rate Plan falls back to the property's default set. Every response carries the current list, `[]` when none.
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTax'
+          description: Taxes in the set, each with the taxes calculated underneath it.
+      description: 'A tax set as returned in responses: every attribute is present.'
+    TaxSets.TaxSetUpdateRequest:
+      type: object
+      required:
+      - tax_set
+      properties:
+        tax_set:
+          $ref: '#/components/schemas/TaxSets.TaxSetUpdate'
+      description: Request body accepted when updating a tax set.
+    TaxSets.TaxSetCreate:
+      type: object
+      required:
+      - title
+      - currency
+      - property_id
+      - taxes
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Tax set title.
+          examples:
+          - Tax Set Title
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Tax set currency (ISO 4217). An unknown code answers 422.
+        associated_rate_plan_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Rate Plans the set applies to. On write, each listed Rate Plan gets this set as its `tax_set_id` — a Rate Plan has one set at a time, so it leaves the set it had; `[]` detaches every Rate Plan, and a detached Rate Plan falls back to the property's default set. Every response carries the current list, `[]` when none.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the tax set belongs to. The first Tax Set created for a Property automatically becomes its default tax set. On update, a different Property moves the set to it.
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxSets.TaxSetTaxWrite'
+          description: 'Taxes to include in the set, by reference. Send an empty list for a set without taxes.
+
+
+            `level` sets the calculation order. Example: a Cleaning Fee of 10.00 per night at level 1 and a 20% VAT at level 0 on a 100.00 night — level 1 is calculated first (fee 10.00), then level 0 on the night price plus the level-1 amounts (VAT 20% of 110.00 = 22.00). With both at level 0 the VAT is 20.00.'
+          examples:
+          - - id: c1fb94b3-ce95-4233-be0e-2748b3728715
+              level: 1
+            - id: a3c4f3c8-841c-4492-b5ff-ce9ca92c1c83
+              level: 0
+      description: Tax Set attributes accepted when creating a tax set.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    Taxes.TaxLogic:
+      type: string
+      enum:
+      - percent
+      - per_room
+      - per_room_per_night
+      - per_person
+      - per_person_per_night
+      - per_night
+      - per_booking
+      description: How the tax amount is calculated.
+  parameters:
+    TaxSets.TaxSetListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order tax sets by creation time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    TaxSets.TaxSetListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the tax sets of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    TaxSets.TaxSetListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order tax sets by title. Applied by default, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    TaxSets.TaxSetOptionsParams:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the tax sets of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

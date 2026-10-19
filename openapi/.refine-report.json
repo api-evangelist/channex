@@ -1,15 +1,37 @@
 {
   "provider": "channex",
   "sources": [
-    "_original/channex-openapi.yml"
+    "_original/channex-openapi.json"
   ],
   "outputs": [
     "channex-ari-api-openapi.yml",
+    "channex-applications-api-openapi.yml",
+    "channex-authentication-api-openapi.yml",
+    "channex-authorize-net-app-api-openapi.yml",
+    "channex-booking-crs-api-openapi.yml",
+    "channex-booking-messages-api-openapi.yml",
+    "channex-booking-payments-api-openapi.yml",
+    "channex-booking-payouts-api-openapi.yml",
+    "channex-booking-reporting-api-openapi.yml",
     "channex-bookings-api-openapi.yml",
-    "channex-channels-api-openapi.yml",
+    "channex-channel-availability-rules-api-openapi.yml",
+    "channex-facilities-api-openapi.yml",
+    "channex-group-users-api-openapi.yml",
+    "channex-groups-api-openapi.yml",
+    "channex-hotel-policies-api-openapi.yml",
+    "channex-live-feed-api-openapi.yml",
+    "channex-payment-app-api-openapi.yml",
+    "channex-photos-api-openapi.yml",
     "channex-properties-api-openapi.yml",
+    "channex-property-users-api-openapi.yml",
     "channex-rate-plans-api-openapi.yml",
+    "channex-reference-data-api-openapi.yml",
     "channex-room-types-api-openapi.yml",
+    "channex-stripe-tokenization-app-api-openapi.yml",
+    "channex-tasks-api-openapi.yml",
+    "channex-tax-sets-api-openapi.yml",
+    "channex-taxes-api-openapi.yml",
+    "channex-webhook-signing-keys-api-openapi.yml",
     "channex-webhooks-api-openapi.yml"
   ],
   "archived": [],
@@ -17,16 +39,8 @@
   "warnings": [],
   "notes": [
     "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
-    "channex-openapi.yml: upgraded openapi 3.0.1 -> OpenAPI 3.2.0",
-    "apis.yml register: already-registered"
+    "channex-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+23 apis, 29 total)"
   ],
-  "skipped": [
-    "channex-ari-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-bookings-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-channels-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-properties-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-rate-plans-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-room-types-api-openapi.yml: previously refined output, superseded by openapi/_original/",
-    "channex-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/"
-  ]
+  "skipped": []
 }

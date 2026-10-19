@@ -110,34 +110,6 @@ apis:
     url: https://docs.channex.io/api-v.1-documentation/channel-api
   - type: Documentation
     url: https://docs.channex.io/api-v.1-documentation/webhook-collection
-- aid: channex:channex-channels-api
-  name: Channex Channels API
-  description: Manage OTA distribution channels.
-  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
-  baseURL: https://secure.channex.io/api/v1
-  tags:
-  - Channels
-  properties:
-  - type: OpenAPI
-    url: openapi/channex-channels-api-openapi.yml
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
-  - type: PostmanCollection
-    url: collections/channex.postman_collection.json
-  - type: OpenCollection
-    url: collections/channex.opencollection.json
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/ari
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/channel-api
-  - type: Documentation
-    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
 - aid: channex:channex-properties-api
   name: Channex Properties API
   description: Manage properties (hotels, apartments, vacation rentals).
@@ -234,6 +206,763 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/channex-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-applications-api
+  name: Channex Applications API
+  description: >-
+    Applications extending Channex (PCI, Messages, payment and PMS integrations): the available catalog
+    and per-property installations.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Applications
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-applications-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-authentication-api
+  name: Channex Authentication API
+  description: >-
+    User accounts and sessions: sign-up and confirmation, sign-in with multi-factor verification, OAuth
+    session exchange, token refresh, sign-out, and password recovery.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Authentication
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-authentication-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-authorize-net-app-api
+  name: Channex Authorize.net App API
+  description: >-
+    Authorize.net Application actions: tokenize a booking's card into an Authorize.net customer profile.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Authorize.net App
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-authorize-net-app-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-booking-crs-api
+  name: Channex Booking CRS API
+  description: >-
+    Creating and updating bookings from your own system rather than receiving them from a channel, including
+    bookings that originated at an OTA. Requires the Booking CRS application installed on the Property;
+    the API is in beta and may change.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Booking CRS
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-booking-crs-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-booking-messages-api
+  name: Channex Booking Messages API
+  description: >-
+    Chat with guests at the booking level: read and send the messages of a booking, and fetch them from
+    the channel on demand. Requires the Messages & Reviews application installed on the Property.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Booking Messages
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-booking-messages-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-booking-payments-api
+  name: Channex Booking Payments API
+  description: >-
+    Payments of a booking: list them and process charges, pre-authorizations, settlements, voids, and
+    refunds. Requires the Payments application installed on the Property; without it every operation here
+    answers `403 Forbidden`.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Booking Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-booking-payments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-booking-payouts-api
+  name: Channex Booking Payouts API
+  description: >-
+    What Booking.com pays out for a booking: the payout details, the price breakdown behind them, and
+    the bank transfer payout. Available for bookings that came through a Booking.com channel.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Booking Payouts
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-booking-payouts-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-booking-reporting-api
+  name: Channex Booking Reporting API
+  description: >-
+    Reports sent back to the OTA about what happened with a booking: a guest no-show, invalid credit card
+    details, a cancellation caused by them, a change of stay, and guest misconduct. Supported for Booking.com
+    bookings; no-shows for Expedia as well.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Booking Reporting
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-booking-reporting-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-channel-availability-rules-api
+  name: Channex Channel Availability Rules API
+  description: >-
+    Availability overrides (stop-sales, offsets, caps) for specific Room Types and
+
+    Channels over a date range — closing out a channel for a holiday week, or capping
+
+    what one Room Type publishes to one Channel.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Channel Availability Rules
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-channel-availability-rules-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-facilities-api
+  name: Channex Facilities API
+  description: >-
+    Read-only dictionary of property- and room-type-level facilities (amenities).
+
+    Channex maintains both dictionaries; they cannot be added to through the API.
+
+    Contact Channex to have a missing facility added.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Facilities
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-facilities-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-group-users-api
+  name: Channex Group Users API
+  description: >-
+    Manage Group Users — a user's membership of a Group, which grants them access to every Property in
+    it. A membership carries a role and, optionally, access policy overrides on top of it.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Group Users
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-group-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-groups-api
+  name: Channex Groups API
+  description: >-
+    Manage Groups — sets of Properties you manage together, and the users who may reach them. Every Property
+    belongs to at least one Group and may belong to several; a Group that still holds a Property cannot
+    be deleted.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Groups
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-groups-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-hotel-policies-api
+  name: Channex Hotel Policies API
+  description: >-
+    Manage Hotel Policies — general property rules: check-in/out windows, guest limits, internet, parking,
+    pets, and smoking. A policy belongs to one property, and the property points at it through `hotel_policy_id`
+    (see the Properties resource); deleting the policy clears that reference.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Hotel Policies
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-hotel-policies-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-live-feed-api
+  name: Channex Live Feed API
+  description: >-
+    Feed of notable account events (new bookings, synchronization errors, guest requests): list and read
+    them, and resolve actionable guest requests.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Live Feed
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-live-feed-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-payment-app-api
+  name: Channex Payment App API
+  description: >-
+    Payment Application actions: connect and manage payment providers, report on transactions, and export
+    them to CSV.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Payment App
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-payment-app-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-photos-api
+  name: Channex Photos API
+  description: Upload and manage Property and RoomType photos.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Photos
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-photos-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-property-users-api
+  name: Channex Property Users API
+  description: >-
+    Manage Property Users — a user's access to a single Property. An access carries a role and, optionally,
+    access policy overrides on top of it, and ownership can be handed to another user.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Property Users
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-property-users-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-reference-data-api
+  name: Channex Reference Data API
+  description: 'Static reference lists: time zones and supported currencies.'
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Reference Data
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-reference-data-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-stripe-tokenization-app-api
+  name: Channex Stripe Tokenization App API
+  description: >-
+    Stripe Tokenization Application actions: tokenize a booking's card into a Stripe token or payment
+    method.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Stripe Tokenization App
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-stripe-tokenization-app-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-tasks-api
+  name: Channex Tasks API
+  description: >-
+    Read-only log of asynchronous tasks processed for a Property (channel syncs, scheduled updates), with
+    timing and outcome.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Tasks
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-tasks-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-tax-sets-api
+  name: Channex Tax Sets API
+  description: >-
+    Manage Tax Sets — named groups of Taxes applied to Rate Plans, with the order the taxes are calculated
+    in. The first set of a Property becomes its default and is applied to every new Rate Plan of the Property
+    automatically; a Rate Plan detached from a set falls back to it. See `default_tax_set_id` on Properties
+    and `tax_set_id` on Rate Plans.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Tax Sets
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-tax-sets-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-taxes-api
+  name: Channex Taxes API
+  description: >-
+    Manage Taxes — individual charges (VAT, city tax, fees) applicable to a Rate Plan or Property. Taxes
+    reach a Rate Plan grouped in a Tax Set.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Taxes
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-taxes-api-openapi.yml
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  - type: PostmanCollection
+    url: collections/channex.postman_collection.json
+  - type: OpenCollection
+    url: collections/channex.opencollection.json
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/room-types-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/rate-plans-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/ari
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/bookings-collection
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/channel-api
+  - type: Documentation
+    url: https://docs.channex.io/api-v.1-documentation/webhook-collection
+- aid: channex:channex-webhook-signing-keys-api
+  name: Channex Webhook Signing Keys API
+  description: >-
+    HMAC keys that sign webhook deliveries, so that a receiving endpoint can tell that a
+
+    callback came from Channex and that its body was not altered on the way.
+
+
+    A key is a shared secret: Channex holds it and so do you. It is not an API credential
+
+    — it authenticates nothing against this API and grants no access. It is used in one
+
+    direction only, on the callbacks Channex sends to you.
+
+
+    A key belongs to a billing account and holds up to two secret versions — the current
+
+    one plus an optional pending one, which is what makes rotation zero-downtime. To turn
+
+    signing on, point a webhook at the key with `signing_key_id` and set `is_signed`.
+
+
+    ## What is signed
+
+
+    Every delivery of a signed webhook — the `POST` Channex makes to the webhook's
+
+    `callback_url` — carries three headers:
+
+
+    - `x-hmac-timestamp` — Unix timestamp (seconds) taken when the delivery was signed.
+
+    - `x-hmac-signature-256` — comma-separated lowercase-hex HMAC-SHA256 signatures, one
+      per secret version of the key, the current version first.
+    - `x-hmac-keys-256` — comma-separated version labels (`...` followed by each secret's
+      last 6 characters), in the same order as the signatures.
+
+    Each signature is computed over the string `{timestamp}.{raw request body}`: the value
+
+    of `x-hmac-timestamp`, a dot, and the exact bytes of that delivery's body. Nothing else
+
+    enters it — neither the callback URL nor the webhook's `request_params` and `headers`.
+
+
+    ## Verifying a delivery
+
+
+    Recompute HMAC-SHA256 over `{timestamp}.{raw body}` with your stored secret, then
+
+    compare it against the signature at the position whose label in `x-hmac-keys-256` ends
+
+    with your secret's last 6 characters.
+
+
+    ## Rotating a key
+
+
+    `generate` adds a pending secret version beside the current one, and deliveries are
+
+    then signed with both — so verification against the current secret keeps working while
+
+    the new secret is stored on your side. `rotate` promotes the newest version to be the
+
+    sole current version, after which deliveries carry its signature alone.
+  humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
+  baseURL: https://secure.channex.io/api/v1
+  tags:
+  - Webhook Signing Keys
+  properties:
+  - type: OpenAPI
+    url: openapi/channex-webhook-signing-keys-api-openapi.yml
   - type: Documentation
     url: https://docs.channex.io/api-v.1-documentation/hotels-collection
   - type: PostmanCollection

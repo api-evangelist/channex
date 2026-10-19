@@ -1,0 +1,433 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Stripe Tokenization App API
+  version: 0.0.0
+  description: 'Stripe Tokenization Application actions: tokenize a booking''s card into a Stripe token or payment method.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Stripe Tokenization App
+  description: 'Stripe Tokenization Application actions: tokenize a booking''s card into a Stripe token or payment method.'
+paths:
+  /applications/stripe_tokenization_app/{installation_id}/payment_method:
+    post:
+      operationId: StripeTokenizationApp_paymentMethod
+      summary: Create a Stripe payment method
+      description: Create a Stripe payment method for the booking's card.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Stripe Tokenization Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeTokenizationApp.StripePaymentMethodDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Stripe Tokenization App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeTokenizationApp.TokenizeCardRequest'
+  /applications/stripe_tokenization_app/{installation_id}/token:
+    post:
+      operationId: StripeTokenizationApp_token
+      summary: Create a Stripe token
+      description: Create a Stripe token for the booking's card.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Stripe Tokenization Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeTokenizationApp.StripeTokenDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Stripe Tokenization App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripeTokenizationApp.TokenizeCardRequest'
+  /bookings/{booking_id}/stripe_payment_method:
+    post:
+      operationId: BookingStripeTokenization_bookingPaymentMethod
+      summary: Create a Stripe payment method for a booking
+      description: 'Create a Stripe payment method for the booking''s card. Requires the Stripe
+
+        Tokenization Application installed on the booking''s Property; without it
+
+        the request answers `403 Forbidden`.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking whose card to tokenize.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeTokenizationApp.StripePaymentMethodDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Stripe Tokenization App
+  /bookings/{booking_id}/stripe_token:
+    post:
+      operationId: BookingStripeTokenization_bookingToken
+      summary: Create a Stripe token for a booking
+      description: 'Create a Stripe token for the booking''s card. Requires the Stripe
+
+        Tokenization Application installed on the booking''s Property; without it
+
+        the request answers `403 Forbidden`.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking whose card to tokenize.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StripeTokenizationApp.StripeTokenDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Stripe Tokenization App
+components:
+  schemas:
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    StripeTokenizationApp.StripeTokenDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Stripe token of the booking's card.
+              examples:
+              - tk1234
+          required:
+          - token
+      description: Response document carrying a Stripe token.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    StripeTokenizationApp.TokenizeCardRequest:
+      type: object
+      required:
+      - booking_id
+      properties:
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking whose card to tokenize.
+      description: 'Request body of the tokenization endpoints: the booking whose card to tokenize.'
+    StripeTokenizationApp.StripePaymentMethodDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Stripe payment method of the booking's card.
+              examples:
+              - pm1234
+          required:
+          - token
+      description: Response document carrying a Stripe payment method.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

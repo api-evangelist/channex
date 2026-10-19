@@ -1,226 +1,1267 @@
 openapi: 3.2.0
 info:
-  title: Channex Room Types API
-  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
-  termsOfService: https://channex.io/terms-of-service/
-  contact:
-    name: Channex Support
-    email: support@channex.io
-    url: https://docs.channex.io/
-  version: '1.0'
+  title: Channex.io — Public Room Types API
+  version: 0.0.0
+  description: Manage Room Types — the accommodation inventory (rooms, villas, dormitory beds) of a Property.
 servers:
-- url: https://secure.channex.io/api/v1
-  description: Production
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
 - url: https://staging.channex.io/api/v1
-  description: Staging / sandbox
+  description: Staging server
+  variables: {}
 security:
-- userApiKey: []
+- UserApiKeyAuth: []
 tags:
 - name: Room Types
-  description: Manage room types under a property.
+  description: Manage Room Types — the accommodation inventory (rooms, villas, dormitory beds) of a Property.
 paths:
   /room_types:
     get:
-      operationId: listRoomTypes
-      tags:
-      - Room Types
+      operationId: RoomTypes_list
       summary: List room types
+      description: List room types. Results are paginated and ordered by title, ascending, by default; the `meta` block carries the page, limit, total and ordering.
       parameters:
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/Limit'
-      - name: filter[property_id]
+      - $ref: '#/components/parameters/RoomTypes.RoomTypeListParams.propertyId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - name: order[title]
         in: query
+        required: false
+        description: Order room types by title.
         schema:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[position]
+        in: query
+        required: false
+        description: Order room types by their display position.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[inserted_at]
+        in: query
+        required: false
+        description: Order room types by creation time.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
       responses:
         '200':
-          description: A list of room types.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomTypeList'
-    post:
-      operationId: createRoomType
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoomTypes.RoomTypeResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
       tags:
       - Room Types
+    post:
+      operationId: RoomTypes_create
       summary: Create a room type
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RoomTypeWriteRequest'
+      description: Create a room type for a property. The created room type is returned with `201 Created`.
+      parameters: []
       responses:
         '201':
-          description: The created room type.
+          description: 201 Created response wrapping a resource body.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomTypeResponse'
-  /room_types/options:
-    get:
-      operationId: listRoomTypeOptions
-      tags:
-      - Room Types
-      summary: List room type options
-      responses:
-        '200':
-          description: Room type options.
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RoomTypes.RoomTypeResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OptionsList'
-  /room_types/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    get:
-      operationId: getRoomType
-      tags:
-      - Room Types
-      summary: Get a room type
-      responses:
-        '200':
-          description: The requested room type.
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomTypeResponse'
-    put:
-      operationId: updateRoomType
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request was understood but could not be carried out; `details`, where present, names the reason per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.UnprocessableEntity'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
       tags:
       - Room Types
-      summary: Update a room type
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoomTypeWriteRequest'
+              $ref: '#/components/schemas/RoomTypes.RoomTypeCreateRequest'
+  /room_types/options:
+    get:
+      operationId: RoomTypes_options
+      summary: List room type options
+      description: List room types as lightweight options (id, title, occupancy, display position, photo, property) for selectors. Not paginated; accepts the same property filter and ordering keys as the list.
+      parameters:
+      - $ref: '#/components/parameters/RoomTypes.RoomTypeOptionsParams.propertyId'
+      - name: order[title]
+        in: query
+        required: false
+        description: Order room types by title.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[position]
+        in: query
+        required: false
+        description: Order room types by their display position.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[inserted_at]
+        in: query
+        required: false
+        description: Order room types by creation time.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
       responses:
         '200':
-          description: The updated room type.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoomTypeResponse'
-    delete:
-      operationId: deleteRoomType
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoomTypes.RoomTypeOption'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
       tags:
       - Room Types
-      summary: Delete a room type
+  /room_types/{id}:
+    get:
+      operationId: RoomTypes_read
+      summary: Retrieve a room type
+      description: Retrieve a room type by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
       responses:
         '200':
-          description: Room type deleted.
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RoomTypes.RoomTypeResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Room Types
+    put:
+      operationId: RoomTypes_update
+      summary: Update a room type
+      description: Update a room type by its identifier. Attributes absent from the request are left unchanged. The updated room type is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - name: force
+        in: query
+        required: false
+        description: Remove occupancy options even when they are mapped to channels. Without it the request fails when channel mappings would be affected.
+        schema:
+          type: boolean
+        explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RoomTypes.RoomTypeResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Room Types
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomTypes.RoomTypeUpdateRequest'
+    delete:
+      operationId: RoomTypes_delete
+      summary: Delete a room type
+      description: Delete a room type by its identifier. A room type linked to a channel is refused with `422 Unprocessable Entity` unless `force=true` is sent.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - name: force
+        in: query
+        required: false
+        description: Un-map the room type from its channels before removing it. Without it the request fails when channel mappings would be affected.
+        schema:
+          type: boolean
+        explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Room Types
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
   schemas:
-    RoomTypeWriteRequest:
+    RoomTypes.RoomTypeContentWrite:
+      type: object
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Room type description. Null by default.
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photos.EmbeddedPhotoWrite'
+          description: 'Photos to attach to the room type. The list is merged into the room type''s photos rather than replacing them: an entry with a new `url` attaches a photo, an entry carrying `id` updates that photo, photos the list does not name are kept, and an entry with `is_removed: true` removes the photo it names. A room type holds at most 10 photos, counted separately from the property''s own photos and from every other room type''s: a request that would take the count past 10 is refused, while one that does not raise it is accepted even for a room type already holding more, and removing a photo frees its place. See the Photos resource for the full model.'
+      description: Room type content accepted on create and update.
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    RoomTypes.RoomTypeUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Room type title, as shown in the system. Unique within the property.
+          examples:
+          - Standard Room
+        count_of_rooms:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of rooms (units) of this type available to sell. Affects billing for vacation rentals.
+          examples:
+          - 20
+        occ_adults:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of adult bed spaces in the room type.
+          examples:
+          - 3
+        occ_children:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of child-only bed spaces. Children may also sleep in adult beds; set to 0 if there are no child-only beds.
+          examples:
+          - 0
+        occ_infants:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of infant cots available in the room type.
+          examples:
+          - 0
+        default_occupancy:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Guests accommodated by default without extra spaces. Defaults to `occ_adults` and is silently lowered to it when a larger value is sent. Lowering `occ_adults` lowers this too.
+          deprecated: true
+          examples:
+          - 2
+        room_kind:
+          allOf:
+          - $ref: '#/components/schemas/RoomTypes.RoomKind'
+          description: Kind of room type. Defaults to `room`.
+        capacity:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Number of beds in a single physical room, used for `dorm` room types. Stored and returned whatever the `room_kind`; `null` until set.
+          examples:
+          - 4
+        codes:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+          examples:
+          - pms: RT-42
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the property this room type belongs to. Cannot be changed after the room type is created: a different value is refused, the same value is accepted.'
+        facilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'Room type facility identifiers. See the Room Type Facilities endpoint for the available identifiers. The list replaces the room type''s current facilities: facilities it does not name are detached, `[]` detaches all, identifiers naming no facility are dropped, and a duplicate counts once.'
+        content:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeContentWrite'
+      description: Room type attributes accepted when updating a room type. Every attribute is optional; attributes absent from the request are left unchanged.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    RoomTypes.RoomTypeContent:
+      type: object
+      required:
+      - description
+      - photos
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Room type description. Null by default.
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Photos.Photo'
+          description: Photos attached to the room type. A room type holds at most 10 of them, counted separately from the property's own photos and from every other room type's. See the Photos resource for the full model and management endpoints.
+      description: Room type content as returned in responses.
+    Photos.PhotoKind:
+      type: string
+      enum:
+      - photo
+      - ad
+      - menu
+      description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+    Common.Errors.UnprocessableEntityObject:
+      type: object
+      required:
+      - code
+      - title
+      properties:
+        code:
+          type: string
+          enum:
+          - unprocessable_entity
+        title:
+          type: string
+          enum:
+          - Unprocessable Entity
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps each rejected argument to the reason it was rejected.
+          examples:
+          - thread_id: Thread id is not available
+      description: Error object for a rejected request, adding the reason per argument.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    RoomTypes.RoomTypeCreateRequest:
       type: object
       required:
       - room_type
       properties:
         room_type:
-          $ref: '#/components/schemas/RoomTypeAttributes'
-    RoomTypeAttributes:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeCreate'
+      description: Request body accepted when creating a room type.
+    RoomTypes.RoomTypeResource:
       type: object
       required:
-      - property_id
-      - title
-      - count_of_rooms
-      - occ_adults
-      - default_occupancy
+      - type
+      - id
+      - attributes
+      - relationships
       properties:
-        property_id:
-          type: string
-          format: uuid
-        title:
-          type: string
-          maxLength: 255
-        count_of_rooms:
-          type: integer
-          minimum: 0
-        occ_adults:
-          type: integer
-        occ_children:
-          type: integer
-        occ_infants:
-          type: integer
-        default_occupancy:
-          type: integer
-        room_kind:
+        type:
           type: string
           enum:
-          - room
-          - dorm
-        capacity:
-          type: integer
-        facilities:
-          type: array
-          items:
-            type: string
-        content:
-          type: object
-    OptionsList:
+          - room_type
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/RoomTypes.RoomType'
+        relationships:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeRelationships'
+      description: A room type as returned in responses.
+    RoomTypes.RoomTypeOption:
       type: object
+      required:
+      - type
+      - id
+      - attributes
       properties:
-        data:
-          type: array
-          items:
+        type:
+          type: string
+          enum:
+          - room_type
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeOptionAttributes'
+      description: A lightweight room type option for selectors — no relationships or pagination.
+    RoomTypes.RoomTypeUpdateRequest:
+      type: object
+      required:
+      - room_type
+      properties:
+        room_type:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeUpdate'
+      description: Request body accepted when updating a room type.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Facilities.FacilityResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - facility
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Facilities.Facility'
+      description: A facility resource object (JSON:API), returned by both list and options endpoints.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
             type: array
             items:
               type: string
-            description: A two-element [title, id] pair.
-    RoomTypeResponse:
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.Errors.UnprocessableEntity:
       type: object
+      required:
+      - errors
       properties:
-        data:
-          $ref: '#/components/schemas/RoomType'
-    RoomType:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnprocessableEntityObject'
+      description: The request was understood but could not be carried out; `details`, where present, names the reason per argument.
+    Common.JsonApi.SuccessMessage:
       type: object
+      required:
+      - meta
       properties:
-        id:
-          type: string
-          format: uuid
-        type:
-          type: string
-          example: room_type
-        attributes:
-          $ref: '#/components/schemas/RoomTypeAttributes'
-    RoomTypeList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/RoomType'
         meta:
           type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    RoomTypes.RoomTypeRelationships:
+      type: object
+      required:
+      - property
+      - facilities
+      properties:
+        property:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - property
+              required:
+              - id
+              - type
+          required:
+          - data
+          description: Property the room type belongs to.
+        facilities:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Facilities.FacilityResource'
+          required:
+          - data
+          description: Facilities associated with the room type. Each item is a facility resource carrying its `title` and `category`.
+      description: Relationships of a room type resource.
+    RoomTypes.RoomTypeCreate:
+      type: object
+      required:
+      - title
+      - count_of_rooms
+      - occ_adults
+      - occ_children
+      - occ_infants
+      - property_id
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Room type title, as shown in the system. Unique within the property.
+          examples:
+          - Standard Room
+        count_of_rooms:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of rooms (units) of this type available to sell. Affects billing for vacation rentals.
+          examples:
+          - 20
+        occ_adults:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of adult bed spaces in the room type.
+          examples:
+          - 3
+        occ_children:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of child-only bed spaces. Children may also sleep in adult beds; set to 0 if there are no child-only beds.
+          examples:
+          - 0
+        occ_infants:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of infant cots available in the room type.
+          examples:
+          - 0
+        default_occupancy:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Guests accommodated by default without extra spaces. Defaults to `occ_adults` and is silently lowered to it when a larger value is sent. Lowering `occ_adults` lowers this too.
+          deprecated: true
+          examples:
+          - 2
+        room_kind:
+          allOf:
+          - $ref: '#/components/schemas/RoomTypes.RoomKind'
+          description: Kind of room type. Defaults to `room`.
+        capacity:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Number of beds in a single physical room, used for `dorm` room types. Stored and returned whatever the `room_kind`; `null` until set.
+          examples:
+          - 4
+        codes:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+          examples:
+          - pms: RT-42
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the property this room type belongs to. Cannot be changed after the room type is created: a different value is refused, the same value is accepted.'
+        facilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'Room type facility identifiers. See the Room Type Facilities endpoint for the available identifiers. The list replaces the room type''s current facilities: facilities it does not name are detached, `[]` detaches all, identifiers naming no facility are dropped, and a duplicate counts once.'
+        content:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeContentWrite'
+      description: Room type attributes accepted when creating a room type.
+    RoomTypes.RoomTypeOptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      - occ_adults
+      - occ_children
+      - occ_infants
+      - default_occupancy
+      - position
+      - photo
+      - property_id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          examples:
+          - 994d1375-dbbd-4072-8724-b2ab32ce781b
+        title:
+          type: string
+          examples:
+          - Standard Room
+        occ_adults:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of adult bed spaces in the room type.
+          examples:
+          - 3
+        occ_children:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of child-only bed spaces.
+          examples:
+          - 0
+        occ_infants:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of infant cots available in the room type.
+          examples:
+          - 0
+        default_occupancy:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Guests accommodated by default without extra spaces.
+          examples:
+          - 2
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Zero-based display position of the room type. Set with the `update_positions` endpoint.
+          examples:
+          - 0
+        photo:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: uri
+          description: URL of the room type's photo. `null` when the room type has no photo.
+          examples:
+          - https://images.channex.io/cce1fbdb-e7be-4804-1f71-f7617cb7cc00/
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the property the room type belongs to.
+          examples:
+          - 2941337f-50d6-4189-ae13-f76efaf9c515
+      description: 'Attributes of a room type `/options` item: identifier, title, occupancy, display position, photo, and owning property.'
+    Photos.EmbeddedPhotoWrite:
+      type: object
+      required:
+      - url
+      - kind
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of an existing photo of this parent to update in place or, with `is_removed`, to remove. Omit to attach a new photo. An identifier naming no photo of this parent leaves the list unchanged.
+          examples:
+          - cc673f90-8d65-498d-9ee7-b4b39f8df3ee
+        url:
+          type: string
+          format: uri
+          description: 'URL to fetch the image from: the temporary URL returned by the upload endpoint, passed unchanged, or any reachable image URL. The image is copied into Channex storage, and responses carry that copy''s URL rather than this one. Required in every entry; an entry without `id` whose URL matches a photo already attached updates that photo.'
+          examples:
+          - https://example.com/temporaryphotos/a66edb22-47da-4da8-bab5-3b6f4056256f.png
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/Photos.PhotoKind'
+          description: Kind of photo. Required when attaching or updating a photo; an entry that only removes one may omit it.
+        author:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo author, or null.
+          examples:
+          - John Doe
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo description, or null.
+          examples:
+          - Room View
+        is_removed:
+          type: boolean
+          description: Set to `true` to remove the photo named by `id` or `url` from the parent. The photo is deleted and is no longer readable through the Photos resource. Defaults to `false`.
+      description: A photo in a parent resource's `content.photos` list.
+    RoomTypes.RoomType:
+      type: object
+      required:
+      - id
+      - position
+      - title
+      - count_of_rooms
+      - occ_adults
+      - occ_children
+      - occ_infants
+      - default_occupancy
+      - room_kind
+      - capacity
+      - codes
+      - meta
+      - content
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique room type identifier.
+          examples:
+          - 994d1375-dbbd-4072-8724-b2ab32ce781b
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Zero-based display position of the room type. Set with the `update_positions` endpoint.
+          examples:
+          - 0
+        title:
+          type: string
+          maxLength: 255
+          description: Room type title, as shown in the system. Unique within the property.
+          examples:
+          - Standard Room
+        count_of_rooms:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of rooms (units) of this type available to sell. Affects billing for vacation rentals.
+          examples:
+          - 20
+        occ_adults:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Number of adult bed spaces in the room type.
+          examples:
+          - 3
+        occ_children:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of child-only bed spaces. Children may also sleep in adult beds; set to 0 if there are no child-only beds.
+          examples:
+          - 0
+        occ_infants:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of infant cots available in the room type.
+          examples:
+          - 0
+        default_occupancy:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Guests accommodated by default without extra spaces. Defaults to `occ_adults` and is silently lowered to it when a larger value is sent. Lowering `occ_adults` lowers this too.
+          deprecated: true
+          examples:
+          - 2
+        room_kind:
+          allOf:
+          - $ref: '#/components/schemas/RoomTypes.RoomKind'
+          description: Kind of room type. Defaults to `room`.
+        capacity:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Number of beds in a single physical room, used for `dorm` room types. Stored and returned whatever the `room_kind`; `null` until set.
+          examples:
+          - 4
+        codes:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+          examples:
+          - pms: RT-42
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: 'Free-form object stored for the client''s own use, or null. The platform neither reads nor writes it: an object sent here comes back unchanged.'
+        content:
+          $ref: '#/components/schemas/RoomTypes.RoomTypeContent'
+      description: 'A room type (an accommodation inventory unit — a room, villa, or dormitory bed) as returned in responses: every attribute is present.'
+    RoomTypes.RoomKind:
+      type: string
+      enum:
+      - room
+      - dorm
+      description: Kind of room type. A `dorm` sells beds within a shared physical room; a `room` sells the whole unit.
+    Photos.Photo:
+      type: object
+      required:
+      - id
+      - property_id
+      - room_type_id
+      - kind
+      - position
+      - author
+      - description
+      - url
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique photo identifier.
+          examples:
+          - cc673f90-8d65-498d-9ee7-b4b39f8df3ee
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the photo belongs to. Cannot be changed after the photo is created.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        room_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the Room Type the photo belongs to, or null when the photo is attached at property level. Cannot be changed after the photo is created.
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/Photos.PhotoKind'
+          description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Position in the photo list of the property or, for a room type photo, of that room type. Positions run from `0` without gaps and `0` designates the cover photo. On create the photo is inserted at this position, or appended when omitted; on update it is moved there. The other photos shift to keep the positions contiguous, and a value past the end places the photo last.
+          examples:
+          - 0
+        author:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo author, or null. An empty string is stored as `null`.
+          examples:
+          - John Doe
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo description, or null. An empty string is stored as `null`.
+          examples:
+          - Room View
+        url:
+          type: string
+          format: uri
+          description: URL of the image as served by Channex. The create response carries a placeholder image URL; once the source image has been fetched and stored, typically within a few seconds, the photo carries the URL of the stored copy — read the photo back to obtain it. A source image that cannot be fetched leaves the placeholder in place.
+          examples:
+          - https://images.channex.io/1747b751-28c0-47db-742a-40f62a186a00/
+      description: 'A photo as returned in responses: every attribute is present.'
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Facilities.Facility:
+      type: object
+      required:
+      - id
+      - category
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique facility identifier. Mirrors the resource `id`.
+          examples:
+          - 864d91a6-3a40-4098-a880-84b841e11adb
+        category:
+          type: string
+          description: 'Grouping code the facility belongs to, in lower snake case. The property and
+
+            room type dictionaries have separate vocabularies: a code valid for one is
+
+            rejected by the other. `filter[category]` takes this value.'
+          examples:
+          - general
+        title:
+          type: string
+          description: Human-readable facility name.
+          examples:
+          - 24-hour front desk
+      description: Attributes of a facility (amenity) available at a property or room type.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    RoomTypes.RoomTypeListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only room types of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    RoomTypes.RoomTypeOptionsParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only room types of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
   securitySchemes:
-    userApiKey:
+    UserApiKeyAuth:
       type: apiKey
       in: header
       name: user-api-key
-      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.
+      description: API key for programmatic access, sent in the `user-api-key` header.

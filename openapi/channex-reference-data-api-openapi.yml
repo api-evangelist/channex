@@ -1,0 +1,116 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Reference Data API
+  version: 0.0.0
+  description: 'Static reference lists: time zones and supported currencies.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Reference Data
+  description: 'Static reference lists: time zones and supported currencies.'
+paths:
+  /currencies:
+    get:
+      operationId: ReferenceData_currencies
+      summary: List currencies
+      description: List all supported currencies. The whole list is returned; the endpoint is not paginated.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReferenceData.Currency'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+      tags:
+      - Reference Data
+      security:
+      - {}
+  /timezones:
+    get:
+      operationId: ReferenceData_timezones
+      summary: List time zones
+      description: List all IANA time zones with their current UTC offsets. The whole list is returned; the endpoint is not paginated.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReferenceData.Timezone'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+      tags:
+      - Reference Data
+      security:
+      - {}
+components:
+  schemas:
+    ReferenceData.Timezone:
+      type: object
+      required:
+      - label
+      - utc
+      - tzCode
+      properties:
+        label:
+          type: string
+          description: Human-readable label combining the zone name and its UTC offset.
+          examples:
+          - Europe/London (UTC+00:00)
+        utc:
+          type: string
+          description: Current UTC offset in `±HH:MM` form.
+          examples:
+          - +00:00
+        tzCode:
+          type: string
+          description: IANA time zone identifier.
+          examples:
+          - Europe/London
+      description: An IANA time zone with its current UTC offset.
+    ReferenceData.Currency:
+      type: object
+      required:
+      - code
+      - label
+      properties:
+        code:
+          type: string
+          description: ISO 4217 currency code.
+          examples:
+          - USD
+        label:
+          type: string
+          description: Human-readable currency name including its code.
+          examples:
+          - US Dollar (USD)
+      description: A supported currency.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

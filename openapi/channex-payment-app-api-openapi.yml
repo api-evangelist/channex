@@ -1,0 +1,970 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Payment App API
+  version: 0.0.0
+  description: 'Payment Application actions: connect and manage payment providers, report on transactions, and export them to CSV.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Payment App
+  description: 'Payment Application actions: connect and manage payment providers, report on transactions, and export them to CSV.'
+paths:
+  /applications/payment_app/{installation_id}/connect:
+    post:
+      operationId: PaymentApp_connect
+      summary: Connect a payment provider
+      description: 'Start connecting a payment provider: the response carries a link to the provider''s own connection flow.'
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.ConnectLinkDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentApp.ConnectRequest'
+  /applications/payment_app/{installation_id}/disconnect:
+    post:
+      operationId: PaymentApp_disconnect
+      summary: Disconnect a payment provider
+      description: Disconnect a payment provider.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.SuccessFlagDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentApp.DisconnectRequest'
+  /applications/payment_app/{installation_id}/download_csv:
+    post:
+      operationId: PaymentAppTransactions_downloadCsv
+      summary: Download a transactions export
+      description: Download a requested transactions export as a CSV file.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: 'Transactions export: the CSV file the export token names.'
+          content:
+            text/csv:
+              schema:
+                type: string
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentApp.DownloadCsvRequest'
+  /applications/payment_app/{installation_id}/export_csv:
+    post:
+      operationId: PaymentAppTransactions_exportCsv
+      summary: Request a transactions export
+      description: 'Request a CSV export of payment transactions, selected by the same filters
+
+        the listing takes. The response carries a token; pass it to the download
+
+        endpoint to fetch the file.'
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - name: filter[booking_id]
+        in: query
+        required: false
+        description: Return only transactions of the given booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[payment_provider_id]
+        in: query
+        required: false
+        description: Return only transactions processed by the given payment provider.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[status]
+        in: query
+        required: false
+        description: Return only transactions of the given kind.
+        schema:
+          $ref: '#/components/schemas/BookingPayments.PaymentTransactionType'
+        explode: false
+      - name: filter[inserted_at][lte]
+        in: query
+        required: false
+        description: Return only transactions inserted at or before the given time.
+        schema:
+          type: string
+          format: date-time
+        explode: false
+      - name: filter[inserted_at][gte]
+        in: query
+        required: false
+        description: Return only transactions inserted at or after the given time.
+        schema:
+          type: string
+          format: date-time
+        explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.ExportTokenDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+  /applications/payment_app/{installation_id}/providers:
+    post:
+      operationId: PaymentApp_providers
+      summary: List payment providers
+      description: List the payment providers connected on the installation.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/PaymentApp.PaymentProviderListParams.filterProvider'
+      - $ref: '#/components/parameters/PaymentApp.PaymentProviderListParams.filterIsActive'
+      - $ref: '#/components/parameters/PaymentApp.PaymentProviderListParams.filterIsDefault'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.PaymentProvidersDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+  /applications/payment_app/{installation_id}/set_provider_as_default:
+    post:
+      operationId: PaymentApp_setProviderAsDefault
+      summary: Set the default payment provider
+      description: Make a payment provider connection the default one; every other connection becomes non-default.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.PaymentProvidersDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentApp.SetDefaultProviderRequest'
+  /applications/payment_app/{installation_id}/transactions:
+    post:
+      operationId: PaymentAppTransactions_transactions
+      summary: List payment transactions
+      description: List the payment transactions the installation's providers processed.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - $ref: '#/components/parameters/PaymentApp.PaymentTransactionListParams.booking_id'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/PaymentApp.PaymentTransactionListParams.orderInsertedAt'
+      - name: filter[booking_id]
+        in: query
+        required: false
+        description: Return only transactions of the given booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[payment_provider_id]
+        in: query
+        required: false
+        description: Return only transactions processed by the given payment provider.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[status]
+        in: query
+        required: false
+        description: Return only transactions of the given kind.
+        schema:
+          $ref: '#/components/schemas/BookingPayments.PaymentTransactionType'
+        explode: false
+      - name: filter[inserted_at][lte]
+        in: query
+        required: false
+        description: Return only transactions inserted at or before the given time.
+        schema:
+          type: string
+          format: date-time
+        explode: false
+      - name: filter[inserted_at][gte]
+        in: query
+        required: false
+        description: Return only transactions inserted at or after the given time.
+        schema:
+          type: string
+          format: date-time
+        explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.TransactionListDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+  /applications/payment_app/{installation_id}/update_provider:
+    put:
+      operationId: PaymentApp_updateProvider
+      summary: Update a payment provider
+      description: Update a payment provider connection. Only its title can be changed.
+      parameters:
+      - name: installation_id
+        in: path
+        required: true
+        description: UUID of the Payment Application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentApp.PaymentProvidersDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Payment App
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentApp.UpdateProviderRequest'
+components:
+  schemas:
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    PaymentApp.TransactionPaymentProviderRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - payment_provider
+            attributes:
+              $ref: '#/components/schemas/PaymentApp.PaymentProvider'
+          required:
+          - id
+          - type
+          - attributes
+      description: The payment provider of a transaction, embedded as a relationship.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Authentication.EmbeddedUser:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Authentication.EmbeddedUserAttributes'
+      description: A user embedded in another resource's relationships, carrying identifier, name and email.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    PaymentApp.DisconnectRequest:
+      type: object
+      required:
+      - payment_provider_id
+      properties:
+        payment_provider_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider connection to disconnect.
+      description: Request body accepted when disconnecting a payment provider.
+    BookingPayments.PaymentMeta:
+      type: object
+      required:
+      - total
+      - limit
+      - page
+      - order_by
+      - order_direction
+      properties:
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        limit:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          examples:
+          - 10
+        page:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+      description: Pagination and ordering metadata of payment responses.
+    PaymentApp.PaymentAppTransactionResource:
+      type: object
+      required:
+      - attributes
+      - relationships
+      properties:
+        attributes:
+          $ref: '#/components/schemas/PaymentApp.PaymentAppTransaction'
+        relationships:
+          $ref: '#/components/schemas/PaymentApp.PaymentAppTransactionRelationships'
+      description: Transaction resource. Carries attributes and relationships — no id or type.
+    PaymentApp.PaymentProviderUpdateParams:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Provider connection title.
+          examples:
+          - Test
+      description: Attributes accepted when updating a payment provider connection.
+    PaymentApp.PaymentProvider:
+      type: object
+      required:
+      - id
+      - is_active
+      - is_default
+      - provider
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Provider connection identifier. Mirrors the resource `id`.
+        is_active:
+          type: boolean
+          description: Whether the provider connection is active.
+        is_default:
+          type: boolean
+          description: Whether the provider connection is the default one.
+        details:
+          type: object
+          unevaluatedProperties: {}
+          description: Provider-specific connection details.
+          examples:
+          - account_id: xyz123
+        provider:
+          type: string
+          description: Payment provider kind.
+          examples:
+          - stripe
+        title:
+          type: string
+          description: Provider connection title.
+          examples:
+          - Test
+      description: A payment provider connection.
+    Authentication.EmbeddedUserAttributes:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: User identifier. Mirrors the resource id.
+        name:
+          type: string
+          description: Display name of the user.
+          examples:
+          - Channex User
+        email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: Email address the account is registered with.
+          examples:
+          - user@channex.io
+      description: Identifier, display name and email address of an embedded user.
+    PaymentApp.DownloadCsvRequest:
+      type: object
+      required:
+      - token
+      properties:
+        token:
+          type: string
+          description: Token of the export to download.
+          examples:
+          - WDso87A_U8D18wyEoubzBfi7oNoc7bdF2iaSb6CCJbk=
+      description: Request body accepted when downloading a transactions export.
+    Common.Scalars.email:
+      type: string
+      format: email
+    PaymentApp.PaymentProviderResource:
+      type: object
+      required:
+      - id
+      - type
+      - attributes
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - payment_provider
+        attributes:
+          $ref: '#/components/schemas/PaymentApp.PaymentProvider'
+      description: Payment provider resource.
+    BookingPayments.PaymentTransactionType:
+      type: string
+      enum:
+      - charge
+      - pre_auth
+      - refund
+      - void
+      description: Kind of a payment transaction.
+    PaymentApp.TransactionPaymentRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - payment
+          required:
+          - id
+          - type
+      description: The payment a transaction belongs to, as a linkage (id and type only).
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    PaymentApp.ExportTokenDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Token of the export. Pass it to the download endpoint to fetch the file.
+              examples:
+              - WDso87A_U8D18wyEoubzBfi7oNoc7bdF2iaSb6CCJbk=
+          required:
+          - token
+      description: Response document carrying a CSV export token.
+    PaymentApp.SetDefaultProviderRequest:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider connection to make the default.
+      description: Request body accepted when making a payment provider connection the default one.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    PaymentApp.UpdateProviderRequest:
+      type: object
+      required:
+      - id
+      - params
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider connection to update.
+        params:
+          $ref: '#/components/schemas/PaymentApp.PaymentProviderUpdateParams'
+      description: Request body accepted when updating a payment provider connection.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    PaymentApp.SuccessFlagDocument:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+      description: Response document carrying only a success flag.
+    PaymentApp.PaymentAppTransactionRelationships:
+      type: object
+      required:
+      - booking
+      - payment
+      - payment_provider
+      properties:
+        user:
+          allOf:
+          - $ref: '#/components/schemas/Authentication.EmbeddedUser'
+          description: The user who initiated the transaction. Absent for transactions without a user.
+        booking:
+          allOf:
+          - $ref: '#/components/schemas/PaymentApp.TransactionBookingRelationship'
+          description: The booking the transaction belongs to.
+        payment:
+          allOf:
+          - $ref: '#/components/schemas/PaymentApp.TransactionPaymentRelationship'
+          description: The payment the transaction belongs to.
+        payment_provider:
+          allOf:
+          - $ref: '#/components/schemas/PaymentApp.TransactionPaymentProviderRelationship'
+          description: The payment provider that processed the transaction.
+      description: Relationships of a transaction resource.
+    PaymentApp.PaymentAppTransaction:
+      type: object
+      required:
+      - id
+      - booking_id
+      - user_id
+      - amount
+      - currency
+      - type
+      - ip_address
+      - payment_provider_id
+      - inserted_at
+      - updated_at
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Transaction identifier.
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking the transaction belongs to.
+        user_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the user who initiated the transaction. `null` for transactions without a user.
+        amount:
+          type: string
+          description: Transaction amount as a decimal string.
+          examples:
+          - '100.11'
+        currency:
+          type: string
+          description: Currency of the transaction.
+          examples:
+          - USD
+        type:
+          $ref: '#/components/schemas/BookingPayments.PaymentTransactionType'
+        ip_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: IP address the transaction was initiated from. `null` when not recorded.
+          examples:
+          - 185.229.190.76
+        payment_provider_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider that processed the transaction.
+        details:
+          type: object
+          unevaluatedProperties: {}
+          description: Provider-specific transaction details.
+          examples:
+          - id: pi123
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      description: A payment transaction reported by the Payment Application.
+    PaymentApp.TransactionListDocument:
+      type: object
+      required:
+      - meta
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        meta:
+          $ref: '#/components/schemas/BookingPayments.PaymentMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentApp.PaymentAppTransactionResource'
+      description: Response document for the transactions report.
+    PaymentApp.TransactionBookingRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - booking
+            attributes:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                reference:
+                  type: string
+                  description: Booking reference.
+              required:
+              - id
+              - reference
+          required:
+          - id
+          - type
+          - attributes
+      description: The booking a transaction belongs to, embedded as a relationship.
+    PaymentApp.ConnectLinkDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: object
+          properties:
+            link:
+              type: string
+              format: uri
+              description: Link to the provider's connection flow. Open it in a browser to complete the connection.
+          required:
+          - link
+      description: Response document carrying the provider connection link.
+    PaymentApp.PaymentProvidersDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentApp.PaymentProviderResource'
+      description: Response document for payment provider lists.
+    PaymentApp.ConnectRequest:
+      type: object
+      required:
+      - provider
+      properties:
+        provider:
+          type: string
+          description: Payment provider kind.
+          examples:
+          - stripe
+        title:
+          type: string
+          description: Provider connection title.
+          examples:
+          - Test
+        redirect_url:
+          type: string
+          description: URL to redirect the user to after the connection flow completes.
+          examples:
+          - https://example.com
+      description: Request body accepted when connecting a payment provider.
+  parameters:
+    PaymentApp.PaymentTransactionListParams.booking_id:
+      name: booking_id
+      in: query
+      required: false
+      description: Return only transactions of the given booking.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    PaymentApp.PaymentProviderListParams.filterProvider:
+      name: filter[provider]
+      in: query
+      required: false
+      description: Return only connections of the given provider kind.
+      schema:
+        type: string
+      explode: false
+    PaymentApp.PaymentProviderListParams.filterIsDefault:
+      name: filter[is_default]
+      in: query
+      required: false
+      description: Return only the default (or only non-default) provider connections.
+      schema:
+        type: boolean
+      explode: false
+    PaymentApp.PaymentTransactionListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order transactions by insert time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    PaymentApp.PaymentProviderListParams.filterIsActive:
+      name: filter[is_active]
+      in: query
+      required: false
+      description: Return only active (or only inactive) provider connections.
+      schema:
+        type: boolean
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

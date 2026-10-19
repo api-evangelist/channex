@@ -1,0 +1,1062 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Booking Payments API
+  version: 0.0.0
+  description: 'Payments of a booking: list them and process charges, pre-authorizations, settlements, voids, and refunds. Requires the Payments application installed on the Property; without it every operation here answers `403 Forbidden`.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Booking Payments
+  description: 'Payments of a booking: list them and process charges, pre-authorizations, settlements, voids, and refunds. Requires the Payments application installed on the Property; without it every operation here answers `403 Forbidden`.'
+paths:
+  /bookings/{booking_id}/charge_payment:
+    post:
+      operationId: BookingPayments_charge
+      summary: Charge a payment
+      description: Charge an amount on the booking's payment method.
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayments.PaymentAmountRequest'
+  /bookings/{booking_id}/payments:
+    get:
+      operationId: BookingPayments_list
+      summary: List the payments of a booking
+      description: List the payments of a booking. Requires the Payments application installed on the Property; without it the request answers `403 Forbidden`.
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/BookingPayments.PaymentListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/BookingPayments.PaymentListParams.filterPaymentProviderId'
+      - $ref: '#/components/parameters/BookingPayments.PaymentListParams.filterStatus'
+      - $ref: '#/components/parameters/BookingPayments.PaymentListParams.filterInsertedAtLte'
+      - $ref: '#/components/parameters/BookingPayments.PaymentListParams.filterInsertedAtGte'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentListDocument'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Booking Payments
+  /bookings/{booking_id}/pre_auth_payment:
+    post:
+      operationId: BookingPayments_preAuth
+      summary: Pre-authorize a payment
+      description: 'Pre-authorize an amount on the booking''s payment method: place a hold to be settled via `POST /bookings/{booking_id}/settle_payment` or released via `POST /bookings/{booking_id}/void_payment`.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayments.PaymentAmountRequest'
+  /bookings/{booking_id}/refund_payment:
+    post:
+      operationId: BookingPayments_refund
+      summary: Refund a payment
+      description: Refund a charged payment, fully or partially.
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayments.RefundPaymentRequest'
+  /bookings/{booking_id}/settle_payment:
+    post:
+      operationId: BookingPayments_settle
+      summary: Settle a pre-authorized payment
+      description: 'Settle a pre-authorized payment: capture the held amount.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayments.PaymentIdRequest'
+  /bookings/{booking_id}/void_payment:
+    post:
+      operationId: BookingPayments_void
+      summary: Void a pre-authorized payment
+      description: 'Void a pre-authorized payment: release the held amount without charging.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingPayments.PaymentDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Booking Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingPayments.PaymentIdRequest'
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    BookingPayments.PaymentProviderRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - payment_provider
+            attributes:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                title:
+                  type: string
+                  description: Provider connection title.
+                is_active:
+                  type: boolean
+                  description: Whether the provider connection is active.
+                is_default:
+                  type: boolean
+                  description: Whether the provider connection is the default one.
+                provider:
+                  type: string
+                  description: Payment provider kind.
+                  examples:
+                  - stripe
+                details:
+                  type: object
+                  unevaluatedProperties: {}
+                  description: Provider-specific connection details.
+                  examples:
+                  - account_id: xyz123
+              required:
+              - id
+              - title
+              - is_active
+              - is_default
+              - provider
+          required:
+          - id
+          - type
+          - attributes
+      description: The payment provider of a payment, embedded as a relationship.
+    BookingPayments.PaymentBookingRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - booking
+            attributes:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                reference:
+                  type: string
+                  description: Booking reference.
+              required:
+              - id
+              - reference
+          required:
+          - id
+          - type
+          - attributes
+      description: The booking a payment belongs to, embedded as a relationship.
+    BookingPayments.PaymentListDocument:
+      type: object
+      required:
+      - meta
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        meta:
+          $ref: '#/components/schemas/BookingPayments.PaymentMeta'
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingPayments.PaymentResource'
+      description: Response document for the payment list of a booking.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    BookingPayments.PaymentDocument:
+      type: object
+      required:
+      - meta
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        meta:
+          $ref: '#/components/schemas/BookingPayments.PaymentMeta'
+        data:
+          $ref: '#/components/schemas/BookingPayments.PaymentResource'
+      description: Response document for a payment returned by a payment action.
+    Authentication.EmbeddedUser:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Authentication.EmbeddedUserAttributes'
+      description: A user embedded in another resource's relationships, carrying identifier, name and email.
+    BookingPayments.PaymentTransaction:
+      type: object
+      required:
+      - id
+      - type
+      - currency
+      - amount
+      - ip_address
+      - booking_id
+      - user_id
+      - payment_provider_id
+      - inserted_at
+      - updated_at
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          $ref: '#/components/schemas/BookingPayments.PaymentTransactionType'
+        currency:
+          type: string
+          description: Currency of the transaction.
+          examples:
+          - USD
+        amount:
+          type: string
+          description: Transaction amount as a decimal string.
+          examples:
+          - '100.11'
+        ip_address:
+          type: string
+          description: IP address the transaction was initiated from.
+          examples:
+          - 185.229.190.76
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking the transaction belongs to.
+        user_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the user who initiated the transaction.
+        payment_provider_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider that processed the transaction.
+        details:
+          type: object
+          unevaluatedProperties: {}
+          description: Provider-specific transaction details.
+          examples:
+          - id: pi123
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      description: A single operation performed within a payment.
+    BookingPayments.PaymentMeta:
+      type: object
+      required:
+      - total
+      - limit
+      - page
+      - order_by
+      - order_direction
+      properties:
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        limit:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          examples:
+          - 10
+        page:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+      description: Pagination and ordering metadata of payment responses.
+    BookingPayments.PaymentStatus:
+      type: string
+      enum:
+      - charged
+      - refunded
+      - pre_authorized
+      - cancelled
+      - partially_refunded
+      description: Lifecycle status of a payment.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Authentication.EmbeddedUserAttributes:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: User identifier. Mirrors the resource id.
+        name:
+          type: string
+          description: Display name of the user.
+          examples:
+          - Channex User
+        email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: Email address the account is registered with.
+          examples:
+          - user@channex.io
+      description: Identifier, display name and email address of an embedded user.
+    BookingPayments.Payment:
+      type: object
+      required:
+      - id
+      - booking_id
+      - amount
+      - currency
+      - status
+      - inserted_at
+      - updated_at
+      - transactions
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Payment identifier. Mirrors the resource id.
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking the payment belongs to.
+        amount:
+          type: string
+          description: Payment amount as a decimal string.
+          examples:
+          - '100.11'
+        currency:
+          type: string
+          description: Currency of the payment.
+          examples:
+          - USD
+        status:
+          $ref: '#/components/schemas/BookingPayments.PaymentStatus'
+        description:
+          type: string
+          description: Free-form payment description.
+          examples:
+          - Test payment
+        inserted_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingPayments.PaymentTransaction'
+          description: Operations performed within the payment (charges, pre-auths, refunds, voids).
+      description: A payment of a booking.
+    BookingPayments.PaymentIdRequest:
+      type: object
+      required:
+      - payment_id
+      properties:
+        payment_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the pre-authorized payment to act on.
+        description:
+          type: string
+          description: Free-form payment description.
+      description: Request body for `POST /bookings/{booking_id}/settle_payment` and `POST /bookings/{booking_id}/void_payment`.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Scalars.email:
+      type: string
+      format: email
+    BookingPayments.PaymentAmountRequest:
+      type: object
+      required:
+      - amount
+      - payment_provider_id
+      properties:
+        amount:
+          anyOf:
+          - type: string
+          - type: integer
+          description: Amount to process, as a decimal string or an integer.
+          examples:
+          - '100.5'
+        payment_provider_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the payment provider to process the payment with.
+        description:
+          type: string
+          description: Free-form payment description.
+      description: Request body for `POST /bookings/{booking_id}/pre_auth_payment` and `POST /bookings/{booking_id}/charge_payment`.
+    BookingPayments.PaymentTransactionType:
+      type: string
+      enum:
+      - charge
+      - pre_auth
+      - refund
+      - void
+      description: Kind of a payment transaction.
+    BookingPayments.PaymentRelationships:
+      type: object
+      required:
+      - users
+      - booking
+      - payment_provider
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Authentication.EmbeddedUser'
+          description: Users involved in the payment's transactions.
+        booking:
+          allOf:
+          - $ref: '#/components/schemas/BookingPayments.PaymentBookingRelationship'
+          description: The booking the payment belongs to.
+        payment_provider:
+          allOf:
+          - $ref: '#/components/schemas/BookingPayments.PaymentProviderRelationship'
+          description: The payment provider of the payment.
+      description: Relationships of a payment resource.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    BookingPayments.PaymentResource:
+      type: object
+      required:
+      - id
+      - type
+      - attributes
+      - relationships
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - payment
+        attributes:
+          $ref: '#/components/schemas/BookingPayments.Payment'
+        relationships:
+          $ref: '#/components/schemas/BookingPayments.PaymentRelationships'
+      description: Payment resource.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    BookingPayments.RefundPaymentRequest:
+      type: object
+      required:
+      - payment_id
+      - amount
+      properties:
+        payment_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the charged payment to refund.
+        amount:
+          anyOf:
+          - type: string
+          - type: integer
+          description: Amount to refund, as a decimal string or an integer.
+          examples:
+          - '100.5'
+        description:
+          type: string
+          description: Free-form payment description.
+      description: Request body for `POST /bookings/{booking_id}/refund_payment`.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    BookingPayments.PaymentListParams.filterInsertedAtLte:
+      name: filter[inserted_at][lte]
+      in: query
+      required: false
+      description: Return only payments inserted at or before the given time.
+      schema:
+        type: string
+        format: date-time
+      explode: false
+    BookingPayments.PaymentListParams.filterStatus:
+      name: filter[status]
+      in: query
+      required: false
+      description: Return only payments with the given status.
+      schema:
+        $ref: '#/components/schemas/BookingPayments.PaymentStatus'
+      explode: false
+    BookingPayments.PaymentListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order payments by insert time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    BookingPayments.PaymentListParams.filterPaymentProviderId:
+      name: filter[payment_provider_id]
+      in: query
+      required: false
+      description: Return only payments processed by the given payment provider.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    BookingPayments.PaymentListParams.filterInsertedAtGte:
+      name: filter[inserted_at][gte]
+      in: query
+      required: false
+      description: Return only payments inserted at or after the given time.
+      schema:
+        type: string
+        format: date-time
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

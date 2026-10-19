@@ -1,0 +1,1104 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Live Feed API
+  version: 0.0.0
+  description: 'Feed of notable account events (new bookings, synchronization errors, guest requests): list and read them, and resolve actionable guest requests.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Live Feed
+  description: 'Feed of notable account events (new bookings, synchronization errors, guest requests): list and read them, and resolve actionable guest requests.'
+paths:
+  /live_feed:
+    get:
+      operationId: LiveFeed_list
+      summary: List live feed events
+      description: List live feed events, most recent first. Results are paginated.
+      parameters:
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.propertyId'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.channelId'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.channel'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.groupId'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.event'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.insertedAtFrom'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.insertedAtTo'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.payloadBookingId'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.payloadBookingUniqueId'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.payloadChannelId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/LiveFeed.LiveFeedListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LiveFeed.LiveFeedEventResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Live Feed
+  /live_feed/{id}:
+    get:
+      operationId: LiveFeed_read
+      summary: Retrieve a live feed event
+      description: Retrieve a live feed event by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LiveFeed.LiveFeedEventResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Live Feed
+  /live_feed/{id}/resolve:
+    post:
+      operationId: LiveFeed_resolve
+      summary: Resolve a live feed event
+      description: 'Resolve an actionable live feed event: answer the guest request it carries.
+
+        Applicable to `reservation_request`, `alteration_request`, and `inquiry`
+
+        events; other event kinds are rejected with `422 not_supported`.
+
+        Resolving an already-resolved event returns it unchanged. Returns the event
+
+        with its `payload` updated with the resolution outcome.
+
+
+        Accepting a reservation request emits `accepted_reservation` at once; the
+
+        booking itself arrives later as `booking_new`, once Airbnb confirms the
+
+        stay. Declining emits `declined_reservation`.
+
+
+        A pre-approval or special offer sent in answer to an inquiry gives the
+
+        guest 24 hours to accept it and cannot be withdrawn through the API. When
+
+        the guest accepts, the reservation arrives as a regular new booking (a
+
+        `booking_new` event); no event is emitted when an offer expires or is
+
+        declined.
+
+
+        Accepting an alteration request updates the existing booking with a new
+
+        revision (`booking_modification`) once Airbnb confirms the change.
+
+        Declining or cancelling one emits nothing — read the event again to confirm
+
+        the stored outcome.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LiveFeed.LiveFeedEventResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.NotSupported'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Live Feed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LiveFeed.LiveFeedResolutionRequest'
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    LiveFeed.LiveFeedSyncErrorPayload:
+      type: object
+      required:
+      - channel_id
+      - error_type
+      properties:
+        channel_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the channel connection the error occurred on.
+        error_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Error code, e.g. `price_too_low`, `validation_error`, or `general_error`.
+        log_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the channel event log entry with the error details.
+        channel_event_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the channel event log entry with the error details.
+        channel:
+          type: string
+          description: Short code of the channel, e.g. `BDC`.
+        channel_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Display title of the channel connection.
+        property_name:
+          type: string
+          description: Display title of the Property.
+      description: Payload of `sync_error` and `rate_error` events.
+    LiveFeed.LiveFeedEventResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - live_feed_event
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/LiveFeed.LiveFeedEvent'
+      description: A live feed event resource.
+    LiveFeed.LiveFeedEvent:
+      type: object
+      required:
+      - id
+      - event
+      - property_id
+      - channel_id
+      - payload
+      - inserted_at
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique event identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 9a52c05b-ea75-4fad-aaab-21741c3be253
+        event:
+          allOf:
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedEventType'
+          description: Kind of the event.
+        property_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the Property the event belongs to. `null` when the event is not tied to a Property.
+        channel_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the channel connection the event belongs to. `null` when the event
+
+            is not tied to a channel connection, and `null` on `booking_new`,
+
+            `booking_modification`, `booking_cancellation` and `booking_invalid_guarantee`
+
+            events — read the channel of those from `payload.channel_id`.'
+        payload:
+          anyOf:
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedBookingEventPayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedBookingIssuePayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedOrphanBookingPayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedInvalidGuaranteePayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedSyncErrorPayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedMessagePayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedReservationRequestPayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedAlterationRequestPayload'
+          - $ref: '#/components/schemas/LiveFeed.LiveFeedInquiryPayload'
+          - type: object
+            unevaluatedProperties: {}
+          description: 'Event details; the shape depends on the event kind. `review` events carry
+
+            the full guest review record (see the Reviews resource) and
+
+            `airbnb_notification` events carry the Airbnb notification content. Events
+
+            that can be resolved carry a `resolved` flag; once resolved, `resolution`
+
+            and `comment` record the outcome.'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the event was recorded (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.416184'
+      description: A live feed event.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    LiveFeed.LiveFeedInquiryPayload:
+      type: object
+      required:
+      - booking_details
+      - status
+      properties:
+        booking_details:
+          type: object
+          unevaluatedProperties: {}
+          description: 'Details of the inquired stay: `listing_id`, `checkin_date`, `nights`,
+
+            guest counts, `currency`, `room_type_id`, `property_id`, and `guest_name`.'
+        status:
+          type: string
+          description: 'Status of the inquiry. Once answered, names what was sent: `preapproval` or `special_offer`.'
+        message_thread_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the message thread the inquiry arrived in.
+        resolved:
+          type: boolean
+          description: Whether the inquiry has been resolved.
+        resolution:
+          type: object
+          unevaluatedProperties: {}
+          description: The resolution the inquiry was answered with, as submitted.
+        comment:
+          type: string
+          description: Who resolved the inquiry and when.
+      description: Payload of `inquiry` events.
+    LiveFeed.LiveFeedBookingEventPayload:
+      type: object
+      required:
+      - amount
+      - arrival_date
+      - booking_id
+      - booking_revision_id
+      - booking_unique_id
+      - channel_id
+      - count_of_nights
+      - count_of_rooms
+      - currency
+      - customer_name
+      - ota_code
+      properties:
+        amount:
+          type: string
+          description: Booking total as a decimal number, in `currency`. Carries no currency symbol and no thousands separator.
+          examples:
+          - '628.56'
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Arrival date of the booking.
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking.
+        booking_revision_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking revision the event was produced for.
+        booking_unique_id:
+          type: string
+          description: Human-readable unique identifier of the booking.
+        channel_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the channel connection the booking came through. `null` for bookings created via the Booking CRS API.
+        count_of_nights:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Number of nights of the stay.
+        count_of_rooms:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of non-cancelled rooms in the booking.
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Currency of the booking total.
+        customer_name:
+          type: string
+          description: Guest name and surname.
+        ota_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Reservation code assigned by the OTA.
+      description: 'Payload of `booking_new`, `booking_modification`, and `booking_cancellation`
+
+        events.'
+    Common.Errors.ServiceUnavailable:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - service_unavailable
+            title:
+              type: string
+              enum:
+              - Service Temporary Unavailable
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: A backing service is temporarily unavailable; retry the request later.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    LiveFeed.LiveFeedEventType:
+      type: string
+      enum:
+      - booking_new
+      - booking_modification
+      - booking_cancellation
+      - sync_error
+      - reservation_request
+      - booking_unmapped_room
+      - booking_unmapped_rate
+      - booking_without_property_id
+      - new_booking_after_modification
+      - wubook_flooding_detected
+      - sync_warning
+      - undefined_channel
+      - message
+      - general_error
+      - alteration_request
+      - inquiry
+      - airbnb_notification
+      - review
+      - rate_error
+      - booking_invalid_guarantee
+      - channel_removal_warning
+      - property_removal_warning
+      description: Kind of a live feed event.
+    LiveFeed.LiveFeedResolution:
+      type: object
+      properties:
+        accept:
+          anyOf:
+          - type: boolean
+          - type: string
+            enum:
+            - accept
+            - decline
+            - cancel
+          description: 'The decision. For `reservation_request` events: required boolean — `true`
+
+            accepts the reservation, `false` declines it. For `alteration_request`
+
+            events: required, one of `accept` (apply the change), `decline` (refuse the
+
+            guest''s request), or `cancel` (withdraw an alteration you initiated). Not
+
+            used for `inquiry` events — answer those with `type`.'
+        reason:
+          type: string
+          description: 'Reason a reservation request is declined. Possible values:
+
+            `dates_not_available`, `not_a_good_fit`, `waiting_for_better_reservation`,
+
+            `not_comfortable`. Defaults to `not_comfortable`. Applies to
+
+            `reservation_request` events when `accept` is `false`.'
+        decline_message_to_guest:
+          type: string
+          description: Message sent to the guest when declining. Applies to `reservation_request` events when `accept` is `false`.
+        decline_message_to_airbnb:
+          type: string
+          description: Message sent to Airbnb when declining. Applies to `reservation_request` events when `accept` is `false`.
+        type:
+          type: string
+          enum:
+          - preapproval
+          - special_offer
+          description: 'How to answer an inquiry: pre-approve the guest to book (`preapproval`) or
+
+            send a special offer (`special_offer`) — the only two answers an inquiry
+
+            takes. Required for `inquiry` events.'
+        total_price:
+          type: integer
+          format: int32
+          description: 'Total price of the stay offered with a special offer, as a whole number in
+
+            the listing''s currency. Must include all reservation nights and standard
+
+            fees such as the cleaning fee; taxes and security deposits are not
+
+            included. The Airbnb service fee is deducted from this amount. Required
+
+            for `inquiry` events when `type` is `special_offer`.'
+        block_instant_booking:
+          type: boolean
+          description: 'Whether to block other guests from booking the same dates through Instant
+
+            Book while the pre-approval is pending. Defaults to `false`. Applies to
+
+            `inquiry` events answered with a pre-approval; ignored for special offers.'
+      description: 'Resolution of an actionable live feed event. Which fields apply depends on
+
+        the event kind; unrelated fields are ignored.'
+    LiveFeed.LiveFeedOrphanBookingPayload:
+      type: object
+      required:
+      - booking_id
+      properties:
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking.
+      description: Payload of `booking_without_property_id` events.
+    LiveFeed.LiveFeedBookingIssuePayload:
+      type: object
+      required:
+      - booking_id
+      - booking_revision_id
+      properties:
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking.
+        booking_revision_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the booking revision the issue was detected on.
+      description: 'Payload of `booking_unmapped_room`, `booking_unmapped_rate`, and
+
+        `undefined_channel` events.'
+    LiveFeed.LiveFeedReservationRequestPayload:
+      type: object
+      required:
+      - bms
+      - resolved
+      properties:
+        bms:
+          type: object
+          unevaluatedProperties: {}
+          description: The requested booking, in the booking revision attribute format. See the Booking Revisions resource.
+        resolved:
+          type: boolean
+          description: Whether the request has been resolved.
+        message_thread_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the message thread the request arrived in.
+        resolution:
+          type: string
+          description: 'Outcome of the resolution: `accepted` or `declined`.'
+        comment:
+          type: string
+          description: Who resolved the request and when.
+      description: Payload of `reservation_request` events.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    LiveFeed.LiveFeedInvalidGuaranteePayload:
+      type: object
+      required:
+      - unique_id
+      - channel_id
+      properties:
+        unique_id:
+          type: string
+          description: Human-readable unique identifier of the booking.
+        channel_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the channel connection the booking came through. `null` for bookings created via the Booking CRS API.
+      description: Payload of `booking_invalid_guarantee` events.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Errors.NotSupported:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - not_supported
+            title:
+              type: string
+              enum:
+              - Method not supported
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Messages API.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    LiveFeed.LiveFeedMessagePayload:
+      type: object
+      required:
+      - id
+      - booking_id
+      - ota_message_id
+      - message
+      - message_thread_id
+      - have_attachment
+      - meta
+      - sender
+      - inserted_at
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the message.
+        booking_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the booking the message thread belongs to. `null` for threads without a booking (e.g. Airbnb inquiries).
+        ota_message_id:
+          type: string
+          description: Identifier of the message at the OTA.
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Message text, truncated to 50 characters. `null` for attachment-only messages.
+        message_thread_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the message thread.
+        have_attachment:
+          type: boolean
+          description: Whether the message carries an attachment.
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Additional message details. `null` for plain messages.
+        sender:
+          type: string
+          description: 'Who sent the message. Possible values: `guest`, `property`, `system`, `agent`.'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the message was received (ISO 8601, no timezone offset).
+      description: Payload of `message` events.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    LiveFeed.LiveFeedAlterationRequestPayload:
+      type: object
+      required:
+      - id
+      - bms
+      - resolved
+      properties:
+        id:
+          type: string
+          description: Identifier of the alteration request at Airbnb.
+        bms:
+          type: object
+          unevaluatedProperties: {}
+          description: The altered booking, in the booking revision attribute format, with the `booking_id` of the affected booking. See the Booking Revisions resource.
+        resolved:
+          type: boolean
+          description: Whether the request has been resolved.
+        message_thread_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the message thread the request arrived in.
+        resolution:
+          type: string
+          description: 'The decision the request was resolved with: `accept`, `decline`, or
+
+            `cancel` when resolved through this API; `accepted` or `cancelled` when the
+
+            guest resolved it on Airbnb.'
+        status:
+          type: string
+          description: 'Resulting request status: `ACCEPTED`, `DECLINED`, or `CANCELED`.'
+        comment:
+          type: string
+          description: Who resolved the request and when.
+      description: Payload of `alteration_request` events.
+    LiveFeed.LiveFeedResolutionRequest:
+      type: object
+      required:
+      - resolution
+      properties:
+        resolution:
+          $ref: '#/components/schemas/LiveFeed.LiveFeedResolution'
+      description: Request payload for resolving a live feed event.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    LiveFeed.LiveFeedListParams.event:
+      name: filter[event]
+      in: query
+      required: false
+      description: Return only events of this kind.
+      schema:
+        $ref: '#/components/schemas/LiveFeed.LiveFeedEventType'
+      explode: false
+    LiveFeed.LiveFeedListParams.groupId:
+      name: filter[group_id]
+      in: query
+      required: false
+      description: Return only events of Properties in this Group.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    LiveFeed.LiveFeedListParams.payloadBookingId:
+      name: filter[payload][booking_id]
+      in: query
+      required: false
+      description: Return only events whose payload names this booking.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    LiveFeed.LiveFeedListParams.insertedAtTo:
+      name: filter[inserted_at][lte]
+      in: query
+      required: false
+      description: Return only events recorded at or before this moment (ISO 8601 without a timezone offset; a date alone is refused).
+      schema:
+        type: string
+      explode: false
+    LiveFeed.LiveFeedListParams.channel:
+      name: filter[channel]
+      in: query
+      required: false
+      description: 'Return only events of channel connections on these channels, by channel
+
+        code. Accepts several codes separated by commas, and matches regardless of
+
+        case. Events not tied to a channel connection are excluded, which includes
+
+        every booking event.'
+      schema:
+        type: string
+      explode: false
+    LiveFeed.LiveFeedListParams.payloadChannelId:
+      name: filter[payload][channel_id]
+      in: query
+      required: false
+      description: Return only events whose payload names this channel connection. Unlike `filter[channel]`, this reaches booking events.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    LiveFeed.LiveFeedListParams.channelId:
+      name: filter[channel_id]
+      in: query
+      required: false
+      description: Return only events belonging to this channel connection.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    LiveFeed.LiveFeedListParams.payloadBookingUniqueId:
+      name: filter[payload][booking_unique_id]
+      in: query
+      required: false
+      description: Return only events whose payload names this booking, by its human-readable identifier.
+      schema:
+        type: string
+      explode: false
+    LiveFeed.LiveFeedListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order events by insertion time. Applied by default, descending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    LiveFeed.LiveFeedListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only events belonging to this Property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    LiveFeed.LiveFeedListParams.insertedAtFrom:
+      name: filter[inserted_at][gte]
+      in: query
+      required: false
+      description: Return only events recorded at or after this moment (ISO 8601 without a timezone offset; a date alone is refused).
+      schema:
+        type: string
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

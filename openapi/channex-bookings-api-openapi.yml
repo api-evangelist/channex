@@ -1,271 +1,1573 @@
 openapi: 3.2.0
 info:
-  title: Channex Bookings API
-  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
-  termsOfService: https://channex.io/terms-of-service/
-  contact:
-    name: Channex Support
-    email: support@channex.io
-    url: https://docs.channex.io/
-  version: '1.0'
+  title: Channex.io — Public Bookings API
+  version: 0.0.0
+  description: Bookings received from the connected channels, together with the revisions they are built from. A booking is the current state of a reservation — the latest of its revisions; a revision is one parsed and normalised message from a booking source. Read bookings and their revisions, pull the feed of revisions not yet acknowledged, acknowledge what you received, and inspect the raw source message a revision was parsed from. To keep a PMS in step, pull the feed rather than polling the booking list; either source works for the initial pull.
 servers:
-- url: https://secure.channex.io/api/v1
-  description: Production
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
 - url: https://staging.channex.io/api/v1
-  description: Staging / sandbox
+  description: Staging server
+  variables: {}
 security:
-- userApiKey: []
+- UserApiKeyAuth: []
 tags:
 - name: Bookings
-  description: Retrieve and manage bookings and booking revisions.
+  description: Bookings received from the connected channels, together with the revisions they are built from. A booking is the current state of a reservation — the latest of its revisions; a revision is one parsed and normalised message from a booking source. Read bookings and their revisions, pull the feed of revisions not yet acknowledged, acknowledge what you received, and inspect the raw source message a revision was parsed from. To keep a PMS in step, pull the feed rather than polling the booking list; either source works for the initial pull.
 paths:
-  /bookings:
-    get:
-      operationId: listBookings
-      tags:
-      - Bookings
-      summary: List bookings
-      parameters:
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/Limit'
-      - name: filter[property_id]
-        in: query
-        schema:
-          type: string
-          format: uuid
-      responses:
-        '200':
-          description: A list of bookings.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BookingList'
-  /bookings/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    get:
-      operationId: getBooking
-      tags:
-      - Bookings
-      summary: Get a booking
-      description: Retrieve the latest revision of a booking.
-      responses:
-        '200':
-          description: The requested booking.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BookingResponse'
-  /bookings/{booking_id}/no_show:
-    parameters:
-    - name: booking_id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    post:
-      operationId: reportNoShow
-      tags:
-      - Bookings
-      summary: Report a no-show
-      responses:
-        '200':
-          description: No-show reported.
-  /bookings/{booking_id}/invalid_card:
-    parameters:
-    - name: booking_id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    post:
-      operationId: reportInvalidCard
-      tags:
-      - Bookings
-      summary: Report an invalid card
-      responses:
-        '200':
-          description: Invalid card reported.
-  /bookings/{booking_id}/cancel_due_invalid_card:
-    parameters:
-    - name: booking_id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    post:
-      operationId: cancelDueInvalidCard
-      tags:
-      - Bookings
-      summary: Cancel a booking due to an invalid card
-      responses:
-        '200':
-          description: Booking cancelled due to invalid card.
   /booking_revisions:
     get:
-      operationId: listBookingRevisions
-      tags:
-      - Bookings
+      operationId: BookingRevisions_list
       summary: List booking revisions
+      description: List booking revisions associated with the user's properties.
+      parameters:
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/BookingRevisions.BookingRevisionListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/BookingRevisions.BookingRevisionListParams.filterPropertyId'
       responses:
         '200':
-          description: A list of booking revisions.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - type
+                      - id
+                      - attributes
+                      - relationships
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - booking_revision
+                        id:
+                          $ref: '#/components/schemas/Common.Scalars.id'
+                        attributes:
+                          $ref: '#/components/schemas/BookingRevisions.BookingRevision'
+                        relationships:
+                          $ref: '#/components/schemas/BookingRevisions.BookingRevisionRelationships'
+                      description: A JSON:API resource object with typed attributes and relationships.
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Bookings
   /booking_revisions/feed:
     get:
-      operationId: getBookingRevisionsFeed
-      tags:
-      - Bookings
-      summary: Booking revisions feed
-      description: Returns unacknowledged booking revisions. Primary mechanism for keeping a PMS in sync with new and modified bookings.
+      operationId: BookingRevisions_feed
+      summary: Pull the feed of unacknowledged revisions
+      description: Feed of not yet acknowledged booking revisions — the primary way to pull bookings from Channex. Acknowledge every received revision via `ack`; an unacknowledged revision keeps being served for 30 minutes, after which a warning email is sent. Returns an empty list when everything is acknowledged.
+      parameters:
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/BookingRevisions.BookingRevisionFeedParams.orderInsertedAt'
+      - $ref: '#/components/parameters/BookingRevisions.BookingRevisionFeedParams.filterPropertyId'
       responses:
         '200':
-          description: Unacknowledged booking revisions.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - type
+                      - id
+                      - attributes
+                      - relationships
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - booking_revision
+                        id:
+                          $ref: '#/components/schemas/Common.Scalars.id'
+                        attributes:
+                          $ref: '#/components/schemas/BookingRevisions.BookingRevision'
+                        relationships:
+                          $ref: '#/components/schemas/BookingRevisions.BookingRevisionRelationships'
+                      description: A JSON:API resource object with typed attributes and relationships.
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Bookings
   /booking_revisions/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
     get:
-      operationId: getBookingRevision
-      tags:
-      - Bookings
-      summary: Get a booking revision
+      operationId: BookingRevisions_read
+      summary: Retrieve a booking revision
+      description: Retrieve a specific booking revision by ID.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
       responses:
         '200':
-          description: The requested booking revision.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
-  /booking_revisions/{id}/ack:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    post:
-      operationId: ackBookingRevision
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                    - type
+                    - id
+                    - attributes
+                    - relationships
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                        - booking_revision
+                      id:
+                        $ref: '#/components/schemas/Common.Scalars.id'
+                      attributes:
+                        $ref: '#/components/schemas/BookingRevisions.BookingRevision'
+                      relationships:
+                        $ref: '#/components/schemas/BookingRevisions.BookingRevisionRelationships'
+                    description: A JSON:API resource object with typed attributes and relationships.
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
       tags:
       - Bookings
+  /booking_revisions/{id}/ack:
+    post:
+      operationId: BookingRevisionAcknowledgements_ack
       summary: Acknowledge a booking revision
+      description: Confirm receiving a booking revision by creating an acknowledge record. The revision stops appearing in the feed.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
       responses:
         '200':
-          description: Revision acknowledged.
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Bookings
+  /bookings:
+    get:
+      operationId: Bookings_list
+      summary: List bookings
+      description: List bookings associated with the user's properties.
+      parameters:
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.orderInsertedAt'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.arrivalDateGte'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.arrivalDateLte'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.departureDateGte'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.departureDateLte'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.insertedAtGte'
+      - $ref: '#/components/parameters/Bookings.BookingListParams.insertedAtLte'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bookings.BookingResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Bookings
+  /bookings/{id}:
+    get:
+      operationId: Bookings_read
+      summary: Retrieve a booking
+      description: Retrieve a booking by ID. Returns the details of the booking's latest revision.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Bookings
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
-    Page:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        default: 1
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 10
   schemas:
-    BookingResponse:
+    Bookings.BookingResource:
       type: object
+      required:
+      - type
+      - id
+      - attributes
       properties:
-        data:
-          $ref: '#/components/schemas/Booking'
-    Envelope:
-      type: object
-      properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
-        errors:
-          type: object
-    Booking:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
         type:
           type: string
-          example: booking
-        attributes:
-          $ref: '#/components/schemas/BookingAttributes'
-    BookingList:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Booking'
-        meta:
-          type: object
-    BookingAttributes:
-      type: object
-      properties:
-        property_id:
-          type: string
-          format: uuid
-        ota_name:
-          type: string
-        ota_reservation_code:
-          type: string
-        status:
-          type: string
           enum:
-          - new
-          - modified
-          - cancelled
-        arrival_date:
+          - booking
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Bookings.Booking'
+      description: A booking resource.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Bookings.Booking:
+      type: object
+      required:
+      - id
+      - booking_id
+      - revision_id
+      - channel_id
+      - unique_id
+      - secondary_ota
+      - acknowledge_status
+      - has_unacked_revisions
+      - amount
+      - occupancy
+      - guarantee
+      - agent
+      - raw_message
+      - is_crs_revision
+      - inserted_at
+      - status
+      - property_id
+      - arrival_date
+      - departure_date
+      - ota_name
+      - currency
+      - ota_reservation_code
+      - arrival_hour
+      - services
+      - payment_collect
+      - payment_type
+      - ota_commission
+      - notes
+      - meta
+      - customer
+      - rooms
+      - deposits
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking identifier.
+          examples:
+          - 603e8e9e-cc67-4ca7-bd13-3c407c6c3bbd
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking identifier (same as `id`).
+        revision_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the latest revision of the booking.
+        channel_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the associated Channel, when known.
+        unique_id:
           type: string
-          format: date
-        departure_date:
-          type: string
-          format: date
-        currency:
-          type: string
+          description: Unique booking identifier combined from the OTA code and the OTA reservation code.
+          examples:
+          - BDC-1556013801
+        secondary_ota:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Secondary OTA the booking came through, when applicable (e.g. `MakeMyTrip`).
+        acknowledge_status:
+          $ref: '#/components/schemas/BookingRevisions.AcknowledgeStatus'
+        has_unacked_revisions:
+          type: boolean
+          description: Whether the booking has revisions that have not been acknowledged yet.
         amount:
           type: string
+          description: Total booking amount as a decimal string.
+          examples:
+          - '220.00'
         occupancy:
-          type: object
-          properties:
-            adults:
-              type: integer
-            children:
-              type: integer
-            infants:
-              type: integer
-        customer:
-          type: object
-        rooms:
-          type: array
-          items:
-            type: object
+          allOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingOccupancy'
+          description: Total booking occupancy.
+        guarantee:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingGuarantee'
+          - type: 'null'
+          description: Credit card provided as payment guarantee, when present.
+        agent:
+          description: Agent the booking was made through.
+        raw_message:
+          type: string
+          description: Raw message received from the booking source, as a string (JSON or OTA-specific payload).
+        is_crs_revision:
+          type: boolean
+          description: Whether the latest revision was produced by the CRS (e.g. via this API) rather than received from an OTA feed.
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the booking was received at Channex (ISO 8601, no timezone offset).
+          examples:
+          - '2019-04-23T10:03:29.335485'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingRevisionStatus'
+          description: Status of the booking, matching its latest revision.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the booking belongs to.
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Arrival date (`YYYY-MM-DD`).
+        departure_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Departure date (`YYYY-MM-DD`).
+        ota_name:
+          type: string
+          description: Name of the booking source.
+          examples:
+          - Booking.com
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Booking currency code.
+        ota_reservation_code:
+          type: string
+          description: Original reservation code at the platform where the guest created the booking.
+          examples:
+          - '113'
+        arrival_hour:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Arrival time in `HH:MM` (24h) format.
+          examples:
+          - '10:00'
         services:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at booking level.
+        payment_collect:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentCollect'
+          - type: 'null'
+        payment_type:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentType'
+          - type: 'null'
+        ota_commission:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Commission amount charged by the OTA, as a decimal string. Currently available for Booking.com and Airbnb channels.
+          examples:
+          - '10.00'
         notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Customer notes for the booking.
+        meta:
+          type: object
+          unevaluatedProperties: {}
+          description: Free-form custom meta-information to exchange with integrated partners.
+        customer:
+          $ref: '#/components/schemas/BookingRevisions.BookingCustomer'
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingRoom'
+          description: Booking rooms.
+        deposits:
+          type: array
+          items: {}
+          description: Deposits associated with the booking.
+      description: A booking — the current state of a reservation, reflecting its latest revision.
+    BookingRevisions.PaymentType:
+      type: string
+      enum:
+      - credit_card
+      - bank_transfer
+      description: 'How the payment is collected: a credit card associated with the booking, or a bank transfer from the OTA.'
+    BookingRevisions.BookingRoomTax:
+      type: object
+      required:
+      - name
+      - type
+      - total_price
+      - is_inclusive
+      properties:
+        name:
           type: string
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Tax type, as a display name.
+          examples:
+          - City Tax
+        total_price:
+          type: string
+          description: Total price of the tax as a decimal string.
+          examples:
+          - '2.92'
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price.
+        price_per_unit:
+          type: string
+          description: Price per unit as a decimal string.
+        price_mode:
+          type: string
+          description: How the tax is applied (e.g. `Per booking`).
+        nights:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of nights the tax applies to.
+        persons:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of persons the tax applies to.
+        version:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Tax record version.
+      description: A tax associated with a booking room.
+    BookingRevisions.BookingGuarantee:
+      type: object
+      required:
+      - card_number
+      - card_type
+      - cardholder_name
+      - cvv
+      - expiration_date
+      - is_virtual
+      properties:
+        card_number:
+          type: string
+          description: Masked credit card number.
+          examples:
+          - 411111******1111
+        card_type:
+          $ref: '#/components/schemas/BookingRevisions.CardType'
+        cardholder_name:
+          type: string
+        cvv:
+          type: string
+          description: Masked CVV / CVC. Always `***` for non-secure connections.
+        expiration_date:
+          type: string
+          description: Credit card expiration date in `MM/YYYY` format.
+          examples:
+          - 12/2021
+        is_virtual:
+          type: boolean
+          description: Whether the card is a virtual credit card.
+        token:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Card token.
+        meta:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingGuaranteeMeta'
+          - type: 'null'
+      description: 'Credit card provided as payment guarantee.
+
+
+        Full card details are returned only to certified PCI DSS partners, and only over
+
+        the secure endpoints: `secure-staging.channex.io` on staging and
+
+        `secure.channex.io` in production. To be granted access, write to
+
+        support@channex.io with the IP addresses to whitelist and your PCI DSS
+
+        certificate. Over any other endpoint the card number and CVV arrive masked.'
+    BookingRevisions.BookingRoom:
+      type: object
+      required:
+      - booking_room_id
+      - room_type_id
+      - rate_plan_id
+      - checkin_date
+      - checkout_date
+      - occupancy
+      - guests
+      - services
+      - taxes
+      - amount
+      - days
+      - ota_commission
+      - ota_unique_id
+      - is_cancelled
+      - meta
+      properties:
+        booking_room_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking room identifier.
+        room_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: Associated Room Type. `null` when the room is not mapped.
+        rate_plan_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: Associated Rate Plan. `null` when the room is not mapped.
+        checkin_date:
+          type: string
+          format: date
+          description: Check-in date (`YYYY-MM-DD`).
+        checkout_date:
+          type: string
+          format: date
+          description: Check-out date (`YYYY-MM-DD`).
+        occupancy:
+          $ref: '#/components/schemas/BookingRevisions.BookingOccupancy'
+        guests:
+          anyOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/BookingRevisions.BookingGuest'
+          - type: 'null'
+          description: Guests of the room, when the OTA exposes them; `null` otherwise.
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at room level.
+        taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingRoomTax'
+        collected_taxes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingCollectedTax'
+          description: Taxes already collected by the OTA, when the booking source reports any. Reported by Booking.com and Airbnb.
+        amount:
+          type: string
+          description: Total booking room amount as a decimal string.
+          examples:
+          - '400.00'
+        days:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: 'Price breakdown per stay date: `YYYY-MM-DD` → decimal string amount.'
+        ota_commission:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: OTA commission for the room as a decimal string, when available.
+        ota_unique_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Unique room ID at the OTA side. Available for a limited set of OTAs (currently Booking.com).
+        is_cancelled:
+          type: boolean
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Free-form meta information (mapping, rate codes, cancel penalties, day breakdowns, policies, …). Can contain `parent_rate_plan_id` when the room is associated with a derived rate plan or occupancy option.
+      description: A room of a booking.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Common.Scalars.country:
+      type: string
+      minLength: 2
+      maxLength: 2
+      description: ISO 3166-1 alpha-2 country code.
+      examples:
+      - GB
+    BookingRevisions.BookingService:
+      type: object
+      required:
+      - name
+      - type
+      - price_mode
+      - price_per_unit
+      - total_price
+      - nights
+      - persons
+      - is_inclusive
+      properties:
+        name:
+          type: string
+          description: Service name in English.
+          examples:
+          - Cancellation Fee
+        type:
+          type: string
+          description: Kind of service, e.g. `Breakfast`, `Internet`, `Parking`. Free-form OTA-provided value.
+          examples:
+          - Breakfast
+        price_mode:
+          type: string
+          description: How the price is applied. Free-form OTA-provided value with inconsistent casing (e.g. `Per stay`, `per_booking`).
+          examples:
+          - Per stay
+        price_per_unit:
+          type: string
+          description: Price per unit as a decimal string.
+          examples:
+          - '1500.00'
+        total_price:
+          type: string
+          description: Total calculated price as a decimal string.
+          examples:
+          - '1500.00'
+        nights:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of nights the service is booked for.
+        persons:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of persons the service is booked for.
+        is_inclusive:
+          type: boolean
+          description: Whether the service price is included in the booking price.
+        service_rph:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Service RPH reference.
+      description: A service (extra charge) attached to a booking or a booking room.
+    BookingRevisions.BookingRevisionStatus:
+      type: string
+      enum:
+      - new
+      - modified
+      - cancelled
+      description: Status of a booking revision.
+    BookingRevisions.BookingCollectedTax:
+      type: object
+      required:
+      - name
+      - type
+      - total_price
+      - is_inclusive
+      properties:
+        name:
+          type: string
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Tax type, as a display name.
+          examples:
+          - City Tax
+        total_price:
+          type: string
+          description: Total price of the tax as a decimal string.
+          examples:
+          - '2.92'
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price.
+        price_per_unit:
+          type: string
+          description: Price per unit as a decimal string.
+        price_mode:
+          type: string
+          description: How the tax is applied (e.g. `Per booking`).
+        nights:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of nights the tax applies to.
+        persons:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of persons the tax applies to.
+        version:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: Tax record version.
+        is_withheld:
+          type: boolean
+          description: Always `true` on a collected tax.
+      description: A tax already collected by the OTA — also known as a withheld tax.
+    Common.Scalars.email:
+      type: string
+      format: email
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    BookingRevisions.CardType:
+      type: string
+      enum:
+      - unknown
+      - AX
+      - BC
+      - BL
+      - CU
+      - DN
+      - DS
+      - EL
+      - JC
+      - MA
+      - MC
+      - MI
+      - VI
+      description: 'Card type code of a payment guarantee:
+
+
+        | Code | Card |
+
+        | --- | --- |
+
+        | `unknown` | Card code is not known |
+
+        | `AX` | American Express |
+
+        | `BC` | Bank Card |
+
+        | `BL` | Carte Bancaire |
+
+        | `CU` | Unionpay Credit Card |
+
+        | `DN` | Diners Club |
+
+        | `DS` | Discover Card |
+
+        | `EL` | Elo |
+
+        | `JC` | Japanese Credit Bureau Credit Card |
+
+        | `MA` | Maestro |
+
+        | `MC` | Master Card |
+
+        | `MI` | NSPK MIR |
+
+        | `VI` | Visa |'
+    BookingRevisions.AcknowledgeStatus:
+      type: string
+      enum:
+      - pending
+      - acknowledged
+      description: Whether the revision has been acknowledged by the consumer.
+    BookingRevisions.BookingGuest:
+      type: object
+      required:
+      - name
+      - surname
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+      description: A guest of a booking room. Name and surname are provided when the OTA exposes them.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    BookingRevisions.BookingRevisionRelationships:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            property:
+              type: object
+              properties:
+                id:
+                  anyOf:
+                  - $ref: '#/components/schemas/Common.Scalars.id'
+                  - type: 'null'
+                type:
+                  type: string
+                  enum:
+                  - property
+              required:
+              - id
+              - type
+              description: Property the booking belongs to. `id` is `null` for unmapped bookings.
+            booking:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - booking
+              required:
+              - id
+              - type
+              description: Booking the revision belongs to.
+          required:
+          - property
+          - booking
+      description: Relationships of a booking revision resource (non-standard layout).
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    BookingRevisions.BookingGuaranteeMeta:
+      type: object
+      properties:
+        virtual_card_currency_code:
+          type: string
+          description: Currency of the virtual credit card.
+        virtual_card_current_balance:
+          type: string
+          description: Initial balance on the virtual credit card, as a string.
+        virtual_card_decimal_places:
+          type: string
+          description: Count of decimal places of the balance value.
+        virtual_card_effective_date:
+          type: string
+          description: Date the virtual credit card becomes active for charges.
+        virtual_card_expiration_date:
+          type: string
+          description: Virtual credit card expiration date.
+      description: Additional virtual-card details of a guarantee. Available only for Booking.com and some Expedia bookings.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    BookingRevisions.BookingRevision:
+      type: object
+      required:
+      - id
+      - booking_id
+      - property_id
+      - channel_id
+      - unique_id
+      - system_id
+      - ota_reservation_code
+      - ota_name
+      - secondary_ota
+      - status
+      - acknowledge_status
+      - rooms
+      - services
+      - guarantee
+      - customer
+      - occupancy
+      - arrival_date
+      - departure_date
+      - arrival_hour
+      - amount
+      - currency
+      - notes
+      - deposits
+      - agent
+      - payment_collect
+      - payment_type
+      - ota_commission
+      - inserted_at
+      - meta
+      - raw_message
+      - is_crs_revision
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique booking revision identifier.
+          examples:
+          - c64a3a6e-e38f-436e-a72e-8bd7e619b6fc
+        booking_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the associated Booking.
+        property_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the associated Property. `null` for unmapped bookings.
+        channel_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the associated Channel, when known.
+        unique_id:
+          type: string
+          description: Unique booking identifier combined from the OTA code and the OTA reservation code. Usually the same for all revisions of a booking.
+          examples:
+          - BDC-4072171540
+        system_id:
+          type: string
+          description: Unique message identifier at the booking source platform, unique per revision. Used for message deduplication.
+        ota_reservation_code:
+          type: string
+          description: Original reservation code at the platform where the guest created the booking. Unique per booking message.
+        ota_name:
+          type: string
+          description: Name of the OTA where the booking was originally created.
+          examples:
+          - BookingCom
+        secondary_ota:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Secondary OTA the booking came through, when applicable (e.g. `MakeMyTrip`).
+        status:
+          $ref: '#/components/schemas/BookingRevisions.BookingRevisionStatus'
+        acknowledge_status:
+          $ref: '#/components/schemas/BookingRevisions.AcknowledgeStatus'
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingRoom'
+          description: Booking rooms. Can be empty (e.g. cancellation revisions).
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingRevisions.BookingService'
+          description: Services at booking level.
+        guarantee:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingGuarantee'
+          - type: 'null'
+          description: Credit card provided as payment guarantee, when present.
+        customer:
+          $ref: '#/components/schemas/BookingRevisions.BookingCustomer'
+        occupancy:
+          allOf:
+          - $ref: '#/components/schemas/BookingRevisions.BookingOccupancy'
+          description: Total booking occupancy.
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Arrival date (`YYYY-MM-DD`). Can be `null` on cancellation revisions.
+        departure_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Departure date (`YYYY-MM-DD`). Can be `null` on cancellation revisions.
+        arrival_hour:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Arrival time in `HH:MM` (24h) format.
+          examples:
+          - 02:00
+        amount:
+          type: string
+          description: Total booking amount as a decimal string.
+          examples:
+          - '400.00'
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Booking currency code.
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Customer notes for the booking.
+        deposits:
+          type: array
+          items: {}
+          description: Deposits associated with the booking.
+        agent:
+          description: Agent the booking was made through.
+        payment_collect:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentCollect'
+          - type: 'null'
+        payment_type:
+          anyOf:
+          - $ref: '#/components/schemas/BookingRevisions.PaymentType'
+          - type: 'null'
+        ota_commission:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Commission amount charged by the OTA, as a decimal string. Currently available for Booking.com and Airbnb channels.
+          examples:
+          - '0.00'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the revision was received at Channex (ISO 8601, no timezone offset).
+          examples:
+          - '2026-07-21T12:12:36.919641'
+        meta:
+          type: object
+          unevaluatedProperties: {}
+          description: Free-form revision meta (e.g. `ruid`, `converter_version`, `source`).
+        raw_message:
+          type: string
+          description: Raw message received from the booking source, as a string (JSON or OTA-specific payload).
+        is_crs_revision:
+          type: boolean
+          description: Whether the revision was produced by the CRS (e.g. via the Bookings API) rather than received from an OTA feed.
+      description: A booking revision — an immutable snapshot of a booking received from a booking source (a new booking, a modification, or a cancellation).
+    BookingRevisions.PaymentCollect:
+      type: string
+      enum:
+      - property
+      - ota
+      description: 'Who collects the payment: the property or the OTA (guest already paid at the OTA). `null` usually means the property collects it.'
+    BookingRevisions.BookingOccupancy:
+      type: object
+      required:
+      - adults
+      - children
+      - infants
+      properties:
+        adults:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        children:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        infants:
+          $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+        ages:
+          anyOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          description: Ages of the children, when `children` is not 0. Can be `null` in room occupancies.
+      description: Occupancy breakdown by guest kind.
+    BookingRevisions.BookingCustomer:
+      type: object
+      required:
+      - name
+      - surname
+      - mail
+      - phone
+      - language
+      - country
+      - city
+      - address
+      - zip
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        mail:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          - type: 'null'
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+        language:
+          anyOf:
+          - type: string
+          - type: 'null'
+        country:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.country'
+          - type: 'null'
+        city:
+          anyOf:
+          - type: string
+          - type: 'null'
+        address:
+          anyOf:
+          - type: string
+          - type: 'null'
+        zip:
+          anyOf:
+          - type: string
+          - type: 'null'
+        state:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Not present in every response variant.
+        company:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Not present in every response variant.
+        meta:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Free-form OTA-specific details (e.g. Booking.com `is_genius`).
+      description: Information about the customer who made the booking.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    Bookings.BookingListParams.departureDateLte:
+      name: filter[departure_date][lte]
+      in: query
+      required: false
+      description: Return only bookings with a departure date at or before this date.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Bookings.BookingListParams.departureDateGte:
+      name: filter[departure_date][gte]
+      in: query
+      required: false
+      description: Return only bookings with a departure date at or after this date.
+      schema:
+        type: string
+        format: date
+      explode: false
+    BookingRevisions.BookingRevisionFeedParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order revisions by receive time. Defaults to `asc`, oldest first.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Bookings.BookingListParams.arrivalDateGte:
+      name: filter[arrival_date][gte]
+      in: query
+      required: false
+      description: Return only bookings with an arrival date at or after this date.
+      schema:
+        type: string
+        format: date
+      explode: false
+    BookingRevisions.BookingRevisionFeedParams.filterPropertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only revisions belonging to this Property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    BookingRevisions.BookingRevisionListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order revisions by receive time. Defaults to `desc`.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    BookingRevisions.BookingRevisionListParams.filterPropertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only revisions belonging to this Property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Bookings.BookingListParams.arrivalDateLte:
+      name: filter[arrival_date][lte]
+      in: query
+      required: false
+      description: Return only bookings with an arrival date at or before this date.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Bookings.BookingListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order bookings by receive time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Bookings.BookingListParams.insertedAtGte:
+      name: filter[inserted_at][gte]
+      in: query
+      required: false
+      description: Return only bookings received at or after this time.
+      schema:
+        type: string
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    Bookings.BookingListParams.insertedAtLte:
+      name: filter[inserted_at][lte]
+      in: query
+      required: false
+      description: Return only bookings received at or before this time.
+      schema:
+        type: string
+      explode: false
   securitySchemes:
-    userApiKey:
+    UserApiKeyAuth:
       type: apiKey
       in: header
       name: user-api-key
-      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.
+      description: API key for programmatic access, sent in the `user-api-key` header.

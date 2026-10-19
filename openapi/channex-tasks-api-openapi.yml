@@ -1,0 +1,653 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Tasks API
+  version: 0.0.0
+  description: Read-only log of asynchronous tasks processed for a Property (channel syncs, scheduled updates), with timing and outcome.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Tasks
+  description: Read-only log of asynchronous tasks processed for a Property (channel syncs, scheduled updates), with timing and outcome.
+paths:
+  /tasks:
+    get:
+      operationId: Tasks_list
+      description: List processed tasks, oldest first. Scope to a single property with `?filter[property_id]=`.
+      parameters:
+      - $ref: '#/components/parameters/Tasks.TaskListParams.propertyId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Tasks.TaskListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tasks.TaskResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Tasks
+      summary: Tasks list
+      x-summary-source: derived
+  /tasks/{id}:
+    get:
+      operationId: Tasks_read
+      description: Retrieve a single task by id, including its input payload, per-step timings, and channel events.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tasks.TaskDetailResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Tasks
+      summary: Tasks read
+      x-summary-source: derived
+components:
+  parameters:
+    Tasks.TaskListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only tasks belonging to this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Tasks.TaskListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order tasks by the moment they were recorded. Applied by default, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  schemas:
+    Tasks.Task:
+      type: object
+      required:
+      - id
+      - success
+      - uid
+      - errors
+      - task
+      - user_email
+      - user_name
+      - waiting_time
+      - execution_time
+      - received_at
+      - inserted_at
+      - executed_at
+      - finished_at
+      - property_id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique task identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 9de7ccd0-5254-454f-a61f-2fd8092293fc
+        success:
+          type: boolean
+          description: Whether the task completed successfully.
+          examples:
+          - true
+        uid:
+          type: integer
+          format: int64
+          description: Numeric unique identifier for the task execution (microsecond-resolution timestamp).
+          examples:
+          - 1776283211072671
+        errors:
+          type: array
+          items: {}
+          description: Errors produced during execution. Empty when `success` is `true`.
+        task:
+          allOf:
+          - $ref: '#/components/schemas/Tasks.TaskType'
+          description: Type of operation the task carries out.
+          examples:
+          - Property.UpdateDate
+        user_email:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          - type: 'null'
+          description: Email of the user who triggered the task, or `null` for system-triggered tasks.
+        user_name:
+          type: string
+          description: Display name of the user who triggered the task. `System` for system-triggered tasks.
+          examples:
+          - System
+        waiting_time:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Time the task spent queued before execution started, in milliseconds.
+          examples:
+          - 16
+        execution_time:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Task execution duration, in milliseconds.
+          examples:
+          - 254
+        received_at:
+          type: string
+          format: date-time
+          description: When the task was received (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.056375'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the task was recorded (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.416184'
+        executed_at:
+          type: string
+          format: date-time
+          description: When execution started (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.072672'
+        finished_at:
+          type: string
+          format: date-time
+          description: When execution finished (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.327201'
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the property the task belongs to.
+          examples:
+          - 18535b75-26a0-4716-ae99-0578006639c5
+      description: A task as returned in list responses.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Tasks.TaskResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - task
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Tasks.Task'
+      description: A task resource (list shape).
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Tasks.TaskDetailResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - task
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Tasks.TaskDetail'
+      description: A task resource with full execution detail.
+    Tasks.TaskType:
+      type: string
+      enum:
+      - Property.ActivateChannel
+      - Property.AddChannel
+      - Property.AddChannelAvailabilityRules
+      - Property.AddRatePlan
+      - Property.AddRoomType
+      - Property.AddWebhook
+      - Property.ApplyAvailabilityChanges
+      - Property.BackstageSync
+      - Property.DeactivateChannel
+      - Property.DeactivateWebhook
+      - Property.RecalculateAllCrossCurrencyRate
+      - Property.ReceiveBooking
+      - Property.RemoveChannel
+      - Property.RemoveChannelAvailabilityRules
+      - Property.RemoveRatePlan
+      - Property.RemoveRoomType
+      - Property.RemoveWebhook
+      - Property.SetCancellationPolicy
+      - Property.SetCutOffTime
+      - Property.SetTaxSet
+      - Property.UpdateAvailability
+      - Property.UpdateChannelAvailabilityRules
+      - Property.UpdateDate
+      - Property.UpdateMinStayType
+      - Property.UpdateProperty
+      - Property.UpdateRatePlan
+      - Property.UpdateRestrictions
+      - Property.UpdateRoomType
+      - Property.UpdateTimezone
+      - Property.UpdateWebhook
+      description: Type of operation a task carries out.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Scalars.email:
+      type: string
+      format: email
+    Tasks.TaskDetail:
+      type: object
+      required:
+      - id
+      - success
+      - uid
+      - errors
+      - task
+      - user_email
+      - user_name
+      - waiting_time
+      - execution_time
+      - received_at
+      - inserted_at
+      - executed_at
+      - finished_at
+      - source
+      - payload
+      - ip_address
+      - channel_events
+      - timings
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique task identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 9de7ccd0-5254-454f-a61f-2fd8092293fc
+        success:
+          type: boolean
+          description: Whether the task completed successfully.
+          examples:
+          - true
+        uid:
+          type: integer
+          format: int64
+          description: Numeric unique identifier for the task execution (microsecond-resolution timestamp).
+          examples:
+          - 1776283211072671
+        errors:
+          type: array
+          items: {}
+          description: Errors produced during execution. Empty when `success` is `true`.
+        task:
+          allOf:
+          - $ref: '#/components/schemas/Tasks.TaskType'
+          description: Type of operation the task carries out.
+          examples:
+          - Property.UpdateDate
+        user_email:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          - type: 'null'
+          description: Email of the user who triggered the task, or `null` for system-triggered tasks.
+        user_name:
+          type: string
+          description: Display name of the user who triggered the task. `System` for system-triggered tasks.
+          examples:
+          - System
+        waiting_time:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Time the task spent queued before execution started, in milliseconds.
+          examples:
+          - 16
+        execution_time:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Task execution duration, in milliseconds.
+          examples:
+          - 254
+        received_at:
+          type: string
+          format: date-time
+          description: When the task was received (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.056375'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the task was recorded (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.416184'
+        executed_at:
+          type: string
+          format: date-time
+          description: When execution started (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.072672'
+        finished_at:
+          type: string
+          format: date-time
+          description: When execution finished (ISO 8601, no timezone offset).
+          examples:
+          - '2026-04-15T20:00:11.327201'
+        source:
+          type: string
+          description: Origin of the task (e.g. `unknown`, an API client, or an internal system).
+          examples:
+          - unknown
+        payload:
+          type: object
+          unevaluatedProperties: {}
+          description: Input payload the task was executed with. The shape depends on the task type.
+        ip_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: IP address the task request originated from, or `null` for system-triggered tasks.
+        channel_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tasks.TaskChannelEvent'
+          description: Per-channel update outcomes produced by the task.
+        timings:
+          type: array
+          items:
+            type: array
+            prefixItems:
+            - type: string
+            - type: integer
+              format: int32
+          description: Per-step execution timings as `[step_name, duration_ms]` pairs.
+      description: 'A single task with full execution detail. Extends the list shape with the input
+
+        payload, per-step timings, channel events, and request metadata; the top-level
+
+        `property_id` is not present (it appears inside `payload`).'
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Tasks.TaskChannelEvent:
+      type: object
+      required:
+      - id
+      - success
+      - channel_id
+      - channel_title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique channel event identifier.
+          examples:
+          - ce2bbd71-fc1a-4b03-b070-0a90b543ac85
+        success:
+          type: boolean
+          description: Whether the channel update succeeded.
+          examples:
+          - true
+        channel_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the channel the event targets.
+          examples:
+          - a2a767c0-187a-4476-9b23-8cceebe917d4
+        channel_title:
+          type: string
+          description: Display title of the channel.
+          examples:
+          - demo
+      description: Outcome of a single channel update produced by a task.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

@@ -1,0 +1,766 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Booking Messages API
+  version: 0.0.0
+  description: 'Chat with guests at the booking level: read and send the messages of a booking, and fetch them from the channel on demand. Requires the Messages & Reviews application installed on the Property.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Booking Messages
+  description: 'Chat with guests at the booking level: read and send the messages of a booking, and fetch them from the channel on demand. Requires the Messages & Reviews application installed on the Property.'
+paths:
+  /bookings/{booking_id}/messages:
+    get:
+      operationId: BookingMessages_list
+      summary: List the messages of a booking
+      description: 'List the messages of a booking. Results are paginated and ordered by receive time.
+
+
+        A booking whose conversation has not been seen before is fetched from the provider as the
+
+        request is handled, so a provider that has no messaging refuses the request.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/BookingMessages.BookingMessageListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MessageThreads.MessageResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+                - $ref: '#/components/schemas/Common.Errors.NotSupported'
+      tags:
+      - Booking Messages
+    post:
+      operationId: BookingMessages_send
+      summary: Send a message to a booking
+      description: 'Send a message to a booking. The message is passed to the provider as the request is
+
+        handled, so a provider that refuses it refuses the request. A booking with no channel —
+
+        one created through the Bookings endpoint, say — cannot carry messages. A provider rate
+
+        limit answers 429 with a `Retry-After` header. The provider did not take the message, so
+
+        send it again after that delay.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MessageThreads.MessageResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.UnprocessableEntity'
+                - $ref: '#/components/schemas/Common.Errors.NotSupported'
+        '429':
+          description: The client has sent too many requests and is being rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.TooManyRequests'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageThreads.MessageCreateRequest'
+  /bookings/{booking_id}/messages/pull:
+    post:
+      operationId: BookingMessages_pull
+      summary: Pull the messages of a booking
+      description: 'Fetch the booking''s conversation from the provider and store what is new. Answers the
+
+        thread''s messages — the ones already held as well as the ones just pulled — as a plain
+
+        list, without pagination. Takes no request body.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MessageThreads.MessageResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.UnprocessableEntity'
+                - $ref: '#/components/schemas/Common.Errors.NotSupported'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Messages
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    MessageThreads.Message:
+      type: object
+      required:
+      - message
+      - attachments
+      - sender
+      - inserted_at
+      - updated_at
+      properties:
+        message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Message text. A message carries either text or attachments, never both: `null` when `attachments` is non-empty.'
+          examples:
+          - Thanks for your message.
+        attachments:
+          type: array
+          items:
+            type: string
+          description: 'Links to the attachments of the message — absolute URLs pointing at the
+
+            Attachments download endpoint. Empty when the message carries text.'
+          examples:
+          - - https://staging.channex.io/api/v1/attachments/4e160f0b-016a-424a-a30d-a9f0a8b1cbaa/8f14e45f/photo.jpeg
+        sender:
+          allOf:
+          - $ref: '#/components/schemas/MessageThreads.MessageSender'
+          description: 'Message direction: who sent it.'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the message was received (ISO 8601, no timezone offset).
+          examples:
+          - '2021-07-28T04:25:15.000000'
+        updated_at:
+          type: string
+          format: date-time
+          description: When the message was updated (ISO 8601, no timezone offset).
+          examples:
+          - '2021-07-28T04:25:22.613482'
+        meta:
+          type: object
+          unevaluatedProperties: {}
+          description: 'Extra details carried by the message, varying by what produced it — an Airbnb inquiry
+
+            records `status`, `live_feed_event_id` and `booking_details` (dates, guest counts,
+
+            prices). Absent when the message has none.'
+      description: A chat message inside a Message Thread.
+    MessageThreads.MessageSender:
+      type: string
+      enum:
+      - guest
+      - property
+      - system
+      - agent
+      description: Who sent a message.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Common.Errors.UnprocessableEntityObject:
+      type: object
+      required:
+      - code
+      - title
+      properties:
+        code:
+          type: string
+          enum:
+          - unprocessable_entity
+        title:
+          type: string
+          enum:
+          - Unprocessable Entity
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps each rejected argument to the reason it was rejected.
+          examples:
+          - thread_id: Thread id is not available
+      description: Error object for a rejected request, adding the reason per argument.
+    Common.Errors.ServiceUnavailable:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - service_unavailable
+            title:
+              type: string
+              enum:
+              - Service Temporary Unavailable
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: A backing service is temporarily unavailable; retry the request later.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Errors.NotSupported:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - not_supported
+            title:
+              type: string
+              enum:
+              - Method not supported
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The operation is not supported for this resource — e.g. the booking's OTA does not support the Messages API.
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.Errors.UnprocessableEntity:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnprocessableEntityObject'
+      description: The request was understood but could not be carried out; `details`, where present, names the reason per argument.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    MessageThreads.MessageRelationships:
+      type: object
+      required:
+      - message_thread
+      properties:
+        message_thread:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - message_thread
+              required:
+              - id
+              - type
+          required:
+          - data
+          description: Thread the message belongs to.
+        user:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - user
+              required:
+              - id
+              - type
+          required:
+          - data
+          description: User who sent the message. Present only on messages sent by a property-side user.
+      description: Relationships of a message resource.
+    MessageThreads.MessageCreate:
+      type: object
+      properties:
+        message:
+          type: string
+          description: 'Message text to send. Takes precedence: when present, `attachment_id` is ignored.'
+          examples:
+          - Thanks for your message.
+        attachment_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Identifier of an attachment uploaded through the Attachments endpoint, to send as the message. Ignored when `message` is present.
+      description: 'Attributes accepted when sending a message. Provide either `message` or `attachment_id` —
+
+        a message carries text or an attachment, never both. When `message` is present,
+
+        `attachment_id` is ignored.'
+    Common.Errors.TooManyRequests:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - http_too_many_requests
+            title:
+              type: string
+              enum:
+              - Too Many Requests
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The client has sent too many requests and is being rate limited.
+    MessageThreads.MessageCreateRequest:
+      type: object
+      required:
+      - message
+      properties:
+        message:
+          $ref: '#/components/schemas/MessageThreads.MessageCreate'
+      description: Request body accepted when sending a message.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    MessageThreads.MessageResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - message
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/MessageThreads.Message'
+        relationships:
+          $ref: '#/components/schemas/MessageThreads.MessageRelationships'
+      description: A message resource, as returned by the thread and booking message listings and by sending a message.
+  parameters:
+    BookingMessages.BookingMessageListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order messages by receive time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

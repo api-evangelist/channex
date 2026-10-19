@@ -1,127 +1,684 @@
 openapi: 3.2.0
 info:
-  title: Channex Webhooks API
-  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
-  termsOfService: https://channex.io/terms-of-service/
-  contact:
-    name: Channex Support
-    email: support@channex.io
-    url: https://docs.channex.io/
-  version: '1.0'
+  title: Channex.io — Public Webhooks API
+  version: 0.0.0
+  description: 'Push notifications for what happens on an account. A webhook subscribes a callback URL
+
+    to a set of events; when one occurs, Channex sends it a `POST` request.
+
+
+    A webhook watches one property, or — created with `property_id: null` — every property
+
+    of a billing account. A new webhook is inactive until `is_active` is set.
+
+
+    ## What is delivered
+
+
+    Every delivery is a `POST` to `callback_url` with a JSON body of five keys:
+
+
+    - `event` — the event name, one of the values `/webhooks/events` lists.
+
+    - `property_id` — the property the event happened on.
+
+    - `user_id` — the user who caused it, or `null` for events the platform raises itself,
+
+    which is most of them. Useful for ignoring changes your own integration made.
+
+    - `timestamp` — when the event happened, ISO 8601 UTC with microseconds, e.g.
+
+    `2026-09-21T13:58:55.587742Z`.
+
+    - `payload` — the event''s own data. Present only when the webhook''s `send_data` is
+
+    true; when it is false the key is absent altogether and the other four are all the
+
+    delivery carries.
+
+
+    A signed webhook carries three `x-hmac-*` headers besides. See the Webhook Signing Keys
+
+    resource for what they hold and how to verify them — the `x-hmac-timestamp` header is
+
+    Unix seconds, not the body''s `timestamp`.
+
+
+    ## Retries
+
+
+    A delivery is successful when the callback URL answers `2xx`. A `5xx`, a connection
+
+    refused, a DNS failure, a timeout (30 seconds to connect, 30 to read) or a TLS error is
+
+    retried; a `4xx`, a redirect — which is never followed — and an expired TLS certificate
+
+    are final and are not.
+
+
+    There are eleven retries after the first attempt, spaced 1 minute, 2, 4, 8, 15, 30
+
+    minutes, then 1, 2, 4, 6 and 10 hours, so the last one lands about 24 hours after the
+
+    event. Those gaps are the earliest a retry is made, not the exact moment: a retry can
+
+    run up to a minute later.
+
+
+    Deliveries to one host are made one at a time, so a slow endpoint delays its own queue.
+
+    A webhook whose oldest unresolved failure is 72 hours old is deactivated — `is_active`
+
+    becomes false, the account is notified by email, and the pending deliveries for that
+
+    host are dropped. A `4xx` starts that clock as surely as a `5xx` does.
+
+
+    ## Order
+
+
+    Deliveries are not ordered: a delivery retried after a failure arrives after ones raised
+
+    later, so a payload can describe a state older than the one before it. Treat a delivery
+
+    as a signal that something changed rather than as the change itself, and read the
+
+    current state back through the API — `GET /booking_revisions/{id}` for a booking event,
+
+    the availability and restrictions endpoints for an `ari` one.'
 servers:
-- url: https://secure.channex.io/api/v1
-  description: Production
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
 - url: https://staging.channex.io/api/v1
-  description: Staging / sandbox
+  description: Staging server
+  variables: {}
 security:
-- userApiKey: []
+- UserApiKeyAuth: []
 tags:
 - name: Webhooks
-  description: Manage event notification callbacks.
+  description: 'Push notifications for what happens on an account. A webhook subscribes a callback URL
+
+    to a set of events; when one occurs, Channex sends it a `POST` request.
+
+
+    A webhook watches one property, or — created with `property_id: null` — every property
+
+    of a billing account. A new webhook is inactive until `is_active` is set.
+
+
+    ## What is delivered
+
+
+    Every delivery is a `POST` to `callback_url` with a JSON body of five keys:
+
+
+    - `event` — the event name, one of the values `/webhooks/events` lists.
+
+    - `property_id` — the property the event happened on.
+
+    - `user_id` — the user who caused it, or `null` for events the platform raises itself,
+
+    which is most of them. Useful for ignoring changes your own integration made.
+
+    - `timestamp` — when the event happened, ISO 8601 UTC with microseconds, e.g.
+
+    `2026-09-21T13:58:55.587742Z`.
+
+    - `payload` — the event''s own data. Present only when the webhook''s `send_data` is
+
+    true; when it is false the key is absent altogether and the other four are all the
+
+    delivery carries.
+
+
+    A signed webhook carries three `x-hmac-*` headers besides. See the Webhook Signing Keys
+
+    resource for what they hold and how to verify them — the `x-hmac-timestamp` header is
+
+    Unix seconds, not the body''s `timestamp`.
+
+
+    ## Retries
+
+
+    A delivery is successful when the callback URL answers `2xx`. A `5xx`, a connection
+
+    refused, a DNS failure, a timeout (30 seconds to connect, 30 to read) or a TLS error is
+
+    retried; a `4xx`, a redirect — which is never followed — and an expired TLS certificate
+
+    are final and are not.
+
+
+    There are eleven retries after the first attempt, spaced 1 minute, 2, 4, 8, 15, 30
+
+    minutes, then 1, 2, 4, 6 and 10 hours, so the last one lands about 24 hours after the
+
+    event. Those gaps are the earliest a retry is made, not the exact moment: a retry can
+
+    run up to a minute later.
+
+
+    Deliveries to one host are made one at a time, so a slow endpoint delays its own queue.
+
+    A webhook whose oldest unresolved failure is 72 hours old is deactivated — `is_active`
+
+    becomes false, the account is notified by email, and the pending deliveries for that
+
+    host are dropped. A `4xx` starts that clock as surely as a `5xx` does.
+
+
+    ## Order
+
+
+    Deliveries are not ordered: a delivery retried after a failure arrives after ones raised
+
+    later, so a payload can describe a state older than the one before it. Treat a delivery
+
+    as a signal that something changed rather than as the change itself, and read the
+
+    current state back through the API — `GET /booking_revisions/{id}` for a booking event,
+
+    the availability and restrictions endpoints for an `ari` one.'
 paths:
   /webhooks:
     get:
-      operationId: listWebhooks
-      tags:
-      - Webhooks
+      operationId: Webhooks_list
       summary: List webhooks
+      description: List webhooks. Results are paginated and ordered by creation time, newest first.
+      parameters:
+      - $ref: '#/components/parameters/Webhooks.WebhookListParams.propertyId'
+      - $ref: '#/components/parameters/Webhooks.WebhookListParams.isActive'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Webhooks.WebhookListParams.orderInsertedAt'
       responses:
         '200':
-          description: A list of webhooks.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookList'
-    post:
-      operationId: createWebhook
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhooks.WebhookResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
       tags:
       - Webhooks
+    post:
+      operationId: Webhooks_create
       summary: Create a webhook
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WebhookWriteRequest'
+      description: 'Create a webhook. `property_id` is required unless `is_global` is true, and one
+
+        account may hold only one webhook per `callback_url` and `event_mask` pair. A
+
+        webhook is inactive until `is_active` is set, and the created webhook is returned with
+
+        `201 Created`.'
+      parameters: []
       responses:
         '201':
-          description: The created webhook.
+          description: 201 Created response wrapping a resource body.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookResponse'
-  /webhooks/{id}:
-    parameters:
-    - $ref: '#/components/parameters/Id'
-    get:
-      operationId: getWebhook
-      tags:
-      - Webhooks
-      summary: Get a webhook
-      responses:
-        '200':
-          description: The requested webhook.
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Webhooks.WebhookResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookResponse'
-    put:
-      operationId: updateWebhook
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
       tags:
       - Webhooks
-      summary: Update a webhook
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WebhookWriteRequest'
+              $ref: '#/components/schemas/Webhooks.WebhookCreateRequest'
+  /webhooks/events:
+    get:
+      operationId: WebhookEventCatalog_events
+      summary: List webhook events
+      description: List every event type a webhook can subscribe to. Not paginated.
+      parameters: []
       responses:
         '200':
-          description: The updated webhook.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookResponse'
-    delete:
-      operationId: deleteWebhook
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Webhooks.WebhookEvents'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
       tags:
       - Webhooks
-      summary: Delete a webhook
-      responses:
-        '200':
-          description: Webhook deleted.
   /webhooks/test:
     post:
-      operationId: testWebhook
+      operationId: WebhookTest_test
+      summary: Test a callback URL
+      description: 'Send a test POST to the callback URL and return what the target answered — its status
+
+        code and body, whatever they are, plus the attempt as a `delivery` log entry. A
+
+        target that answers `405` or `404` is reported, not treated as an error. Neither the
+
+        webhook nor the delivery entry is stored.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhooks.WebhookTestResult'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
       tags:
       - Webhooks
-      summary: Test a webhook
-      description: Send a sample request to a callback URL to verify delivery.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                callback_url:
-                  type: string
-                  format: uri
+              $ref: '#/components/schemas/Webhooks.WebhookUpdateRequest'
+  /webhooks/{id}:
+    get:
+      operationId: Webhooks_read
+      summary: Retrieve a webhook
+      description: Retrieve a webhook by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
       responses:
         '200':
-          description: Test request sent.
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Webhooks.WebhookResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Webhooks
+    put:
+      operationId: Webhooks_update
+      summary: Update a webhook
+      description: 'Update a webhook by its identifier. Attributes absent from the request are left
+
+        unchanged. `is_global` cannot be changed after creation, and a protected webhook
+
+        cannot be updated: the request answers `422` naming the flag.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Webhooks.WebhookResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Webhooks.WebhookUpdateRequest'
+    delete:
+      operationId: Webhooks_delete
+      summary: Delete a webhook
+      description: 'Delete a webhook by its identifier. Its delivery log goes with it. A protected
+
+        webhook cannot be deleted: the request answers `422` naming the flag.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhooks
+  /webhooks/{id}/test:
+    post:
+      operationId: WebhookTest_testWebhook
+      summary: Test a webhook
+      description: 'Send a test POST through a stored webhook and return what the target answered.
+
+        The request body is optional: attributes carried in it override the stored
+
+        configuration for this test only and are validated like on the callback-URL test.
+
+        The attempt is stored in the webhook''s delivery log with `is_test: true`; test
+
+        entries are not counted in delivery statistics.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhooks.WebhookTestResult'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Webhooks
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Webhooks.WebhookUpdateRequest'
 components:
-  parameters:
-    Id:
-      name: id
-      in: path
-      required: true
-      schema:
-        type: string
-        format: uuid
   schemas:
-    WebhookAttributes:
+    Webhooks.WebhookHmac:
+      type: object
+      required:
+      - signatures
+      - signing_keys
+      - timestamp
+      properties:
+        signatures:
+          type: array
+          items:
+            type: string
+          description: Lowercase-hex HMAC-SHA256 signatures sent, the current key's first.
+        signing_keys:
+          type: array
+          items:
+            type: string
+          description: Masked labels (`...` + last 6 of the secret) of the signing key versions used, in the same order.
+          examples:
+          - - '...4f9c2a'
+        timestamp:
+          anyOf:
+          - type: integer
+            format: int64
+          - type: 'null'
+          description: Unix-seconds timestamp of the signing string, as sent in `x-hmac-timestamp`.
+          examples:
+          - 1758100512
+      description: 'HMAC facts of a signed request: what was sent in the `x-hmac-*` headers,
+
+        broken out per signing key version.'
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Webhooks.WebhookCreateRequest:
+      type: object
+      required:
+      - webhook
+      properties:
+        webhook:
+          $ref: '#/components/schemas/Webhooks.WebhookCreate'
+      description: Request body accepted when creating a webhook.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    SigningKeys.SigningKey:
+      type: object
+      required:
+      - id
+      - inserted_at
+      - updated_at
+      - rotated_at
+      - title
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique signing key identifier. Mirrors the top-level resource `id`.
+          examples:
+          - f2b45efc-9917-44f5-b6ac-3c26468bdb47
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the key was created (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        updated_at:
+          type: string
+          format: date-time
+          description: When the key was last updated (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+        rotated_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: date-time
+          description: When the key was last rotated (ISO 8601, no timezone offset). Null until the first rotation.
+          examples:
+          - '2026-09-17T09:05:12.331907'
+        title:
+          type: string
+          description: Human-readable name of the key.
+          examples:
+          - Production signing key
+      description: 'An HMAC signing key for webhook deliveries. The secrets live in the key''s
+
+        versions and are masked to `...` + last 6 everywhere except the create
+
+        and generate responses.'
+    Webhooks.WebhookCreate:
       type: object
       required:
       - callback_url
@@ -130,59 +687,1195 @@ components:
         callback_url:
           type: string
           format: uri
+          description: URL called via POST when a subscribed trigger event occurs. Must carry a scheme and a resolvable host.
+          examples:
+          - https://your-website.com/api/push_message
         event_mask:
-          type: string
-          description: Event filter. Use `*` for all events or a semicolon-separated list (e.g. `booking;ari;message`).
-        property_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
+          $ref: '#/components/schemas/Webhooks.EventMask'
+        request_params:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: Additional GET query parameters appended to the callback request, or null when none are set.
+        headers:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: 'Custom request headers for the callback request, or null when none are set. Use this
+
+            to authenticate against a protected endpoint, e.g.
+
+            `{ "Authorization": "Basic user:password" }`.'
         is_active:
           type: boolean
+          description: Whether the webhook is active. Only active webhooks receive notifications. `false` by default.
+          examples:
+          - true
         send_data:
           type: boolean
-        headers:
-          type: object
-        request_params:
-          type: object
+          description: 'Whether to include event payload data in the callback. When `false`, the delivery
+
+            carries `event`, `property_id`, `user_id` and `timestamp` and no `payload`. `false`
+
+            by default.'
+          examples:
+          - true
         is_global:
           type: boolean
-    Webhook:
+          description: 'Whether the webhook receives events from every property of the billing account rather
+
+            than from one. `false` by default, and fixed after creation: a property-level webhook
+
+            cannot be converted to a global one.
+
+
+            A global and a property-level webhook can cover the same event. When they point at
+
+            different callback URLs both are delivered; when they point at the same one the
+
+            delivery is made once, with the property-level webhook''s settings.'
+          examples:
+          - false
+        is_signed:
+          type: boolean
+          description: 'Whether deliveries are signed. When `true`, every callback request carries the
+
+            `x-hmac-timestamp`, `x-hmac-signature-256` and `x-hmac-keys-256` headers, computed
+
+            with the key referenced by `signing_key_id`. The Webhook Signing Keys resource
+
+            describes the signed string and how to verify a delivery. `false` by default.'
+          examples:
+          - false
+        signing_key_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the signing key deliveries are signed with, or null when none is assigned.
+
+            Required whenever `is_signed` is true; the key must belong to a billing account the
+
+            caller is a member of. Responses also expose the key, with its masked versions,
+
+            through the `signing_key` relationship.'
+        property_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the property to associate the webhook with. Required unless `is_global` is
+
+            true; a request that omits both answers `422`.'
+          examples:
+          - 716305c4-561a-4561-a187-7f5b8aeb5920
+      description: Attributes accepted when creating a webhook.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Webhooks.WebhookEvents:
       type: object
+      required:
+      - events
       properties:
-        id:
-          type: string
-          format: uuid
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Webhooks.WebhookEvent'
+      description: The webhook event types available for subscription.
+    SigningKeys.SigningKeyWebhookResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
         type:
           type: string
-          example: webhook
+          enum:
+          - webhook
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
         attributes:
-          $ref: '#/components/schemas/WebhookAttributes'
-    WebhookWriteRequest:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyWebhook'
+      description: A webhook that signs its deliveries with the key.
+    Webhooks.WebhookEvent:
+      type: string
+      enum:
+      - ari
+      - booking
+      - booking_new
+      - booking_modification
+      - booking_cancellation
+      - booking_unmapped_room
+      - booking_unmapped_rate
+      - non_acked_booking
+      - message
+      - sync_error
+      - sync_warning
+      - rate_error
+      - reservation_request
+      - alteration_request
+      - accepted_reservation
+      - declined_reservation
+      - inquiry
+      - review
+      - updated_review
+      - published_review
+      - new_channel
+      - updated_channel
+      - disconnect_channel
+      - disconnect_listing
+      - activate_channel
+      - deactivate_channel
+      - channel_removal_warning
+      - property_removal_warning
+      - message_thread_booking_assigned
+      - booking_invalid_guarantee
+      - airbnb_notification
+      description: Webhook event types that can trigger a push notification.
+    Webhooks.EmbeddedWebhookBillingAccount:
+      type: object
+      required:
+      - id
+      - type
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - billing_account
+      description: The billing account a webhook belongs to.
+    Webhooks.WebhookResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Webhooks.Webhook'
+        relationships:
+          $ref: '#/components/schemas/Webhooks.WebhookRelationships'
+      description: 'A webhook resource: the subscription attributes plus the property and account it belongs to.'
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Webhooks.EmbeddedWebhookProperty:
+      type: object
+      required:
+      - id
+      - type
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - property
+      description: The property a webhook belongs to.
+    Webhooks.WebhookLastAttempt:
+      type: object
+      required:
+      - error
+      - success
+      - status_code
+      - attempted_at
+      properties:
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Error reason when the attempt failed (e.g. `timeout`, `proxy_error`), or null on success.
+          examples:
+          - timeout
+        success:
+          type: boolean
+          description: Whether the delivery attempt succeeded.
+          examples:
+          - true
+        status_code:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: HTTP status code returned by the callback URL. Null when the request failed before a response was received (e.g. timeout or proxy error).
+          examples:
+          - 200
+        attempted_at:
+          type: string
+          format: date-time
+          description: When the attempt was made (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+      description: Details of the most recent webhook delivery attempt.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    SigningKeys.SigningKeyWebhook:
+      type: object
+      required:
+      - id
+      - callback_url
+      - event_mask
+      - is_global
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique webhook identifier. Mirrors the resource `id`.
+          examples:
+          - 59f4e1a9-b158-42c6-9130-6f0a08c1ec41
+        callback_url:
+          type: string
+          format: uri
+          description: URL the webhook delivers to.
+          examples:
+          - https://your-website.com/api/push_message
+        event_mask:
+          type: string
+          description: 'Events the webhook subscribes to: `*` for every event, or a semicolon-separated list of event names.'
+          examples:
+          - booking_new;booking_modification;booking_cancellation
+        is_global:
+          type: boolean
+          description: Whether the webhook covers every property of its billing account rather than one.
+          examples:
+          - false
+      description: A webhook using the signing key, reduced to its identifying attributes.
+    Webhooks.WebhookTestDelivery:
+      type: object
+      required:
+      - id
+      - webhook_id
+      - property_id
+      - event
+      - is_test
+      - success
+      - status_code
+      - error
+      - response_time
+      - attempt
+      - is_signed
+      - callback_url
+      - payload
+      - request_headers
+      - response_headers
+      - response
+      - user_id
+      - started_at
+      - finished_at
+      - inserted_at
+      properties:
+        id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: Identifier the entry gets once stored. Null in the test response.
+        webhook_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the tested webhook. Null for the callback-URL test, which is bound to no webhook.
+        property_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the property associated with the tested webhook. Null for the callback-URL test and for a global webhook.
+        event:
+          type: string
+          enum:
+          - test
+          description: Always `test`.
+        is_test:
+          type: boolean
+          enum:
+          - true
+          description: 'Always `true`: the entry was written by a test, not by a live delivery.'
+        success:
+          type: boolean
+          description: Whether the test delivery succeeded.
+          examples:
+          - true
+        status_code:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: HTTP status code returned by the callback URL. Null when no response was received.
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Failure reason (e.g. `timeout`), or null on success.
+        response_time:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Delivery round-trip time in milliseconds.
+          examples:
+          - 583
+        attempt:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: 'Always `0`: a test is never retried.'
+        is_signed:
+          type: boolean
+          description: Whether the test request was HMAC-signed.
+        hmac:
+          allOf:
+          - $ref: '#/components/schemas/Webhooks.WebhookHmac'
+          description: HMAC facts of the test request. Omitted when unsigned.
+        callback_url:
+          type: string
+          format: uri
+          description: Callback URL the test request was sent to.
+          examples:
+          - https://your-website.com/api/push_message
+        payload:
+          type: string
+          description: 'Serialized JSON payload of the test: always the standard test body — a `payload`
+
+            given in the request is ignored. The delivered body omits it when `send_data` is
+
+            false.'
+          examples:
+          - '{"hello":"world"}'
+        request_headers:
+          type: string
+          description: Serialized JSON request headers sent with the test request.
+          examples:
+          - '{"Content-type":"application/json"}'
+        response_headers:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Serialized JSON response headers returned by the callback URL. Null when no response was received.
+        response:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Response body returned by the callback URL, or the failure reason.
+        user_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the user who ran the test. Null when it was run by the system.
+        started_at:
+          type: string
+          format: date-time
+          description: When the test attempt started (ISO 8601, no timezone offset).
+          examples:
+          - '2026-09-23T14:09:24.058655'
+        finished_at:
+          type: string
+          format: date-time
+          description: When the test attempt finished (ISO 8601, no timezone offset).
+          examples:
+          - '2026-09-23T14:09:24.641801'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the entry was written (ISO 8601, no timezone offset).
+          examples:
+          - '2026-09-23T14:09:24.641801'
+      description: A webhook test attempt in the shape of a delivery log entry.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    SigningKeys.SigningKeyRelationships:
+      type: object
+      required:
+      - signing_key_versions
+      - webhooks
+      properties:
+        signing_key_versions:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SigningKeys.SigningKeyVersionResource'
+          required:
+          - data
+          description: The key's secret versions — the current one first, then oldest first. Secrets are masked to `...` plus their last 6 characters.
+        webhooks:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SigningKeys.SigningKeyWebhookResource'
+          required:
+          - data
+          description: The webhooks that sign their deliveries with the key, oldest first. Empty when no webhook uses it.
+      description: 'Relationships of a signing key: its secret versions and the webhooks using it.'
+    Webhooks.EventMask:
+      type: string
+      description: 'Event mask. Use `*` for every event, or a semicolon-separated list of event names,
+
+        e.g. `booking_new;booking_modification;booking_cancellation`. An unknown name
+
+        rejects the request, naming it.'
+      examples:
+      - booking_new;booking_modification;booking_cancellation
+    Webhooks.WebhookTestResult:
+      type: object
+      required:
+      - request_url
+      - status
+      - headers
+      - body
+      - is_signed
+      - delivery
+      properties:
+        request_url:
+          type: string
+          description: URL the test request was sent to.
+          examples:
+          - https://your-website.com/api/push_message
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code returned by the callback URL. `0` when no response was received (timeout or connection failure); `body` then carries the reason.
+          examples:
+          - 405
+        headers:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Response headers returned by the callback URL, lower-cased.
+          examples:
+          - content-type: application/json
+        body:
+          type: string
+          description: Response body returned by the callback URL, as text.
+          examples:
+          - "{\n  \"success\": true\n}"
+        is_signed:
+          type: boolean
+          description: Whether the test request was HMAC-signed.
+          examples:
+          - true
+        hmac:
+          allOf:
+          - $ref: '#/components/schemas/Webhooks.WebhookHmac'
+          description: 'HMAC facts of the test request: the signatures, key labels and timestamp sent. Omitted when unsigned.'
+        delivery:
+          allOf:
+          - $ref: '#/components/schemas/Webhooks.WebhookTestDelivery'
+          description: The test attempt described as a webhook delivery log entry.
+      description: 'Result of a webhook test: what the target callback URL answered.'
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    SigningKeys.SigningKeyVersionResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key_version
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyVersion'
+      description: A secret version of a signing key. Carries no relationships.
+    SigningKeys.SigningKeyResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - signing_key
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/SigningKeys.SigningKey'
+        relationships:
+          $ref: '#/components/schemas/SigningKeys.SigningKeyRelationships'
+      description: A signing key resource with its masked versions.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Webhooks.EmbeddedWebhookOrganization:
+      type: object
+      required:
+      - id
+      - type
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - organization
+      description: The organization a webhook belongs to.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Webhooks.WebhookUpdate:
+      type: object
+      properties:
+        callback_url:
+          type: string
+          format: uri
+          description: URL called via POST when a subscribed trigger event occurs. Must carry a scheme and a resolvable host.
+          examples:
+          - https://your-website.com/api/push_message
+        event_mask:
+          $ref: '#/components/schemas/Webhooks.EventMask'
+        request_params:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: Additional GET query parameters appended to the callback request, or null when none are set.
+        headers:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: 'Custom request headers for the callback request, or null when none are set. Use this
+
+            to authenticate against a protected endpoint, e.g.
+
+            `{ "Authorization": "Basic user:password" }`.'
+        is_active:
+          type: boolean
+          description: Whether the webhook is active. Only active webhooks receive notifications. `false` by default.
+          examples:
+          - true
+        send_data:
+          type: boolean
+          description: 'Whether to include event payload data in the callback. When `false`, the delivery
+
+            carries `event`, `property_id`, `user_id` and `timestamp` and no `payload`. `false`
+
+            by default.'
+          examples:
+          - true
+        is_global:
+          type: boolean
+          description: 'Whether the webhook receives events from every property of the billing account rather
+
+            than from one. `false` by default, and fixed after creation: a property-level webhook
+
+            cannot be converted to a global one.
+
+
+            A global and a property-level webhook can cover the same event. When they point at
+
+            different callback URLs both are delivered; when they point at the same one the
+
+            delivery is made once, with the property-level webhook''s settings.'
+          examples:
+          - false
+        is_signed:
+          type: boolean
+          description: 'Whether deliveries are signed. When `true`, every callback request carries the
+
+            `x-hmac-timestamp`, `x-hmac-signature-256` and `x-hmac-keys-256` headers, computed
+
+            with the key referenced by `signing_key_id`. The Webhook Signing Keys resource
+
+            describes the signed string and how to verify a delivery. `false` by default.'
+          examples:
+          - false
+        signing_key_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the signing key deliveries are signed with, or null when none is assigned.
+
+            Required whenever `is_signed` is true; the key must belong to a billing account the
+
+            caller is a member of. Responses also expose the key, with its masked versions,
+
+            through the `signing_key` relationship.'
+        property_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the property to associate the webhook with. Required unless `is_global` is
+
+            true; a request that omits both answers `422`.'
+          examples:
+          - 716305c4-561a-4561-a187-7f5b8aeb5920
+      description: Attributes accepted when updating a webhook. Every attribute is optional; attributes absent from the request are left unchanged.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Webhooks.Webhook:
+      type: object
+      required:
+      - id
+      - protected
+      - callback_url
+      - event_mask
+      - request_params
+      - headers
+      - is_active
+      - send_data
+      - is_global
+      - is_signed
+      - signing_key_id
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique webhook identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 058457e7-b76c-4654-9228-ec8395b0121b
+        activity:
+          allOf:
+          - $ref: '#/components/schemas/Webhooks.WebhookActivity'
+          description: Delivery activity statistics, test deliveries not counted. Returned by the list endpoint only, and only for some authentication types.
+        protected:
+          type: boolean
+          description: 'Whether the webhook is managed by Channex. Set on the webhooks created for you when you
+
+            install an integration app; a protected webhook cannot be updated or deleted through
+
+            this API. `false` for a webhook you create yourself.'
+          examples:
+          - false
+        callback_url:
+          type: string
+          format: uri
+          description: URL called via POST when a subscribed trigger event occurs. Must carry a scheme and a resolvable host.
+          examples:
+          - https://your-website.com/api/push_message
+        event_mask:
+          $ref: '#/components/schemas/Webhooks.EventMask'
+        request_params:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: Additional GET query parameters appended to the callback request, or null when none are set.
+        headers:
+          anyOf:
+          - type: object
+            unevaluatedProperties:
+              type: string
+          - type: 'null'
+          description: 'Custom request headers for the callback request, or null when none are set. Use this
+
+            to authenticate against a protected endpoint, e.g.
+
+            `{ "Authorization": "Basic user:password" }`.'
+        is_active:
+          type: boolean
+          description: Whether the webhook is active. Only active webhooks receive notifications. `false` by default.
+          examples:
+          - true
+        send_data:
+          type: boolean
+          description: 'Whether to include event payload data in the callback. When `false`, the delivery
+
+            carries `event`, `property_id`, `user_id` and `timestamp` and no `payload`. `false`
+
+            by default.'
+          examples:
+          - true
+        is_global:
+          type: boolean
+          description: 'Whether the webhook receives events from every property of the billing account rather
+
+            than from one. `false` by default, and fixed after creation: a property-level webhook
+
+            cannot be converted to a global one.
+
+
+            A global and a property-level webhook can cover the same event. When they point at
+
+            different callback URLs both are delivered; when they point at the same one the
+
+            delivery is made once, with the property-level webhook''s settings.'
+          examples:
+          - false
+        is_signed:
+          type: boolean
+          description: 'Whether deliveries are signed. When `true`, every callback request carries the
+
+            `x-hmac-timestamp`, `x-hmac-signature-256` and `x-hmac-keys-256` headers, computed
+
+            with the key referenced by `signing_key_id`. The Webhook Signing Keys resource
+
+            describes the signed string and how to verify a delivery. `false` by default.'
+          examples:
+          - false
+        signing_key_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: 'UUID of the signing key deliveries are signed with, or null when none is assigned.
+
+            Required whenever `is_signed` is true; the key must belong to a billing account the
+
+            caller is a member of. Responses also expose the key, with its masked versions,
+
+            through the `signing_key` relationship.'
+      description: 'A webhook subscription: a callback URL notified when subscribed events occur.'
+    Webhooks.WebhookUpdateRequest:
       type: object
       required:
       - webhook
       properties:
         webhook:
-          $ref: '#/components/schemas/WebhookAttributes'
-    WebhookList:
+          $ref: '#/components/schemas/Webhooks.WebhookUpdate'
+      description: Request body accepted when updating a webhook, and when testing a callback URL.
+    Webhooks.WebhookActivity:
       type: object
+      required:
+      - deliveries
+      - last_attempt
+      - series
       properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Webhook'
-        meta:
+        deliveries:
           type: object
-    WebhookResponse:
+          properties:
+            response_time:
+              type: object
+              properties:
+                p95_ms:
+                  anyOf:
+                  - type: number
+                    format: double
+                  - type: 'null'
+                  description: 95th percentile response time in milliseconds. Null when no deliveries have been recorded.
+                  examples:
+                  - 125.4
+              required:
+              - p95_ms
+            success_count:
+              allOf:
+              - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+              description: Number of successful deliveries.
+              examples:
+              - 0
+            failed_count:
+              allOf:
+              - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+              description: Number of failed deliveries.
+              examples:
+              - 0
+          required:
+          - response_time
+          - success_count
+          - failed_count
+          description: Aggregated delivery counters and response-time statistics.
+        last_attempt:
+          anyOf:
+          - $ref: '#/components/schemas/Webhooks.WebhookLastAttempt'
+          - type: 'null'
+          description: Details of the last delivery attempt. Null when no attempts have been made.
+        series:
+          type: object
+          properties:
+            timestamp:
+              type: array
+              items:
+                type: integer
+                format: int64
+              description: Unix epoch timestamps (seconds) for each data point in the series.
+            success:
+              type: array
+              items:
+                $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+              description: Successful delivery counts per timestamp.
+            failed:
+              type: array
+              items:
+                $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+              description: Failed delivery counts per timestamp.
+          required:
+          - timestamp
+          - success
+          - failed
+          description: Time series of delivery counts. The three arrays are parallel and indexed by `timestamp`.
+      description: Delivery activity statistics for a webhook.
+    Common.Errors.InvalidNestedArguments:
       type: object
+      required:
+      - errors
       properties:
-        data:
-          $ref: '#/components/schemas/Webhook'
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    SigningKeys.SigningKeyVersion:
+      type: object
+      required:
+      - id
+      - is_current
+      - secret
+      - inserted_at
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique version identifier. Mirrors the resource `id`.
+          examples:
+          - 058457e7-b76c-4654-9228-ec8395b0121b
+        is_current:
+          type: boolean
+          description: 'Whether this is the key''s current version. A key has one current version and at most
+
+            one pending version awaiting rotation.'
+          examples:
+          - true
+        secret:
+          type: string
+          description: 'The version''s secret masked to `...` plus its last 6 characters — the label
+
+            identifying the version in the `x-hmac-keys-256` delivery header and in API
+
+            responses. The full secret is never rendered here.'
+          examples:
+          - '...i_rH1w'
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the version was created (ISO 8601, no timezone offset).
+          examples:
+          - '2026-06-17T02:56:37.717460'
+      description: A secret version of a signing key.
+    Webhooks.WebhookRelationships:
+      type: object
+      required:
+      - billing_account
+      - organization
+      properties:
+        property:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Webhooks.EmbeddedWebhookProperty'
+          required:
+          - data
+          description: The property the webhook watches. Absent for a global webhook.
+        billing_account:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Webhooks.EmbeddedWebhookBillingAccount'
+          required:
+          - data
+          description: The billing account the webhook belongs to.
+        organization:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Webhooks.EmbeddedWebhookOrganization'
+          required:
+          - data
+          description: The organization the webhook belongs to.
+        signing_key:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SigningKeys.SigningKeyResource'
+          required:
+          - data
+          description: The signing key deliveries are signed with, with its versions masked. Absent when no key is assigned.
+      description: 'Relationships of a webhook: the property it watches, and the account it belongs to.'
+  parameters:
+    Webhooks.WebhookListParams.isActive:
+      name: filter[is_active]
+      in: query
+      required: false
+      description: Return only active webhooks, or only inactive ones.
+      schema:
+        type: boolean
+      explode: false
+    Webhooks.WebhookListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only webhooks watching this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Webhooks.WebhookListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order webhooks by creation time. Applied by default, descending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
   securitySchemes:
-    userApiKey:
+    UserApiKeyAuth:
       type: apiKey
       in: header
       name: user-api-key
-      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.
+      description: API key for programmatic access, sent in the `user-api-key` header.

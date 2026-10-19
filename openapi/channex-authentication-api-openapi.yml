@@ -1,0 +1,277 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Authentication API
+  version: 0.0.0
+  description: 'User accounts and sessions: sign-up and confirmation, sign-in with multi-factor verification, OAuth session exchange, token refresh, sign-out, and password recovery.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Authentication
+  description: 'User accounts and sessions: sign-up and confirmation, sign-in with multi-factor verification, OAuth session exchange, token refresh, sign-out, and password recovery.'
+paths:
+  /whoami:
+    get:
+      operationId: AuthenticationCurrentUser_whoami
+      description: Return the currently authenticated user.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Authentication.CurrentUserResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Authentication
+      summary: Authentication current user whoami
+      x-summary-source: derived
+components:
+  schemas:
+    Common.Scalars.email:
+      type: string
+      format: email
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Authentication.CurrentUserResource:
+      type: object
+      required:
+      - type
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+        attributes:
+          $ref: '#/components/schemas/Authentication.User'
+        relationships:
+          $ref: '#/components/schemas/Authentication.CurrentUserRelationships'
+      description: The current user. Carries type, attributes and relationships — no id.
+    Authentication.Organization:
+      type: object
+      required:
+      - id
+      - title
+      - role
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Organization identifier. Mirrors the resource id.
+        title:
+          type: string
+          description: Organization title.
+          examples:
+          - Andrew Company
+        role:
+          type: string
+          description: Role of the user within the organization.
+          examples:
+          - owner
+      description: An organization the user belongs to.
+    Authentication.SystemRole:
+      type: string
+      enum:
+      - user
+      - admin
+      - api
+      description: System-wide role of a user account.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Authentication.UserUiSetting:
+      type: object
+      required:
+      - id
+      - user_id
+      - show_notifications
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UI settings record identifier. Mirrors the resource id.
+        user_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the user the settings belong to.
+        show_notifications:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether in-app notifications are shown to the user. `null` when the preference has not been set.
+      description: UI preferences of a user account.
+    Authentication.UserSettings:
+      type: object
+      properties:
+        block_booking_export:
+          type: boolean
+          description: Whether booking exports are blocked for the user.
+        allow_airbnb_rate_plans:
+          type: boolean
+          description: Whether the user may manage Airbnb rate plans.
+      description: Per-user feature switches. Empty for accounts with no switches set.
+    Authentication.UserUiSettingRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              $ref: '#/components/schemas/Authentication.UserUiSetting'
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - user_ui_setting
+          required:
+          - attributes
+          - id
+          - type
+      description: A user's UI settings embedded as a relationship, attributes included.
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Authentication.CurrentUserRelationships:
+      type: object
+      required:
+      - user_ui_setting
+      properties:
+        user_ui_setting:
+          allOf:
+          - $ref: '#/components/schemas/Authentication.UserUiSettingRelationship'
+          description: UI preferences of the user.
+        organization:
+          allOf:
+          - $ref: '#/components/schemas/Authentication.OrganizationRelationship'
+          description: Organization the user belongs to. Absent for accounts without one.
+      description: Relationships of the current-user resource.
+    Authentication.PreferredLanguage:
+      type: string
+      enum:
+      - ar
+      - de
+      - el
+      - en
+      - es
+      - fr
+      - hu
+      - it
+      - nl
+      - pt
+      - pt_BR
+      - ru
+      - sv
+      - th
+      description: Interface language of a user account.
+    Authentication.User:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - settings
+      - preferred_language
+      - is_api_key_allowed
+      - signed_agreement_version
+      - system_role
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: User identifier. Mirrors the resource id.
+        name:
+          type: string
+          description: Display name of the user.
+          examples:
+          - Andrew
+        email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: Email address the account is registered with.
+        settings:
+          $ref: '#/components/schemas/Authentication.UserSettings'
+        preferred_language:
+          $ref: '#/components/schemas/Authentication.PreferredLanguage'
+        is_api_key_allowed:
+          type: boolean
+          description: Whether the user may create and use API keys.
+        signed_agreement_version:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Version of the user agreement the user has signed. `null` when no agreement has been signed yet.
+        system_role:
+          $ref: '#/components/schemas/Authentication.SystemRole'
+      description: A user account.
+    Authentication.OrganizationRelationship:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          properties:
+            attributes:
+              $ref: '#/components/schemas/Authentication.Organization'
+            id:
+              $ref: '#/components/schemas/Common.Scalars.id'
+            type:
+              type: string
+              enum:
+              - organization
+          required:
+          - attributes
+          - id
+          - type
+      description: An organization embedded as a relationship, attributes included.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

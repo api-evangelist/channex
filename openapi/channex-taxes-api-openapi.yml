@@ -1,0 +1,943 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Taxes API
+  version: 0.0.0
+  description: Manage Taxes — individual charges (VAT, city tax, fees) applicable to a Rate Plan or Property. Taxes reach a Rate Plan grouped in a Tax Set.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Taxes
+  description: Manage Taxes — individual charges (VAT, city tax, fees) applicable to a Rate Plan or Property. Taxes reach a Rate Plan grouped in a Tax Set.
+paths:
+  /taxes:
+    get:
+      operationId: Taxes_list
+      summary: List taxes
+      description: List taxes. Results are paginated; the `meta` block carries the page, limit, total and ordering.
+      parameters:
+      - $ref: '#/components/parameters/Taxes.TaxListParams.propertyId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Taxes.TaxListParams.orderTitle'
+      - $ref: '#/components/parameters/Taxes.TaxListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Taxes.TaxResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Taxes
+    post:
+      operationId: Taxes_create
+      summary: Create a tax
+      description: Create a tax for a property. The created tax is returned with `201 Created`.
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Taxes.TaxResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Taxes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Taxes.TaxCreateRequest'
+  /taxes/options:
+    get:
+      operationId: Taxes_options
+      summary: List tax options
+      description: List taxes as lightweight `id` + `title` items for selectors. Not paginated; accepts the same property filter as the list.
+      parameters:
+      - $ref: '#/components/parameters/Taxes.TaxOptionsParams'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - type
+                      - id
+                      - attributes
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - tax
+                        id:
+                          $ref: '#/components/schemas/Common.Scalars.id'
+                        attributes:
+                          $ref: '#/components/schemas/Common.JsonApi.OptionAttributes'
+                      description: A lightweight JSON:API resource returned by `/options` endpoints — id + title only, no relationships or pagination.
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Taxes
+  /taxes/{id}:
+    get:
+      operationId: Taxes_read
+      summary: Retrieve a tax
+      description: Retrieve a tax by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Taxes.TaxResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Taxes
+    put:
+      operationId: Taxes_update
+      summary: Update a tax
+      description: Update a tax by its identifier. Attributes absent from the request are left unchanged. The updated tax is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Taxes.TaxResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Taxes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Taxes.TaxUpdateRequest'
+    delete:
+      operationId: Taxes_delete
+      summary: Delete a tax
+      description: Delete a tax by its identifier. A tax held by a tax set cannot be deleted while the set refers to it.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Taxes
+components:
+  schemas:
+    Taxes.Tax:
+      type: object
+      required:
+      - id
+      - title
+      - logic
+      - type
+      - is_inclusive
+      - currency
+      - skip_nights
+      - max_nights
+      - applicable_after
+      - applicable_before
+      - rate
+      - applicable_date_ranges
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique tax identifier.
+          examples:
+          - 6d30137e-74a1-41f6-aa96-2c0371e94dbf
+        title:
+          type: string
+          maxLength: 255
+          description: Tax title.
+          examples:
+          - 10% VAT
+        logic:
+          $ref: '#/components/schemas/Taxes.TaxLogic'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/Taxes.TaxType'
+          description: Kind of charge the tax represents. Defaults to `tax`.
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price (`true`) or added on top (`false`). Defaults to `true`.
+        currency:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          - type: 'null'
+          description: Tax amount currency (ISO 4217). Required unless `logic` is `percent` — also when an update changes `logic` to a fixed amount — and null when it is.
+        skip_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Count of nights skipped at tax calculation — for long-stay taxes applied from the Nth night. `null` when not set.
+        max_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Maximum count of nights used as the taxable base — for taxes applied only to the first N nights. `null` when not set.
+        applicable_after:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy start date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        applicable_before:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy end date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        rate:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          description: Tax amount. A percentage greater than 0 and at most 100 when `logic` is `percent`; a fixed amount greater than 0 in `currency` otherwise.
+          examples:
+          - '20.00'
+        applicable_date_ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Taxes.TaxApplicableDateRange'
+          maxItems: 20
+          description: Stay-date ranges the tax applies within (up to 20). Empty when the tax applies on every date.
+      description: 'A tax as returned in responses: every attribute is present.'
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Taxes.TaxCreateRequest:
+      type: object
+      required:
+      - tax
+      properties:
+        tax:
+          $ref: '#/components/schemas/Taxes.TaxCreate'
+      description: Request body accepted when creating a tax.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Scalars.decimalString:
+      type: string
+      description: A decimal number as a string, e.g. `100.00`. Every monetary amount the API returns takes this form.
+      examples:
+      - '100.00'
+    Taxes.TaxUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Tax title.
+          examples:
+          - 10% VAT
+        logic:
+          $ref: '#/components/schemas/Taxes.TaxLogic'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/Taxes.TaxType'
+          description: Kind of charge the tax represents. Defaults to `tax`.
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price (`true`) or added on top (`false`). Defaults to `true`.
+        currency:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          - type: 'null'
+          description: Tax amount currency (ISO 4217). Required unless `logic` is `percent` — also when an update changes `logic` to a fixed amount — and null when it is.
+        skip_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Count of nights skipped at tax calculation — for long-stay taxes applied from the Nth night. `null` when not set.
+        max_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Maximum count of nights used as the taxable base — for taxes applied only to the first N nights. `null` when not set.
+        applicable_after:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy start date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        applicable_before:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy end date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the Property the tax belongs to. Fixed at creation: a different value on update is ignored.'
+        rate:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: number
+          description: 'Tax amount: a decimal string like `"20.00"`, or a number. A percentage greater than 0 and at most 100 when `logic` is `percent`; a fixed amount greater than 0 in `currency` otherwise.'
+          examples:
+          - '20.00'
+        applicable_date_ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Taxes.TaxApplicableDateRange'
+          maxItems: 20
+          description: Stay-date ranges the tax applies within (up to 20) — e.g. a seasonal tourist tax. Each range needs both bounds, with `after` on or before `before`; ranges may overlap. Omit to apply on every date.
+      description: Tax attributes accepted when updating a tax. Every attribute is optional; attributes absent from the request are left unchanged. `applicable_date_ranges` replaces the stored ranges (`[]` clears them); `property_id` cannot be changed.
+    Taxes.TaxCreate:
+      type: object
+      required:
+      - title
+      - logic
+      - property_id
+      - rate
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Tax title.
+          examples:
+          - 10% VAT
+        logic:
+          $ref: '#/components/schemas/Taxes.TaxLogic'
+        type:
+          allOf:
+          - $ref: '#/components/schemas/Taxes.TaxType'
+          description: Kind of charge the tax represents. Defaults to `tax`.
+        is_inclusive:
+          type: boolean
+          description: Whether the tax is included in the room price (`true`) or added on top (`false`). Defaults to `true`.
+        currency:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          - type: 'null'
+          description: Tax amount currency (ISO 4217). Required unless `logic` is `percent` — also when an update changes `logic` to a fixed amount — and null when it is.
+        skip_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Count of nights skipped at tax calculation — for long-stay taxes applied from the Nth night. `null` when not set.
+        max_nights:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          - type: 'null'
+          description: Maximum count of nights used as the taxable base — for taxes applied only to the first N nights. `null` when not set.
+        applicable_after:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy start date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        applicable_before:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Legacy end date of a single applicability range. Sending `applicable_after` or `applicable_before` replaces `applicable_date_ranges` with that one range; both are `null` when the ranges were set through `applicable_date_ranges`.
+          deprecated: true
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the Property the tax belongs to. Fixed at creation: a different value on update is ignored.'
+        rate:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: number
+          description: 'Tax amount: a decimal string like `"20.00"`, or a number. A percentage greater than 0 and at most 100 when `logic` is `percent`; a fixed amount greater than 0 in `currency` otherwise.'
+          examples:
+          - '20.00'
+        applicable_date_ranges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Taxes.TaxApplicableDateRange'
+          maxItems: 20
+          description: Stay-date ranges the tax applies within (up to 20) — e.g. a seasonal tourist tax. Each range needs both bounds, with `after` on or before `before`; ranges may overlap. Omit to apply on every date.
+      description: Tax attributes accepted when creating a tax.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Taxes.TaxApplicableDateRange:
+      type: object
+      required:
+      - after
+      - before
+      properties:
+        after:
+          type: string
+          format: date
+          description: First date the tax applies.
+        before:
+          type: string
+          format: date
+          description: Last date the tax applies.
+      description: A range of stay dates the tax applies within (inclusive ISO 8601 `YYYY-MM-DD` bounds).
+    Taxes.TaxResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - tax
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Taxes.Tax'
+        relationships:
+          $ref: '#/components/schemas/Taxes.TaxRelationships'
+      description: A tax as returned in responses.
+    Taxes.TaxType:
+      type: string
+      enum:
+      - tax
+      - fee
+      - city_tax
+      description: Kind of charge the tax represents.
+    Common.JsonApi.OptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        title:
+          type: string
+          examples:
+          - My Hotel
+      description: 'Attributes of a lightweight `/options` item: identifier and display title.'
+    Taxes.TaxUpdateRequest:
+      type: object
+      required:
+      - tax
+      properties:
+        tax:
+          $ref: '#/components/schemas/Taxes.TaxUpdate'
+      description: Request body accepted when updating a tax.
+    Taxes.TaxRelationships:
+      type: object
+      required:
+      - property
+      properties:
+        property:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  $ref: '#/components/schemas/Common.Scalars.id'
+                type:
+                  type: string
+                  enum:
+                  - property
+              required:
+              - id
+              - type
+          required:
+          - data
+          description: Property the tax belongs to.
+      description: Relationships of a tax resource.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    Taxes.TaxLogic:
+      type: string
+      enum:
+      - percent
+      - per_room
+      - per_room_per_night
+      - per_person
+      - per_person_per_night
+      - per_night
+      - per_booking
+      description: How the tax amount is calculated.
+  parameters:
+    Taxes.TaxListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the taxes of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Taxes.TaxOptionsParams:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the taxes of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Taxes.TaxListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order taxes by title. Applied by default, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    Taxes.TaxListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order taxes by creation time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

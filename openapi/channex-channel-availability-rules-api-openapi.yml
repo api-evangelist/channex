@@ -1,0 +1,991 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Channel Availability Rules API
+  version: 0.0.0
+  description: 'Availability overrides (stop-sales, offsets, caps) for specific Room Types and
+
+    Channels over a date range — closing out a channel for a holiday week, or capping
+
+    what one Room Type publishes to one Channel.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Channel Availability Rules
+  description: 'Availability overrides (stop-sales, offsets, caps) for specific Room Types and
+
+    Channels over a date range — closing out a channel for a holiday week, or capping
+
+    what one Room Type publishes to one Channel.'
+paths:
+  /channel_availability_rules:
+    get:
+      operationId: ChannelAvailabilityRules_list
+      summary: List availability rules
+      description: 'List availability rules. Results are paginated, 10 per page by default, and ordered
+
+        by creation time ascending unless `order[…]` says otherwise; the `meta` block carries
+
+        the page, limit, total and ordering.'
+      parameters:
+      - name: filter[property_id]
+        in: query
+        required: false
+        description: Return only rules of this property.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[type]
+        in: query
+        required: false
+        description: Return only rules of this type.
+        schema:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        explode: false
+      - name: order[inserted_at]
+        in: query
+        required: false
+        description: Order rules by creation time. Applied by default, ascending.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[title]
+        in: query
+        required: false
+        description: Order rules by title.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[type]
+        in: query
+        required: false
+        description: Order rules by type.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Channel Availability Rules
+    post:
+      operationId: ChannelAvailabilityRules_create
+      summary: Create an availability rule
+      description: 'Create an availability rule. `type`, `start_date` and at least one channel and room
+
+        type are required, as is `value` for the two types that use it; `end_date`, when
+
+        given, must be later than `start_date`, and the title defaults to the name of the
+
+        type. The created rule is returned with `201 Created`.'
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Channel Availability Rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleCreateRequest'
+  /channel_availability_rules/options:
+    get:
+      operationId: ChannelAvailabilityRules_options
+      summary: List availability rule options
+      description: 'List availability rules as lightweight items for selectors — every read attribute
+
+        except `value`, and no relationships. Filtered and ordered like `list`, but not
+
+        paginated: every matching rule comes back in one response.'
+      parameters:
+      - name: filter[property_id]
+        in: query
+        required: false
+        description: Return only rules of this property.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        explode: false
+      - name: filter[type]
+        in: query
+        required: false
+        description: Return only rules of this type.
+        schema:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        explode: false
+      - name: order[inserted_at]
+        in: query
+        required: false
+        description: Order rules by creation time. Applied by default, ascending.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[title]
+        in: query
+        required: false
+        description: Order rules by title.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      - name: order[type]
+        in: query
+        required: false
+        description: Order rules by type.
+        schema:
+          $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+        explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleOption'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Channel Availability Rules
+  /channel_availability_rules/{id}:
+    get:
+      operationId: ChannelAvailabilityRules_read
+      summary: Retrieve an availability rule
+      description: Retrieve an availability rule by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Channel Availability Rules
+    put:
+      operationId: ChannelAvailabilityRules_update
+      summary: Update an availability rule
+      description: 'Update an availability rule by its identifier. Attributes absent from the request are
+
+        left unchanged, and `property_id` is ignored — a rule stays with its property. The
+
+        updated rule is returned.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Channel Availability Rules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleUpdateRequest'
+    delete:
+      operationId: ChannelAvailabilityRules_delete
+      summary: Delete an availability rule
+      description: Delete an availability rule by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Channel Availability Rules
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    ChannelAvailabilityRules.EmbeddedRuleProperty:
+      type: object
+      required:
+      - id
+      - type
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - property
+      description: The property an availability rule belongs to.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleOptionAttributes:
+      type: object
+      required:
+      - id
+      - type
+      - start_date
+      - affected_channels
+      - affected_room_types
+      - title
+      - days
+      - end_date
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique rule identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 98a6b45d-49aa-4080-8bfc-9ec94fe24d81
+        type:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        start_date:
+          type: string
+          format: date
+          description: First date the rule applies.
+          examples:
+          - '2026-10-01'
+        affected_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Channels the rule affects. At least one, and each must be a channel of the property.
+        affected_room_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Room types the rule affects. At least one, and each must be a room type of the property.
+        title:
+          type: string
+          description: Rule title. Defaults to the name of the rule's `type` when omitted.
+          examples:
+          - Close out
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelAvailabilityRules.DayOfWeek'
+          description: 'Days of week the rule applies to. A rule that applies every day carries all seven;
+
+            an empty list means the rule applies on no day and changes nothing. Names outside
+
+            the seven are ignored.'
+        end_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Last date the rule applies, or null to apply to every date from `start_date` on. Must be later than `start_date`.
+      description: 'Attributes of an availability rule `/options` item: the read attributes except `value`.'
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    ChannelAvailabilityRules.DayOfWeek:
+      type: string
+      enum:
+      - mo
+      - tu
+      - we
+      - th
+      - fr
+      - sa
+      - su
+      description: Day of week a rule can be restricted to.
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleUpdateRequest:
+      type: object
+      required:
+      - channel_availability_rule
+      properties:
+        channel_availability_rule:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleUpdate'
+      description: Request body accepted when updating an availability rule.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleCreateRequest:
+      type: object
+      required:
+      - channel_availability_rule
+      properties:
+        channel_availability_rule:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleCreate'
+      description: Request body accepted when creating an availability rule.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleOption:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - channel_availability_rule
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleOptionAttributes'
+      description: 'A lightweight availability rule for selectors: the read attributes except `value`, and no relationships.'
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleUpdate:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        start_date:
+          type: string
+          format: date
+          description: First date the rule applies.
+          examples:
+          - '2026-10-01'
+        affected_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Channels the rule affects. At least one, and each must be a channel of the property.
+        affected_room_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Room types the rule affects. At least one, and each must be a room type of the property.
+        title:
+          type: string
+          description: Rule title. Defaults to the name of the rule's `type` when omitted.
+          examples:
+          - Close out
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelAvailabilityRules.DayOfWeek'
+          description: 'Days of week the rule applies to. A rule that applies every day carries all seven;
+
+            an empty list means the rule applies on no day and changes nothing. Names outside
+
+            the seven are ignored.'
+        end_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Last date the rule applies, or null to apply to every date from `start_date` on. Must be later than `start_date`.
+        value:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: 'Adjustment value: subtracted from availability for `availability_offset` and the
+
+            ceiling for `max_availability`, where it is required. Null for `close_out`.'
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the property the rule belongs to.
+      description: Attributes accepted when updating an availability rule. Every attribute is optional; attributes absent from the request are left unchanged.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - channel_availability_rule
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRule'
+        relationships:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.ChannelAvailabilityRuleRelationships'
+      description: 'An availability rule resource: the rule attributes plus the property it belongs to.'
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    ChannelAvailabilityRules.ChannelAvailabilityRuleCreate:
+      type: object
+      required:
+      - type
+      - start_date
+      - affected_channels
+      - affected_room_types
+      - property_id
+      properties:
+        type:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        start_date:
+          type: string
+          format: date
+          description: First date the rule applies.
+          examples:
+          - '2026-10-01'
+        affected_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Channels the rule affects. At least one, and each must be a channel of the property.
+        affected_room_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Room types the rule affects. At least one, and each must be a room type of the property.
+        title:
+          type: string
+          description: Rule title. Defaults to the name of the rule's `type` when omitted.
+          examples:
+          - Close out
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelAvailabilityRules.DayOfWeek'
+          description: 'Days of week the rule applies to. A rule that applies every day carries all seven;
+
+            an empty list means the rule applies on no day and changes nothing. Names outside
+
+            the seven are ignored.'
+        end_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Last date the rule applies, or null to apply to every date from `start_date` on. Must be later than `start_date`.
+        value:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: 'Adjustment value: subtracted from availability for `availability_offset` and the
+
+            ceiling for `max_availability`, where it is required. Null for `close_out`.'
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the property the rule belongs to.
+      description: Attributes accepted when creating an availability rule.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    ChannelAvailabilityRules.ChannelAvailabilityRuleRelationships:
+      type: object
+      required:
+      - property
+      properties:
+        property:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChannelAvailabilityRules.EmbeddedRuleProperty'
+          required:
+          - data
+          description: The property the rule belongs to.
+      description: 'Relationships of an availability rule: the property it belongs to.'
+    ChannelAvailabilityRules.ChannelAvailabilityRule:
+      type: object
+      required:
+      - id
+      - type
+      - start_date
+      - affected_channels
+      - affected_room_types
+      - title
+      - days
+      - end_date
+      - value
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique rule identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 98a6b45d-49aa-4080-8bfc-9ec94fe24d81
+        type:
+          $ref: '#/components/schemas/ChannelAvailabilityRules.AvailabilityRuleType'
+        start_date:
+          type: string
+          format: date
+          description: First date the rule applies.
+          examples:
+          - '2026-10-01'
+        affected_channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Channels the rule affects. At least one, and each must be a channel of the property.
+        affected_room_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/Common.Scalars.id'
+          description: Room types the rule affects. At least one, and each must be a room type of the property.
+        title:
+          type: string
+          description: Rule title. Defaults to the name of the rule's `type` when omitted.
+          examples:
+          - Close out
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelAvailabilityRules.DayOfWeek'
+          description: 'Days of week the rule applies to. A rule that applies every day carries all seven;
+
+            an empty list means the rule applies on no day and changes nothing. Names outside
+
+            the seven are ignored.'
+        end_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          description: Last date the rule applies, or null to apply to every date from `start_date` on. Must be later than `start_date`.
+        value:
+          anyOf:
+          - type: integer
+            format: int32
+          - type: 'null'
+          description: 'Adjustment value: subtracted from availability for `availability_offset` and the
+
+            ceiling for `max_availability`, where it is required. Null for `close_out`.'
+      description: 'An availability rule as returned in responses: every attribute is present.'
+    ChannelAvailabilityRules.AvailabilityRuleType:
+      type: string
+      enum:
+      - close_out
+      - availability_offset
+      - max_availability
+      description: Kind of availability override the rule applies.
+  parameters:
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

@@ -1,0 +1,615 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Applications API
+  version: 0.0.0
+  description: 'Applications extending Channex (PCI, Messages, payment and PMS integrations): the available catalog and per-property installations.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Applications
+  description: 'Applications extending Channex (PCI, Messages, payment and PMS integrations): the available catalog and per-property installations.'
+paths:
+  /applications:
+    get:
+      operationId: ApplicationCatalog_list
+      summary: List available applications
+      description: List the applications available for installation.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Applications.ApplicationResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Applications
+  /applications/install:
+    post:
+      operationId: ApplicationLifecycle_install
+      summary: Install an application
+      description: 'Install an application on a Property. Name the application by
+
+        `application_id` or by `application_code`; the response carries the new
+
+        installation with the application''s own default settings and `is_active`
+
+        set.
+
+
+        A Property may hold only one installation of the same application: a second
+
+        one is refused. An `application_code` or `application_id` that names no
+
+        application answers `404`; a `property_id` that names no Property is
+
+        refused. A body naming neither `application_id` nor `application_code`, and
+
+        a body carrying no `property_id`, are refused the same way.
+
+
+        The caller must be entitled to install — an account owner, an admin or an
+
+        API key — and must reach the Property; an application restricted to
+
+        Property owners also requires the `owner` role. A caller failing either
+
+        check is refused with `403`.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Applications.ApplicationInstallationResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Applications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Applications.ApplicationInstallationCreateRequest'
+  /applications/installed:
+    get:
+      operationId: InstalledApplications_installed
+      summary: List installed applications
+      description: 'List the caller''s active application installations across their Properties.
+
+
+        An installation whose `is_active` is `false` is left out. Items carry their
+
+        rate-plan mappings inside `attributes.relationships`, and neither the
+
+        install time nor the active flag.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Applications.InstalledApplicationResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+      tags:
+      - Applications
+  /applications/{application_installation_id}/uninstall:
+    delete:
+      operationId: ApplicationLifecycle_uninstall
+      summary: Uninstall an application
+      description: 'Uninstall an application from a Property. The installation and its
+
+        rate-plan mappings are removed; uninstalling it again answers `404`.'
+      parameters:
+      - name: application_installation_id
+        in: path
+        required: true
+        description: UUID of the application installation.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Applications
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Applications.ApplicationResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - application
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Applications.Application'
+      description: Application resource. No relationships.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Applications.ApplicationInstallationListItem:
+      type: object
+      required:
+      - id
+      - property_id
+      - application_id
+      - application_code
+      - settings
+      - relationships
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Installation identifier. Mirrors the resource `id`.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the application is installed on.
+        application_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the installed application. Alternative to `application_code`.
+        application_code:
+          type: string
+          description: Code of the installed application. Alternative to `application_id`.
+          examples:
+          - channex_messages
+        settings:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Application-specific installation settings. `null` when the application has none.
+        relationships:
+          $ref: '#/components/schemas/Applications.ApplicationInstallationRelationships'
+      description: An application installation as returned by the installed listing.
+    Applications.ApplicationInstallationCreateRequest:
+      type: object
+      required:
+      - application_installation
+      properties:
+        application_installation:
+          $ref: '#/components/schemas/Applications.ApplicationInstallationCreate'
+      description: Request body accepted when installing an application.
+    Applications.ApplicationInstallationRelationships:
+      type: object
+      required:
+      - rate_plans
+      properties:
+        rate_plans:
+          type: object
+          properties:
+            data:
+              type: array
+              items: {}
+          required:
+          - data
+      description: Rate plans an installation is linked to.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Applications.ApplicationInstallationCreate:
+      type: object
+      required:
+      - property_id
+      properties:
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the application is installed on.
+        application_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the installed application. Alternative to `application_code`.
+        application_code:
+          type: string
+          description: Code of the installed application. Alternative to `application_id`.
+          examples:
+          - channex_messages
+      description: Attributes accepted when installing an application. The application is identified by `application_id` or `application_code`.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Applications.InstalledApplicationResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - application_installation
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Applications.ApplicationInstallationListItem'
+      description: An installed application as returned by the installed listing.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Applications.ApplicationInstallation:
+      type: object
+      required:
+      - id
+      - property_id
+      - application_id
+      - application_code
+      - settings
+      - inserted_at
+      - is_active
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Installation identifier. Mirrors the resource `id`.
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the application is installed on.
+        application_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the installed application. Alternative to `application_code`.
+        application_code:
+          type: string
+          description: Code of the installed application. Alternative to `application_id`.
+          examples:
+          - channex_messages
+        settings:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Application-specific installation settings. `null` when the application has none.
+        inserted_at:
+          type: string
+          format: date-time
+          description: When the application was installed (ISO 8601, no timezone offset).
+          examples:
+          - '2026-09-22T12:58:10.798350'
+        is_active:
+          type: boolean
+          description: Whether the installation is active. Only active installations appear in the installed listing.
+      description: An application installation.
+    Applications.Application:
+      type: object
+      required:
+      - code
+      - id
+      - description
+      - title
+      - is_configurable
+      - logo_url
+      - price
+      - representation_settings
+      - vr_price
+      properties:
+        code:
+          type: string
+          description: Application code.
+          examples:
+          - channex_pci
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Application identifier. Mirrors the resource `id`.
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Description of the application (HTML). `null` when not provided.
+        title:
+          type: string
+          description: Application display name.
+          examples:
+          - Channex PCI
+        is_configurable:
+          type: boolean
+          description: Whether the application has per-installation settings.
+        logo_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: URL of the application logo. `null` when not provided.
+        price: {}
+        representation_settings: {}
+        vr_price: {}
+      description: An application available for installation.
+    Applications.ApplicationInstallationResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - application_installation
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Applications.ApplicationInstallation'
+        relationships:
+          $ref: '#/components/schemas/Applications.ApplicationInstallationRelationships'
+      description: An application installation as returned by the install endpoint.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

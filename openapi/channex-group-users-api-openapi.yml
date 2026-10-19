@@ -1,0 +1,703 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Group Users API
+  version: 0.0.0
+  description: Manage Group Users — a user's membership of a Group, which grants them access to every Property in it. A membership carries a role and, optionally, access policy overrides on top of it.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Group Users
+  description: Manage Group Users — a user's membership of a Group, which grants them access to every Property in it. A membership carries a role and, optionally, access policy overrides on top of it.
+paths:
+  /group_users:
+    get:
+      operationId: GroupUsers_list
+      summary: List group users
+      description: List the memberships of one group. `filter[group_id]` is required. Not paginated.
+      parameters:
+      - $ref: '#/components/parameters/GroupUsers.GroupUserListParams'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GroupUsers.GroupUserResource'
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Group Users
+    post:
+      operationId: GroupUsers_invite
+      summary: Invite a user into a group
+      description: 'Invite a user into a group, granting them access to every property in it. A user
+
+        without a Channex account gets one, and an onboarding email. An address already
+
+        invited into the group is refused. The created membership is returned with
+
+        `201 Created`.'
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupUsers.GroupUserResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Group Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupUsers.GroupUserCreateRequest'
+  /group_users/{id}:
+    get:
+      operationId: GroupUsers_read
+      summary: Retrieve a group user
+      description: Retrieve a membership by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupUsers.GroupUserResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Group Users
+    put:
+      operationId: GroupUsers_update
+      summary: Update a group user
+      description: 'Update a membership''s role or access policy overrides. Attributes absent from the
+
+        request are left unchanged. The updated membership is returned.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GroupUsers.GroupUserResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Group Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupUsers.GroupUserUpdateRequest'
+    delete:
+      operationId: GroupUsers_withdraw
+      summary: Withdraw a group user
+      description: 'Withdraw a user''s access to the group. A user cannot withdraw their own access:
+
+        the request is refused with `400` and `details` naming the reason.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '400':
+          description: The request could not be processed in the current state; `details` explains why.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequestWithReason'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Group Users
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    GroupUsers.GroupUserResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      - relationships
+      properties:
+        type:
+          type: string
+          enum:
+          - group_user
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/GroupUsers.GroupUser'
+        relationships:
+          $ref: '#/components/schemas/GroupUsers.GroupUserRelationships'
+      description: 'A group user resource: the membership attributes plus the group and user it links.'
+    GroupUsers.GroupUserRole:
+      type: string
+      enum:
+      - owner
+      - user
+      description: Role granted to a user within a group.
+    GroupUsers.GroupUserUpdate:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/GroupUsers.GroupUserRole'
+        overrides:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Access policy overrides applied to this membership on top of the role, or null when the role applies unchanged.
+      description: Attributes accepted when updating a group user. Both are optional; an attribute absent from the request is left unchanged.
+    Authentication.EmbeddedUser:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - user
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Authentication.EmbeddedUserAttributes'
+      description: A user embedded in another resource's relationships, carrying identifier, name and email.
+    GroupUsers.GroupUserRelationships:
+      type: object
+      required:
+      - group
+      - user
+      properties:
+        group:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/GroupUsers.EmbeddedGroup'
+          required:
+          - data
+          description: The group the membership belongs to.
+        user:
+          type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Authentication.EmbeddedUser'
+          required:
+          - data
+          description: The user the membership grants access to.
+      description: 'Relationships of a group user resource: the group the membership is in and the user it grants access to.'
+    GroupUsers.GroupUserCreateRequest:
+      type: object
+      required:
+      - invite
+      properties:
+        invite:
+          $ref: '#/components/schemas/GroupUsers.GroupUserCreate'
+      description: Request body accepted when inviting a user into a group.
+    GroupUsers.EmbeddedGroup:
+      type: object
+      required:
+      - id
+      - type
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        type:
+          type: string
+          enum:
+          - group
+      description: The group a membership belongs to, as it appears among a group user's relationships.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Authentication.EmbeddedUserAttributes:
+      type: object
+      required:
+      - id
+      - name
+      - email
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: User identifier. Mirrors the resource id.
+        name:
+          type: string
+          description: Display name of the user.
+          examples:
+          - Channex User
+        email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: Email address the account is registered with.
+          examples:
+          - user@channex.io
+      description: Identifier, display name and email address of an embedded user.
+    GroupUsers.GroupUserCreate:
+      type: object
+      required:
+      - group_id
+      - user_email
+      - role
+      properties:
+        group_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the group to invite the user into.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        user_email:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.email'
+          description: 'Email address of the user to invite. A user without a Channex account gets one,
+
+            and an onboarding email.'
+          examples:
+          - other_user@channex.io
+        role:
+          $ref: '#/components/schemas/GroupUsers.GroupUserRole'
+        overrides:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Access policy overrides applied to this membership on top of the role, or null when the role applies unchanged.
+      description: Attributes accepted when inviting a user into a group.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Scalars.email:
+      type: string
+      format: email
+    Common.Errors.BadRequestReasonObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: string
+          description: Human-readable reason the request could not be processed.
+          examples:
+          - User already invited
+      description: Error object for a bad request, adding a single human-readable reason.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    GroupUsers.GroupUserUpdateRequest:
+      type: object
+      required:
+      - group_user
+      properties:
+        group_user:
+          $ref: '#/components/schemas/GroupUsers.GroupUserUpdate'
+      description: Request body accepted when updating a group user.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.BadRequestWithReason:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.BadRequestReasonObject'
+      description: The request could not be processed in the current state; `details` explains why.
+    GroupUsers.GroupUser:
+      type: object
+      required:
+      - id
+      - user_id
+      - group_id
+      - role
+      - overrides
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique group user identifier. Mirrors the top-level resource `id`.
+          examples:
+          - 776533f2-c10e-49d8-bddc-14b3e27c2a00
+        user_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the user the membership grants access to.
+          examples:
+          - c9cfa184-5095-4ef2-bbe2-e723ffb49184
+        group_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the group the membership belongs to.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        role:
+          $ref: '#/components/schemas/GroupUsers.GroupUserRole'
+        overrides:
+          anyOf:
+          - type: object
+            unevaluatedProperties: {}
+          - type: 'null'
+          description: Access policy overrides applied to this membership on top of the role, or null when the role applies unchanged.
+      description: 'A user''s membership of a group, as returned in responses: every attribute is present.'
+  parameters:
+    GroupUsers.GroupUserListParams:
+      name: filter[group_id]
+      in: query
+      required: true
+      description: UUID of the group whose users to list.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

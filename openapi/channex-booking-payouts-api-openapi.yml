@@ -1,0 +1,765 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Booking Payouts API
+  version: 0.0.0
+  description: 'What Booking.com pays out for a booking: the payout details, the price breakdown behind them, and the bank transfer payout. Available for bookings that came through a Booking.com channel.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Booking Payouts
+  description: 'What Booking.com pays out for a booking: the payout details, the price breakdown behind them, and the bank transfer payout. Available for bookings that came through a Booking.com channel.'
+paths:
+  /bookings/{id}/bank_transfer_payout:
+    get:
+      operationId: BookingPayouts_bankTransferPayout
+      summary: Retrieve the bank transfer payout of a booking
+      description: 'Retrieve the bank-transfer payouts of a Booking.com booking: the amount, scheduled date, and status of each bank transfer. The data is requested from Booking.com and returned in Booking.com''s response format — see Getting BT payout details for reservation in the Booking.com Connectivity documentation. Supported for Booking.com bookings. Errors reported by Booking.com are relayed with status `200 OK` and appear in the `errors` array.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - errors
+                - meta
+                - warnings
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingComBankTransferPayout'
+                  errors:
+                    type: array
+                    items: {}
+                    description: Errors reported by Booking.com. Empty on success.
+                  meta:
+                    type: object
+                    properties:
+                      ruid:
+                        type: string
+                        description: Booking.com request trace identifier.
+                        examples:
+                        - d828ebd4-1732-4d0f-89ab-5c6b182e84ef
+                    required:
+                    - ruid
+                  warnings:
+                    type: array
+                    items: {}
+                    description: Warnings reported by Booking.com. Empty when there are none.
+                description: Response envelope of the Booking.com payments endpoints. Errors reported by Booking.com are relayed with status `200 OK` and appear in `errors`.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Payouts
+  /bookings/{id}/payout_details:
+    get:
+      operationId: BookingPayouts_payoutDetails
+      summary: Retrieve the payout details of a booking
+      description: 'Retrieve the payout details of a Booking.com booking: the overall payout status, the scheduled payouts per payment method, the partner payout summary, and the commissions and charges per room reservation. The data is requested from Booking.com and returned in Booking.com''s response format — see Getting payout details for reservation in the Booking.com Connectivity documentation. Supported for Booking.com bookings. Errors reported by Booking.com are relayed with status `200 OK` and appear in the `errors` array.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - errors
+                - meta
+                - warnings
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingComPayoutDetails'
+                  errors:
+                    type: array
+                    items: {}
+                    description: Errors reported by Booking.com. Empty on success.
+                  meta:
+                    type: object
+                    properties:
+                      ruid:
+                        type: string
+                        description: Booking.com request trace identifier.
+                        examples:
+                        - d828ebd4-1732-4d0f-89ab-5c6b182e84ef
+                    required:
+                    - ruid
+                  warnings:
+                    type: array
+                    items: {}
+                    description: Warnings reported by Booking.com. Empty when there are none.
+                description: Response envelope of the Booking.com payments endpoints. Errors reported by Booking.com are relayed with status `200 OK` and appear in `errors`.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Payouts
+  /bookings/{id}/price_breakdown:
+    get:
+      operationId: BookingPayouts_priceBreakdown
+      summary: Retrieve the price breakdown of a booking
+      description: 'Retrieve the price breakdown of a Booking.com booking: the partner payout summary, the reservation totals, and the commissions and charges per room reservation. The data is requested from Booking.com and returned in Booking.com''s response format — see Getting price breakdown for reservation in the Booking.com Connectivity documentation. Supported for Booking.com bookings. Errors reported by Booking.com are relayed with status `200 OK` and appear in the `errors` array.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - errors
+                - meta
+                - warnings
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Bookings.BookingComPriceBreakdown'
+                  errors:
+                    type: array
+                    items: {}
+                    description: Errors reported by Booking.com. Empty on success.
+                  meta:
+                    type: object
+                    properties:
+                      ruid:
+                        type: string
+                        description: Booking.com request trace identifier.
+                        examples:
+                        - d828ebd4-1732-4d0f-89ab-5c6b182e84ef
+                    required:
+                    - ruid
+                  warnings:
+                    type: array
+                    items: {}
+                    description: Warnings reported by Booking.com. Empty when there are none.
+                description: Response envelope of the Booking.com payments endpoints. Errors reported by Booking.com are relayed with status `200 OK` and appear in `errors`.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request body failed validation.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '503':
+          description: A backing service is temporarily unavailable; retry the request later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.ServiceUnavailable'
+      tags:
+      - Booking Payouts
+components:
+  schemas:
+    Bookings.BookingComPartnerPayout:
+      type: object
+      required:
+      - commissionable_price
+      - commissions_and_charges
+      - total_payout
+      properties:
+        commissionable_price:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComAmount'
+          description: Price the commission is calculated on.
+        commissions_and_charges:
+          type: object
+          properties:
+            currency:
+              allOf:
+              - $ref: '#/components/schemas/Common.Scalars.currency'
+              description: ISO 4217 currency code.
+              examples:
+              - GBP
+            decimals:
+              allOf:
+              - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+              description: Number of decimal places in `value`.
+            value:
+              type: string
+              description: Amount digits, without a decimal separator.
+              examples:
+              - '1575'
+            breakdown:
+              type: object
+              properties:
+                total_charges:
+                  allOf:
+                  - $ref: '#/components/schemas/Bookings.BookingComAmount'
+                  description: Total charges.
+                total_commissions:
+                  allOf:
+                  - $ref: '#/components/schemas/Bookings.BookingComAmount'
+                  description: Total commissions.
+              required:
+              - total_charges
+              - total_commissions
+          required:
+          - currency
+          - decimals
+          - value
+          - breakdown
+          description: Total commissions and charges deducted from the payout.
+        total_payout:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComAmount'
+          description: Total amount paid out to the property.
+      description: Summary of the payout Booking.com sends to the property.
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Bookings.BookingComApplicableRate:
+      type: object
+      required:
+      - decimals
+      - type
+      - value
+      properties:
+        decimals:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of decimal places in `value`.
+        type:
+          type: string
+          description: 'Rate type. Possible values: `PERCENTAGE`.'
+        value:
+          type: string
+          description: Rate digits, without a decimal separator.
+          examples:
+          - '20'
+      description: 'Rate a charge is calculated from, in the same fixed-point format as monetary amounts: the rate equals `value` divided by 10 to the power of `decimals`.'
+    Bookings.BookingComBankTransfer:
+      type: object
+      required:
+      - amount
+      - payout_date
+      - status
+      properties:
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComAmount'
+          description: Payout amount.
+        payout_date:
+          type: string
+          format: date
+          description: Date the payout is scheduled for (`YYYY-MM-DD`).
+        status:
+          type: string
+          description: 'Payout status. Possible values: `PENDING`.'
+      description: A scheduled bank-transfer payout.
+    Bookings.BookingComAmount:
+      type: object
+      required:
+      - currency
+      - decimals
+      - value
+      properties:
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: ISO 4217 currency code.
+          examples:
+          - GBP
+        decimals:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of decimal places in `value`.
+        value:
+          type: string
+          description: Amount digits, without a decimal separator.
+          examples:
+          - '1575'
+      description: 'Monetary amount in Booking.com''s fixed-point format: the amount equals `value` divided by 10 to the power of `decimals` — e.g. `value` `"1575"` with `decimals` `2` is 15.75.'
+    Common.Errors.ServiceUnavailable:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - service_unavailable
+            title:
+              type: string
+              enum:
+              - Service Temporary Unavailable
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: A backing service is temporarily unavailable; retry the request later.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Bookings.BookingComRoomPriceBreakdown:
+      type: object
+      required:
+      - charges
+      - room_reservation_id
+      properties:
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingComCharge'
+          description: Charges applied to the room reservation.
+        room_reservation_id:
+          type: string
+          description: Booking.com room reservation identifier.
+          examples:
+          - '6438226735'
+      description: Commissions and charges for one room reservation.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Bookings.BookingComPriceBreakdown:
+      type: object
+      required:
+      - partner_payout
+      - payment_tags
+      - payout_type
+      - price_breakdown
+      - property_id
+      - reservation_id
+      - total_price_of_reservation
+      properties:
+        partner_payout:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComPartnerPayout'
+          description: Summary of the payout to the property.
+        payment_tags:
+          type: array
+          items:
+            type: string
+          description: 'Payment programme tags applied to the reservation. Possible values: `PAYMENTS_BY_BOOKING`.'
+        payout_type:
+          type: string
+          description: 'Payout model. Possible values: `GROSS`.'
+        price_breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingComRoomPriceBreakdown'
+          description: Commissions and charges per room reservation.
+        property_id:
+          type: string
+          description: Booking.com property (hotel) identifier.
+          examples:
+          - '36364'
+        reservation_id:
+          type: string
+          description: Booking.com reservation identifier.
+          examples:
+          - '5741260940'
+        total_price_of_reservation:
+          type: object
+          properties:
+            total_amount_paid:
+              allOf:
+              - $ref: '#/components/schemas/Bookings.BookingComAmount'
+              description: Total amount already paid.
+            total_amount_to_collect_at_property:
+              allOf:
+              - $ref: '#/components/schemas/Bookings.BookingComAmount'
+              description: Total amount to collect from the guest at the property.
+          required:
+          - total_amount_paid
+          - total_amount_to_collect_at_property
+          description: Reservation price totals.
+      description: Price breakdown of a Booking.com reservation.
+    Bookings.BookingComPayoutDetails:
+      type: object
+      required:
+      - partner_payout
+      - payment_tags
+      - payout_type
+      - price_breakdown
+      - property_id
+      - reservation_id
+      - total_price_of_reservation
+      - payout
+      - payout_status
+      properties:
+        partner_payout:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComPartnerPayout'
+          description: Summary of the payout to the property.
+        payment_tags:
+          type: array
+          items:
+            type: string
+          description: 'Payment programme tags applied to the reservation. Possible values: `PAYMENTS_BY_BOOKING`.'
+        payout_type:
+          type: string
+          description: 'Payout model. Possible values: `GROSS`.'
+        price_breakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookings.BookingComRoomPriceBreakdown'
+          description: Commissions and charges per room reservation.
+        property_id:
+          type: string
+          description: Booking.com property (hotel) identifier.
+          examples:
+          - '36364'
+        reservation_id:
+          type: string
+          description: Booking.com reservation identifier.
+          examples:
+          - '5741260940'
+        total_price_of_reservation:
+          type: object
+          properties:
+            total_amount_paid:
+              allOf:
+              - $ref: '#/components/schemas/Bookings.BookingComAmount'
+              description: Total amount already paid.
+            total_amount_to_collect_at_property:
+              allOf:
+              - $ref: '#/components/schemas/Bookings.BookingComAmount'
+              description: Total amount to collect from the guest at the property.
+          required:
+          - total_amount_paid
+          - total_amount_to_collect_at_property
+          description: Reservation price totals.
+        payout:
+          type: object
+          properties:
+            bank_transfers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Bookings.BookingComBankTransfer'
+              description: Scheduled bank-transfer payouts.
+            customer_credit_cards:
+              type: array
+              items: {}
+              description: Customer credit card payouts.
+            virtual_credit_cards:
+              type: array
+              items: {}
+              description: Virtual credit card payouts.
+          required:
+          - bank_transfers
+          - customer_credit_cards
+          - virtual_credit_cards
+          description: Payouts grouped by payment method.
+        payout_status:
+          type: string
+          description: 'Overall payout status. Possible values: `PENDING`.'
+      description: Payout details of a Booking.com reservation.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Bookings.BookingComBankTransferPayout:
+      type: object
+      required:
+      - payout
+      - payout_type
+      - property_id
+      - reservation_id
+      properties:
+        payout:
+          type: object
+          properties:
+            bank_transfers:
+              type: array
+              items:
+                $ref: '#/components/schemas/Bookings.BookingComBankTransfer'
+              description: Scheduled bank-transfer payouts.
+          required:
+          - bank_transfers
+          description: Payouts.
+        payout_type:
+          type: string
+          description: 'Payout model. Possible values: `GROSS`.'
+        property_id:
+          type: string
+          description: Booking.com property (hotel) identifier.
+          examples:
+          - '36364'
+        reservation_id:
+          type: string
+          description: Booking.com reservation identifier.
+          examples:
+          - '5741260940'
+      description: Bank-transfer payout state of a Booking.com reservation.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Bookings.BookingComCharge:
+      type: object
+      required:
+      - amount
+      - applicable_rate
+      - applicable_type
+      - is_already_collected_from_guest
+      - is_included_total_partner_payout
+      - type
+      properties:
+        amount:
+          allOf:
+          - $ref: '#/components/schemas/Bookings.BookingComAmount'
+          description: Charge amount.
+        applicable_rate:
+          anyOf:
+          - $ref: '#/components/schemas/Bookings.BookingComApplicableRate'
+          - type: 'null'
+          description: Rate the charge is calculated from. `null` for fixed charges.
+        applicable_type: {}
+        is_already_collected_from_guest:
+          type: string
+          description: Whether the charge has already been collected from the guest. String-encoded boolean.
+          examples:
+          - 'TRUE'
+        is_included_total_partner_payout:
+          type: string
+          description: Whether the charge is included in the total partner payout. String-encoded boolean.
+          examples:
+          - 'TRUE'
+        type:
+          type: string
+          description: 'Charge type. Possible values: `VAT`, `COMMISSION`, `PAYMENT CHARGE`.'
+      description: A single commission or charge applied to a room reservation.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

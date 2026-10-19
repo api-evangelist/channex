@@ -1,127 +1,859 @@
 openapi: 3.2.0
 info:
-  title: Channex ARI API
-  description: 'Channex is a white-label hotel channel manager API. This specification describes the JSON-based REST API (v1) for managing properties, room types, rate plans, availability and restrictions (ARI), bookings, channels, and webhooks. Requests and responses use a resource envelope: response bodies carry a `data` (or `meta` / `errors`) root key, and `data` objects contain `type` and `attributes`. Write requests wrap their payload under a resource-type key (e.g. `property`, `room_type`, `rate_plan`).'
-  termsOfService: https://channex.io/terms-of-service/
-  contact:
-    name: Channex Support
-    email: support@channex.io
-    url: https://docs.channex.io/
-  version: '1.0'
+  title: Channex.io — Public ARI API
+  version: 0.0.0
+  description: 'Read and update Availability, Rates and Inventory. Rates and restrictions are held per Rate Plan and date; real availability is held per Room Type and date, and every Rate Plan of that Room Type reads it back as its own `availability`. Updates on both paths are queued: the response references a background task per Property (see the Tasks resource), and the new values are readable a moment later rather than at once. The `availability_offset` and `max_availability` values a read returns are set through Channel Availability Rules, not here.'
 servers:
-- url: https://secure.channex.io/api/v1
-  description: Production
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
 - url: https://staging.channex.io/api/v1
-  description: Staging / sandbox
+  description: Staging server
+  variables: {}
 security:
-- userApiKey: []
+- UserApiKeyAuth: []
 tags:
 - name: ARI
-  description: Availability, Rates, and Inventory (restrictions).
+  description: 'Read and update Availability, Rates and Inventory. Rates and restrictions are held per Rate Plan and date; real availability is held per Room Type and date, and every Rate Plan of that Room Type reads it back as its own `availability`. Updates on both paths are queued: the response references a background task per Property (see the Tasks resource), and the new values are readable a moment later rather than at once. The `availability_offset` and `max_availability` values a read returns are set through Channel Availability Rules, not here.'
 paths:
   /availability:
     get:
-      operationId: getAvailability
-      tags:
-      - ARI
-      summary: Get availability
-      description: Get availability per room type for a property and date range.
+      operationId: AriAvailability_listAvailability
+      summary: Read availability
+      description: 'Read the real availability per Room Type and date, before any rate-plan
+
+        modifier is applied. The answer maps each Room Type of the Property to its
+
+        dates, and each date to the number of rooms left to sell.
+
+
+        The dates come from either a single `filter[date]` or the range
+
+        `filter[date][gte]`–`filter[date][lte]`. Both the Property and the dates are
+
+        required. A Property the credentials cannot reach yields an empty `data`
+
+        object rather than `403 Forbidden` or `404 Not Found`.'
       parameters:
-      - name: filter[property_id]
-        in: query
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: filter[date][gte]
-        in: query
-        schema:
-          type: string
-          format: date
-      - name: filter[date][lte]
-        in: query
-        schema:
-          type: string
-          format: date
+      - $ref: '#/components/parameters/Restrictions.AvailabilityListParams.propertyId'
+      - $ref: '#/components/parameters/Restrictions.AvailabilityListParams.date'
+      - $ref: '#/components/parameters/Restrictions.AvailabilityListParams.dateGte'
+      - $ref: '#/components/parameters/Restrictions.AvailabilityListParams.dateLte'
       responses:
         '200':
-          description: Availability values.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
-    post:
-      operationId: updateAvailability
+                $ref: '#/components/schemas/Restrictions.AvailabilityDocument'
+              examples:
+                Three dates of one room type:
+                  summary: Three dates of one room type
+                  description: The rooms left to sell on each date of a three-day range.
+                  value:
+                    data:
+                      994d1375-dbbd-4072-8724-b2ab32ce781b:
+                        '2026-10-01': 5
+                        '2026-10-02': 5
+                        '2026-10-03': 0
+        '400':
+          description: The request has missing or invalid arguments; `details` lists the reasons.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequestWithReasons'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
       tags:
       - ARI
+    post:
+      operationId: AriAvailability_updateAvailability
       summary: Update availability
-      description: Update room-type availability for one or more dates or date ranges.
+      description: 'Update the availability of specific Room Types and dates. Each change object
+
+        carries the Property and the Room Type it applies to, and targets either a
+
+        single `date` or the range `date_from`–`date_to`, optionally narrowed to
+
+        specific `days`.
+
+
+        Changes are applied asynchronously: `data` carries one background task
+
+        reference per Property, and the new count is readable a moment later rather
+
+        than at once. See the Tasks resource to follow a task to completion.
+
+
+        The availability written here is what every Rate Plan of the Room Type reads
+
+        back: the `availability` of a Rate Plan is derived from it and cannot be set
+
+        directly.
+
+
+        A change object that fails validation is rejected on its own and reported
+
+        under `meta.warnings` while the others are still applied — such a response is
+
+        still `200 OK`, and `data` is empty only when every change object was
+
+        rejected.
+
+
+        Rate limited to ten requests a minute per Property. Rate and restriction
+
+        updates carry a limit of ten a minute of their own, so twenty ARI updates a
+
+        minute per Property in all; beyond that the request answers `429 Too Many
+
+        Requests`, and nothing is applied until the limit expires.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restrictions.UpdateAcknowledgement'
+              examples:
+                A single date and a weekend range:
+                  summary: A single date and a weekend range
+                  description: One date set outright, and a month-long range narrowed to Saturdays and Sundays.
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '429':
+          description: The client has sent too many requests and is being rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.TooManyRequests'
+      tags:
+      - ARI
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AvailabilityUpdateRequest'
-      responses:
-        '200':
-          description: Availability updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Envelope'
+              $ref: '#/components/schemas/Restrictions.AvailabilityUpdateRequest'
+            examples:
+              A single date and a weekend range:
+                summary: A single date and a weekend range
+                description: One date set outright, and a month-long range narrowed to Saturdays and Sundays.
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    room_type_id: 994d1375-dbbd-4072-8724-b2ab32ce781b
+                    date: '2026-10-01'
+                    availability: 5
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    room_type_id: 994d1375-dbbd-4072-8724-b2ab32ce781b
+                    date_from: '2026-10-02'
+                    date_to: '2026-10-31'
+                    days:
+                    - sa
+                    - su
+                    availability: 2
   /restrictions:
     get:
-      operationId: getRestrictions
-      tags:
-      - ARI
-      summary: Get rates and restrictions
-      description: Get rates and restrictions per rate plan for a property and date range.
+      operationId: Ari_listRestrictions
+      summary: Read rates and restrictions
+      description: 'Read rate and restriction values per Rate Plan and date. The answer maps each
+
+        Rate Plan of the Property to its dates, and each date to the values that were
+
+        asked for.
+
+
+        `filter[restrictions]` names those values; a name outside the set is ignored,
+
+        and a request whose every name is ignored answers each date as an empty
+
+        object. The dates come from either a single `filter[date]` or the range
+
+        `filter[date][gte]`–`filter[date][lte]`. Both the Property and the dates are
+
+        required.
+
+
+        A Rate Plan with no state for the dates asked for maps to an empty object,
+
+        and a Property the credentials cannot reach yields an empty `data` object
+
+        rather than `403 Forbidden` or `404 Not Found`.'
       parameters:
-      - name: filter[property_id]
-        in: query
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - name: filter[date][gte]
-        in: query
-        schema:
-          type: string
-          format: date
-      - name: filter[date][lte]
-        in: query
-        schema:
-          type: string
-          format: date
+      - $ref: '#/components/parameters/Restrictions.RestrictionListParams.propertyId'
+      - $ref: '#/components/parameters/Restrictions.RestrictionListParams.date'
+      - $ref: '#/components/parameters/Restrictions.RestrictionListParams.dateGte'
+      - $ref: '#/components/parameters/Restrictions.RestrictionListParams.dateLte'
+      - $ref: '#/components/parameters/Restrictions.RestrictionListParams.restrictions'
       responses:
         '200':
-          description: Rates and restrictions values.
+          description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
-    post:
-      operationId: updateRestrictions
+                $ref: '#/components/schemas/Restrictions.RestrictionsDocument'
+              examples:
+                Three dates of one rate plan:
+                  summary: Three dates of one rate plan
+                  description: Four values over a three-day range, one of them a date closed for sale.
+                  value:
+                    data:
+                      bab451e7-9ab1-4cc4-aa16-107bf7bbabb2:
+                        '2026-10-01':
+                          rate: '200.00'
+                          availability: 5
+                          min_stay_arrival: 1
+                          stop_sell: false
+                        '2026-10-02':
+                          rate: '200.00'
+                          availability: 5
+                          min_stay_arrival: 2
+                          stop_sell: false
+                        '2026-10-03':
+                          rate: '250.00'
+                          availability: 0
+                          min_stay_arrival: 2
+                          stop_sell: true
+        '400':
+          description: The request has missing or invalid arguments; `details` lists the reasons.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.BadRequestWithReasons'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
       tags:
       - ARI
+    post:
+      operationId: Ari_updateRestrictions
       summary: Update rates and restrictions
-      description: Update rate-plan rates and restrictions (rate, min/max stay, stop sell, closed to arrival/departure) for one or more dates.
+      description: 'Update rates and restrictions for specific Rate Plans and dates. Each change
+
+        object carries the Property and the Rate Plan it applies to, and targets
+
+        either a single `date` or the range `date_from`–`date_to`, optionally
+
+        narrowed to specific `days`. Sending both a `date` and the pair is refused,
+
+        and so is sending neither.
+
+
+        Changes are applied asynchronously: `data` carries one background task
+
+        reference per Property, and the new values are readable a moment later rather
+
+        than at once. See the Tasks resource to follow a task to completion.
+
+
+        Change objects are applied in the order given, so a broad range can be set
+
+        first and overridden by later, narrower objects.
+
+
+        A change object that fails validation is rejected on its own and reported
+
+        under `meta.warnings` while the others are still applied — such a response is
+
+        still `200 OK`, and `data` is empty only when every change object was
+
+        rejected. A range that starts in the past is clamped to today rather than
+
+        rejected, and the clamp is reported as a warning of its own.
+
+
+        Rate limited to ten requests a minute per Property. Availability updates
+
+        carry a limit of ten a minute of their own, so twenty ARI updates a minute
+
+        per Property in all; beyond that the request answers `429 Too Many
+
+        Requests`, and nothing is applied until the limit expires.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restrictions.UpdateAcknowledgement'
+              examples:
+                Full sync:
+                  summary: Full sync
+                  description: 'What a client pushes on connect: a rate and every writable restriction for one Rate Plan over a season, in a single change object.'
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+                One rate over a date range:
+                  summary: One rate over a date range
+                  description: 'The everyday change: one rate for every date of a range, sent in the minimum fraction of the currency.'
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+                Rate as a decimal string:
+                  summary: Rate as a decimal string
+                  description: The same change with the rate written as a decimal string rather than in minor units. Either form reads back as a decimal string.
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+                A single date, a range, and a range narrowed by days:
+                  summary: A single date, a range, and a range narrowed by days
+                  description: The three ways a change object is targeted, in one request. Later objects override earlier ones on the dates they share, so the weekend rate wins over the range rate.
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+                Per-occupancy rates:
+                  summary: Per-occupancy rates
+                  description: A Rate Plan sold per person takes `rates`, one entry per occupancy, instead of the single `rate`.
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+                One restriction, no rate:
+                  summary: One restriction, no rate
+                  description: Only the Property, the Rate Plan and the dates are required, so a change object can carry a restriction and no rate at all.
+                  value:
+                    data:
+                    - id: eb31d631-4fcc-478a-80c3-bf7a2acf0699
+                      type: task
+                    meta:
+                      message: Success
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+        '429':
+          description: The client has sent too many requests and is being rate limited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.TooManyRequests'
+      tags:
+      - ARI
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RestrictionsUpdateRequest'
-      responses:
-        '200':
-          description: Rates and restrictions updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Envelope'
+              $ref: '#/components/schemas/Restrictions.RestrictionsUpdateRequest'
+            examples:
+              Full sync:
+                summary: Full sync
+                description: 'What a client pushes on connect: a rate and every writable restriction for one Rate Plan over a season, in a single change object.'
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-01'
+                    date_to: '2026-12-31'
+                    rate: 20000
+                    min_stay_arrival: 2
+                    min_stay_through: 1
+                    max_stay: 14
+                    max_sell: 8
+                    closed_to_arrival: false
+                    closed_to_departure: false
+                    stop_sell: false
+              One rate over a date range:
+                summary: One rate over a date range
+                description: 'The everyday change: one rate for every date of a range, sent in the minimum fraction of the currency.'
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-01'
+                    date_to: '2026-10-31'
+                    rate: 20000
+              Rate as a decimal string:
+                summary: Rate as a decimal string
+                description: The same change with the rate written as a decimal string rather than in minor units. Either form reads back as a decimal string.
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-01'
+                    date_to: '2026-10-31'
+                    rate: '150.50'
+              A single date, a range, and a range narrowed by days:
+                summary: A single date, a range, and a range narrowed by days
+                description: The three ways a change object is targeted, in one request. Later objects override earlier ones on the dates they share, so the weekend rate wins over the range rate.
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date: '2026-10-01'
+                    rate: 18000
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-02'
+                    date_to: '2026-10-31'
+                    rate: 20000
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-02'
+                    date_to: '2026-10-31'
+                    days:
+                    - sa
+                    - su
+                    rate: 25000
+              Per-occupancy rates:
+                summary: Per-occupancy rates
+                description: A Rate Plan sold per person takes `rates`, one entry per occupancy, instead of the single `rate`.
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-10-01'
+                    date_to: '2026-10-31'
+                    rates:
+                    - occupancy: 1
+                      rate: 12100
+                    - occupancy: 2
+                      rate: 13200
+              One restriction, no rate:
+                summary: One restriction, no rate
+                description: Only the Property, the Rate Plan and the dates are required, so a change object can carry a restriction and no rate at all.
+                value:
+                  values:
+                  - property_id: 716305c4-561a-4561-a187-7f5b8aeb5920
+                    rate_plan_id: bab451e7-9ab1-4cc4-aa16-107bf7bbabb2
+                    date_from: '2026-12-24'
+                    date_to: '2026-12-26'
+                    stop_sell: true
 components:
+  parameters:
+    Restrictions.AvailabilityListParams.dateLte:
+      name: filter[date][lte]
+      in: query
+      required: false
+      description: Last date of the range to load, included. Required together with `filter[date][gte]` when `filter[date]` is not given.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.RestrictionListParams.date:
+      name: filter[date]
+      in: query
+      required: false
+      description: Single date to load. Give either this or the `gte`/`lte` pair.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.AvailabilityListParams.date:
+      name: filter[date]
+      in: query
+      required: false
+      description: Single date to load. Give either this or the `gte`/`lte` pair.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.RestrictionListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: true
+      description: UUID of the Property whose Rate Plans to read. Required, and only one id per request is allowed.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Restrictions.RestrictionListParams.dateLte:
+      name: filter[date][lte]
+      in: query
+      required: false
+      description: Last date of the range to load, included. Required together with `filter[date][gte]` when `filter[date]` is not given.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.AvailabilityListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: true
+      description: UUID of the Property whose Room Types to read. Required, and only one id per request is allowed.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Restrictions.RestrictionListParams.dateGte:
+      name: filter[date][gte]
+      in: query
+      required: false
+      description: First date of the range to load. Required together with `filter[date][lte]` when `filter[date]` is not given.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.AvailabilityListParams.dateGte:
+      name: filter[date][gte]
+      in: query
+      required: false
+      description: First date of the range to load. Required together with `filter[date][lte]` when `filter[date]` is not given.
+      schema:
+        type: string
+        format: date
+      explode: false
+    Restrictions.RestrictionListParams.restrictions:
+      name: filter[restrictions]
+      in: query
+      required: true
+      description: Which values to load. Required. Send them comma-separated, or repeat `filter[restrictions][]` once per value; a name outside the set is ignored.
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Restrictions.RestrictionKind'
+      explode: false
   schemas:
-    AvailabilityValue:
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Restrictions.RestrictionKind:
+      type: string
+      enum:
+      - availability
+      - availability_offset
+      - closed_to_arrival
+      - closed_to_departure
+      - max_availability
+      - max_sell
+      - max_stay
+      - min_stay_arrival
+      - min_stay_through
+      - rate
+      - stop_sell
+      - stop_sell_manual
+      description: 'A value that can be read back for a Rate Plan and date.
+
+        `availability` — rooms left to sell, derived from the Room Type.
+
+        `availability_offset` — amount subtracted from the Room Type availability before it is published.
+
+        `closed_to_arrival` — a stay may not begin on the date.
+
+        `closed_to_departure` — a stay may not end on the date.
+
+        `max_availability` — ceiling on published availability, or `null` for none.
+
+        `max_sell` — maximum rooms that may be sold on the date, or `null` for no limit.
+
+        `max_stay` — maximum nights a stay may run; `0` means no maximum.
+
+        `min_stay_arrival` — minimum nights a stay arriving on the date must run.
+
+        `min_stay_through` — minimum nights a stay covering the date must run.
+
+        `rate` — the price for the date.
+
+        `stop_sell` — whether the date is closed for sale.
+
+        `stop_sell_manual` — whether the date is closed because it was closed explicitly, rather than because its availability or rate is 0.'
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Restrictions.UpdateAcknowledgement:
+      type: object
+      required:
+      - data
+      - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restrictions.TaskReference'
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+            warnings:
+              type: array
+              items:
+                anyOf:
+                - $ref: '#/components/schemas/Restrictions.UpdateWarning'
+                - type: string
+              description: The change objects that were rejected, and why. Present only when there are any.
+          required:
+          - message
+      description: 'Acknowledgement of an ARI update. Changes are applied asynchronously: `data`
+
+        references the background tasks produced, one per Property, and is empty when
+
+        every change object was rejected. A rejected change object never fails the
+
+        request — it is reported under `meta.warnings` while the rest is applied, and
+
+        the status is still `200 OK`.'
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Restrictions.RestrictionValues:
+      type: object
+      properties:
+        availability:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Rooms available to sell for the Rate Plan, derived from the Room Type availability. Zero or more.
+        rate:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          description: Rate for the Rate Plan on this date, whichever form the request that set it used.
+          examples:
+          - '200.00'
+        min_stay_arrival:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Minimum nights a stay arriving on this date must run.
+        min_stay_through:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Minimum nights a stay covering this date must run.
+        max_stay:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Maximum nights a stay may run; `0` means no maximum.
+        closed_to_arrival:
+          type: boolean
+          description: Whether a stay may not begin on this date.
+        closed_to_departure:
+          type: boolean
+          description: Whether a stay may not end on this date.
+        stop_sell:
+          type: boolean
+          description: 'Whether the date is closed for sale. A date whose availability or rate is 0
+
+            is closed whether or not it was closed explicitly.'
+        stop_sell_manual:
+          type: boolean
+          description: Whether the date is closed because it was closed explicitly, rather than because its availability or rate is 0.
+        availability_offset:
+          type: integer
+          format: int32
+          description: Amount subtracted from the Room Type availability before it is published. Set through Channel Availability Rules, not here.
+        max_availability:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          description: Ceiling on published availability, or null for none. Set through Channel Availability Rules, not here.
+        max_sell:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          description: Maximum rooms that may be sold on this date, or null for no limit.
+      description: 'Values for one Rate Plan and date. Only the values named in
+
+        `filter[restrictions]` are present.'
+    Restrictions.RestrictionUpdate:
+      type: object
+      required:
+      - property_id
+      - rate_plan_id
+      properties:
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property.
+        rate_plan_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Rate Plan.
+        date:
+          type: string
+          format: date
+          description: Single date the change applies to. Past dates are refused. Give either this or the `date_from`–`date_to` pair, never both.
+        date_from:
+          type: string
+          format: date
+          description: Start of the applicable date range. Past dates are refused. Required together with `date_to` when `date` is not given.
+        date_to:
+          type: string
+          format: date
+          description: End of the applicable date range. Past dates are refused. Required together with `date_from` when `date` is not given.
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restrictions.Weekday'
+          description: Days of the week to affect within `date_from`–`date_to`; omitted means every day. Ignored when a single `date` is given.
+          examples:
+          - - sa
+            - su
+        rate:
+          allOf:
+          - $ref: '#/components/schemas/Restrictions.RateValue'
+          description: 'Rate for the date. Must be greater than 0 and within the Property''s price
+
+            limits, and cannot be unset once given — `null` and `0` are both refused.'
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restrictions.OccupancyRate'
+          description: Per-occupancy rates for a multi-occupancy Rate Plan, as an alternative to the single `rate`.
+        min_stay_arrival:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Minimum nights a stay arriving on the date must run. At least 1.
+        min_stay_through:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Minimum nights a stay covering the date must run. At least 1.
+        min_stay:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: 'Shorthand for whichever minimum stay the Property uses: the value is written
+
+            to `min_stay_arrival` or `min_stay_through` according to
+
+            `property.settings.min_stay_type`. A Property whose `min_stay_type` is
+
+            `both` refuses it — send the specific restriction instead.'
+        max_stay:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Maximum nights a stay may run; `0` means no maximum.
+        max_sell:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          description: Maximum rooms that may be sold on the date. `null` removes the limit.
+        closed_to_arrival:
+          type: boolean
+          description: Whether a stay may not begin on the date. `0` and `1` are accepted as boolean representations.
+        closed_to_departure:
+          type: boolean
+          description: Whether a stay may not end on the date. `0` and `1` are accepted as boolean representations.
+        stop_sell:
+          type: boolean
+          description: 'Whether to close the date for sale. `0` and `1` are accepted as boolean
+
+            representations. A date whose availability or rate is 0 stays closed even
+
+            when this is `false`.'
+      description: 'One rate/restrictions change. Targets either a single `date` or the range
+
+        `date_from`–`date_to`, optionally narrowed to specific `days`.'
+    Restrictions.RestrictionsDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          unevaluatedProperties:
+            type: object
+            unevaluatedProperties:
+              $ref: '#/components/schemas/Restrictions.RestrictionValues'
+      description: 'Answer of the Get Restrictions method: each key is a Rate Plan id, each Rate
+
+        Plan maps dates (`YYYY-MM-DD`) to the values requested for that date. A Rate
+
+        Plan with no state for the requested dates maps to an empty object, and a
+
+        Property the caller cannot reach yields an empty document.'
+    Restrictions.AvailabilityUpdate:
       type: object
       required:
       - property_id
@@ -129,23 +861,93 @@ components:
       - availability
       properties:
         property_id:
-          type: string
-          format: uuid
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property.
         room_type_id:
-          type: string
-          format: uuid
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Room Type.
         date:
           type: string
           format: date
+          description: Single date the change applies to. Give either this or the `date_from`–`date_to` pair, never both.
         date_from:
           type: string
           format: date
+          description: Start of the applicable date range. Required together with `date_to` when `date` is not given.
         date_to:
           type: string
           format: date
+          description: End of the applicable date range. Required together with `date_from` when `date` is not given.
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restrictions.Weekday'
+          description: Days of the week to affect within `date_from`–`date_to`; omitted means every day. Ignored when a single `date` is given.
+          examples:
+          - - sa
+            - su
         availability:
-          type: integer
-    RestrictionsUpdateRequest:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Number of rooms available to sell. A whole number, zero or more.
+          examples:
+          - 2
+      description: 'One availability change. Targets either a single `date` or the range
+
+        `date_from`–`date_to`.'
+    Restrictions.RateValue:
+      anyOf:
+      - $ref: '#/components/schemas/Common.Scalars.decimalString'
+      - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      description: 'A rate value. Two forms are accepted: a decimal amount written as a string
+
+        (`"200.00"`), or an integer in the minimum fraction of the currency (`20000`
+
+        for 200.00 USD). Both avoid floating-point issues, and a bare fractional
+
+        number is refused. Must be greater than 0.'
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Restrictions.Weekday:
+      type: string
+      enum:
+      - mo
+      - tu
+      - we
+      - th
+      - fr
+      - sa
+      - su
+      description: A day-of-week name in two-letter format.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Restrictions.RestrictionsUpdateRequest:
       type: object
       required:
       - values
@@ -153,17 +955,68 @@ components:
         values:
           type: array
           items:
-            $ref: '#/components/schemas/RestrictionValue'
-    Envelope:
+            $ref: '#/components/schemas/Restrictions.RestrictionUpdate'
+          description: 'The changes to apply, in order: a later change overrides an earlier one on the dates they share.'
+      description: Request body accepted when updating rates and restrictions.
+    Restrictions.TaskReference:
       type: object
+      required:
+      - id
+      - type
       properties:
-        data:
-          description: Resource object or array of resource objects.
-        meta:
-          type: object
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          examples:
+          - eb31d631-4fcc-478a-80c3-bf7a2acf0699
+        type:
+          type: string
+          enum:
+          - task
+      description: Reference to a background task produced by an update. Its progress can be read through the Tasks resource.
+    Common.Scalars.decimalString:
+      type: string
+      description: A decimal number as a string, e.g. `100.00`. Every monetary amount the API returns takes this form.
+      examples:
+      - '100.00'
+    Common.Errors.BadRequestWithReasons:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.BadRequestReasonsObject'
+      description: The request has missing or invalid arguments; `details` lists the reasons.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
         errors:
           type: object
-    AvailabilityUpdateRequest:
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Restrictions.AvailabilityUpdateRequest:
       type: object
       required:
       - values
@@ -171,46 +1024,111 @@ components:
         values:
           type: array
           items:
-            $ref: '#/components/schemas/AvailabilityValue'
-    RestrictionValue:
+            $ref: '#/components/schemas/Restrictions.AvailabilityUpdate'
+          description: 'The changes to apply, in order: a later change overrides an earlier one on the dates they share.'
+      description: Request body accepted when updating availability.
+    Common.Errors.BadRequestReasonsObject:
       type: object
       required:
-      - property_id
-      - rate_plan_id
+      - code
+      - title
+      - details
       properties:
-        property_id:
+        code:
           type: string
-          format: uuid
-        rate_plan_id:
+          enum:
+          - bad_request
+        title:
           type: string
-          format: uuid
-        date:
-          type: string
-          format: date
-        date_from:
-          type: string
-          format: date
-        date_to:
-          type: string
-          format: date
+          enum:
+          - Bad Request
+        details:
+          type: array
+          items:
+            type: string
+          description: Human-readable reasons the request could not be processed.
+          examples:
+          - - restrictions is required
+      description: Error object for a bad request, adding a list of human-readable reasons.
+    Common.Errors.TooManyRequests:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - http_too_many_requests
+            title:
+              type: string
+              enum:
+              - Too Many Requests
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The client has sent too many requests and is being rate limited.
+    Restrictions.OccupancyRate:
+      type: object
+      required:
+      - occupancy
+      - rate
+      properties:
+        occupancy:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Occupancy the rate applies to.
+          examples:
+          - 2
         rate:
-          type: string
-          description: Rate as a decimal string ("200.00") or integer in the minimum currency unit (20000 for $200).
-        min_stay_arrival:
-          type: integer
-        min_stay_through:
-          type: integer
-        max_stay:
-          type: integer
-        closed_to_arrival:
-          type: boolean
-        closed_to_departure:
-          type: boolean
-        stop_sell:
-          type: boolean
+          $ref: '#/components/schemas/Restrictions.RateValue'
+      description: A rate for a specific occupancy of a multi-occupancy Rate Plan.
+    Restrictions.AvailabilityDocument:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          unevaluatedProperties:
+            type: object
+            unevaluatedProperties:
+              type: integer
+              format: int32
+      description: 'Answer of the Get Availability method: each key is a Room Type id, each Room
+
+        Type maps dates (`YYYY-MM-DD`) to the number of rooms available to sell on
+
+        that date. The number can be negative. A Property the caller cannot reach
+
+        yields an empty document.'
+    Restrictions.UpdateWarning:
+      type: object
+      required:
+      - warning
+      properties:
+        warning:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each rejected field to the reasons it was rejected.
+          examples:
+          - rate:
+            - must be greater than 0
+      unevaluatedProperties: {}
+      description: 'A change object rejected from an update: the submitted fields echoed back —
+
+        they may hold arbitrarily invalid data — plus `warning` with the reason per
+
+        field.'
   securitySchemes:
-    userApiKey:
+    UserApiKeyAuth:
       type: apiKey
       in: header
       name: user-api-key
-      description: Channex API key passed in the `user-api-key` request header. Generate a key in the Channex application under your account settings.
+      description: API key for programmatic access, sent in the `user-api-key` header.

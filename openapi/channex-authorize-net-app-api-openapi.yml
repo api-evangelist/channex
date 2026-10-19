@@ -1,0 +1,285 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Authorize.net App API
+  version: 0.0.0
+  description: 'Authorize.net Application actions: tokenize a booking''s card into an Authorize.net customer profile.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Authorize.net App
+  description: 'Authorize.net Application actions: tokenize a booking''s card into an Authorize.net customer profile.'
+paths:
+  /bookings/{booking_id}/authorize_net_customer:
+    post:
+      operationId: BookingAuthorizeNet_createCustomer
+      summary: Create an Authorize.net customer profile
+      description: 'Tokenize the booking''s card into a reusable Authorize.net customer profile.
+
+        Requires the Authorize.net Application installed on the booking''s Property;
+
+        without it the request answers `403 Forbidden`.
+
+
+        Send `billing_details` only when the Property''s Authorize.net account
+
+        requires them.'
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        description: UUID of the booking whose card to tokenize.
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizeNet.AuthorizeNetCustomerDocument'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Authorize.net App
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizeNet.AuthorizeNetCustomerRequest'
+components:
+  schemas:
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    AuthorizeNet.AuthorizeNetBillingDetails:
+      type: object
+      properties:
+        first_name:
+          type: string
+          examples:
+          - John
+        last_name:
+          type: string
+          examples:
+          - Doe
+        address:
+          type: string
+          description: Street address.
+          examples:
+          - 173 Yonge St
+        city:
+          type: string
+          examples:
+          - Toronto
+        state:
+          type: string
+          description: State or province.
+          examples:
+          - 'ON'
+        zip:
+          type: string
+          description: Postal or ZIP code.
+          examples:
+          - M5B 2L7
+        country:
+          type: string
+          examples:
+          - Canada
+      description: Billing details of the card holder.
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    AuthorizeNet.AuthorizeNetCustomerRequest:
+      type: object
+      properties:
+        billing_details:
+          $ref: '#/components/schemas/AuthorizeNet.AuthorizeNetBillingDetails'
+      description: Request body of the customer profile endpoint. Send `billing_details` only when the Property's Authorize.net account requires them.
+    AuthorizeNet.AuthorizeNetCustomerDocument:
+      type: object
+      required:
+      - data
+      properties:
+        success:
+          type: boolean
+          description: Whether the request succeeded.
+        data:
+          type: object
+          properties:
+            customer_profile_id:
+              type: string
+              description: Identifier of the Authorize.net customer profile holding the booking's tokenized card.
+              examples:
+              - '524481282'
+          required:
+          - customer_profile_id
+      description: Response document carrying an Authorize.net customer profile reference.
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

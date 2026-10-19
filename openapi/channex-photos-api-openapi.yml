@@ -1,0 +1,838 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Photos API
+  version: 0.0.0
+  description: Upload and manage Property and RoomType photos.
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Photos
+  description: Upload and manage Property and RoomType photos.
+paths:
+  /photos:
+    get:
+      operationId: Photos_list
+      summary: List photos
+      description: List the photos of every property the API key can access. Results are paginated; the `meta` block carries the page, limit, total and ordering.
+      parameters:
+      - $ref: '#/components/parameters/Photos.PhotoListParams.propertyId'
+      - $ref: '#/components/parameters/Photos.PhotoListParams.roomTypeId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/Photos.PhotoListParams.orderPosition'
+      - $ref: '#/components/parameters/Photos.PhotoListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Photos.PhotoResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Photos
+    post:
+      operationId: Photos_create
+      summary: Create a photo
+      description: Attach an image to a property or one of its room types. The image is fetched and copied into Channex storage; the created photo is returned with `201 Created` and carries a placeholder `url` until the copy is stored — read the photo back for the final URL. Without `position` the photo is appended to the end of its list. A property holds at most 30 photos and each of its room types at most 10, counted separately; a request that would take a count past its limit is refused with `422 Unprocessable Entity` on `photos`, and deleting a photo frees its place.
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Photos.PhotoResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Photos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Photos.PhotoCreateRequest'
+  /photos/upload:
+    post:
+      operationId: PhotoUpload_upload
+      summary: Upload a photo file
+      description: Upload a photo file as the multipart part `photo`, returning a temporary URL to pass to create.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Photos.UploadResponse'
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Photos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Photos.PhotoUploadForm'
+            encoding:
+              photo:
+                contentType: image/bmp, image/gif, image/jpeg, image/jp2, image/png, image/webp
+  /photos/{id}:
+    get:
+      operationId: Photos_read
+      summary: Retrieve a photo
+      description: Retrieve a photo by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Photos.PhotoResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Photos
+    put:
+      operationId: Photos_update
+      summary: Update a photo
+      description: Update a photo by its identifier. Attributes absent from the request are left unchanged; `position` moves the photo within its list. The updated photo is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Photos.PhotoResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Photos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Photos.PhotoUpdateRequest'
+    delete:
+      operationId: Photos_delete
+      summary: Delete a photo
+      description: Delete a photo by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Photos
+components:
+  schemas:
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    Photos.PhotoCreate:
+      type: object
+      required:
+      - property_id
+      - url
+      properties:
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the photo belongs to. Cannot be changed after the photo is created.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        room_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the Room Type the photo belongs to, or null when the photo is attached at property level. Cannot be changed after the photo is created.
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/Photos.PhotoKind'
+          description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Position in the photo list of the property or, for a room type photo, of that room type. Positions run from `0` without gaps and `0` designates the cover photo. On create the photo is inserted at this position, or appended when omitted; on update it is moved there. The other photos shift to keep the positions contiguous, and a value past the end places the photo last.
+          examples:
+          - 0
+        author:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo author, or null. An empty string is stored as `null`.
+          examples:
+          - John Doe
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo description, or null. An empty string is stored as `null`.
+          examples:
+          - Room View
+        url:
+          type: string
+          format: uri
+          description: 'URL to fetch the image from: the temporary URL returned by the upload endpoint, passed unchanged, or any reachable image URL, scheme included. The image is copied into Channex storage, and responses carry that copy''s URL rather than this one. The same source URL can be attached to a property, or to one of its room types, only once; a duplicate is refused with `422 Unprocessable Entity` on `url`. Cannot be changed after the photo is created.'
+          examples:
+          - https://example.com/temporaryphotos/a66edb22-47da-4da8-bab5-3b6f4056256f.png
+      description: Photo attributes accepted when creating a photo.
+    Photos.PhotoResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - photo
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/Photos.Photo'
+      description: A photo as returned in responses.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    Photos.PhotoKind:
+      type: string
+      enum:
+      - photo
+      - ad
+      - menu
+      description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+    Photos.PhotoCreateRequest:
+      type: object
+      required:
+      - photo
+      properties:
+        photo:
+          $ref: '#/components/schemas/Photos.PhotoCreate'
+      description: Request body accepted when creating a photo.
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    Photos.PhotoUpdateRequest:
+      type: object
+      required:
+      - photo
+      properties:
+        photo:
+          $ref: '#/components/schemas/Photos.PhotoUpdate'
+      description: Request body accepted when updating a photo.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Photos.PhotoUploadForm:
+      type: object
+      properties:
+        photo: {}
+      required:
+      - photo
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    Photos.UploadResponse:
+      type: object
+      required:
+      - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Temporary URL of the uploaded file. Pass it to create unchanged; its host and path are not part of the contract.
+          examples:
+          - https://example.com/temporaryphotos/a66edb22-47da-4da8-bab5-3b6f4056256f.png
+      description: 'Result of uploading a photo file: the temporary URL to pass to create. Not a JSON:API resource.'
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    Photos.PhotoUpdate:
+      type: object
+      properties:
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the photo belongs to. Cannot be changed after the photo is created.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        room_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the Room Type the photo belongs to, or null when the photo is attached at property level. Cannot be changed after the photo is created.
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/Photos.PhotoKind'
+          description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Position in the photo list of the property or, for a room type photo, of that room type. Positions run from `0` without gaps and `0` designates the cover photo. On create the photo is inserted at this position, or appended when omitted; on update it is moved there. The other photos shift to keep the positions contiguous, and a value past the end places the photo last.
+          examples:
+          - 0
+        author:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo author, or null. An empty string is stored as `null`.
+          examples:
+          - John Doe
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo description, or null. An empty string is stored as `null`.
+          examples:
+          - Room View
+      description: 'Photo attributes accepted when updating a photo. Every attribute is optional; attributes absent from the request are left unchanged. `property_id` and `room_type_id` cannot be changed — send the current value or leave them out. The image itself cannot be changed: to replace it, delete the photo and create a new one.'
+    Photos.Photo:
+      type: object
+      required:
+      - id
+      - property_id
+      - room_type_id
+      - kind
+      - position
+      - author
+      - description
+      - url
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique photo identifier.
+          examples:
+          - cc673f90-8d65-498d-9ee7-b4b39f8df3ee
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: UUID of the Property the photo belongs to. Cannot be changed after the photo is created.
+          examples:
+          - 52397a6e-c330-44f4-a293-47042d3a3607
+        room_type_id:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          - type: 'null'
+          description: UUID of the Room Type the photo belongs to, or null when the photo is attached at property level. Cannot be changed after the photo is created.
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/Photos.PhotoKind'
+          description: 'Kind of photo: `photo` for the property or room type itself, `ad` for an advertising image, `menu` for a restaurant menu. Defaults to `photo`.'
+        position:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          description: Position in the photo list of the property or, for a room type photo, of that room type. Positions run from `0` without gaps and `0` designates the cover photo. On create the photo is inserted at this position, or appended when omitted; on update it is moved there. The other photos shift to keep the positions contiguous, and a value past the end places the photo last.
+          examples:
+          - 0
+        author:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo author, or null. An empty string is stored as `null`.
+          examples:
+          - John Doe
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Photo description, or null. An empty string is stored as `null`.
+          examples:
+          - Room View
+        url:
+          type: string
+          format: uri
+          description: URL of the image as served by Channex. The create response carries a placeholder image URL; once the source image has been fetched and stored, typically within a few seconds, the photo carries the URL of the stored copy — read the photo back to obtain it. A source image that cannot be fetched leaves the placeholder in place.
+          examples:
+          - https://images.channex.io/1747b751-28c0-47db-742a-40f62a186a00/
+      description: 'A photo as returned in responses: every attribute is present.'
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    Photos.PhotoListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order photos by creation time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Photos.PhotoListParams.orderPosition:
+      name: order[position]
+      in: query
+      required: false
+      description: Order photos by their display position.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Photos.PhotoListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the photos of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+    Photos.PhotoListParams.roomTypeId:
+      name: filter[room_type_id]
+      in: query
+      required: false
+      description: Return only the photos of this room type.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.

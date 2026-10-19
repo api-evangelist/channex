@@ -1,0 +1,1210 @@
+openapi: 3.2.0
+info:
+  title: Channex.io — Public Hotel Policies API
+  version: 0.0.0
+  description: 'Manage Hotel Policies — general property rules: check-in/out windows, guest limits, internet, parking, pets, and smoking. A policy belongs to one property, and the property points at it through `hotel_policy_id` (see the Properties resource); deleting the policy clears that reference.'
+servers:
+- url: https://app.channex.io/api/v1
+  description: Production server
+  variables: {}
+- url: https://staging.channex.io/api/v1
+  description: Staging server
+  variables: {}
+security:
+- UserApiKeyAuth: []
+tags:
+- name: Hotel Policies
+  description: 'Manage Hotel Policies — general property rules: check-in/out windows, guest limits, internet, parking, pets, and smoking. A policy belongs to one property, and the property points at it through `hotel_policy_id` (see the Properties resource); deleting the policy clears that reference.'
+paths:
+  /hotel_policies:
+    get:
+      operationId: HotelPolicies_list
+      summary: List hotel policies
+      description: List the hotel policies of every property the credentials can access. Results are paginated, 10 per page by default, and ordered by title ascending unless `order[…]` says otherwise; the `meta` block carries the page, limit, total and ordering.
+      parameters:
+      - $ref: '#/components/parameters/HotelPolicies.HotelPolicyListParams.propertyId'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.page'
+      - $ref: '#/components/parameters/Common.Pagination.PaginationParams.limit'
+      - $ref: '#/components/parameters/HotelPolicies.HotelPolicyListParams.orderTitle'
+      - $ref: '#/components/parameters/HotelPolicies.HotelPolicyListParams.orderInsertedAt'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HotelPolicies.HotelPolicyResource'
+                  meta:
+                    $ref: '#/components/schemas/Common.Pagination.PaginationMeta'
+                description: JSON:API document wrapping a collection of resources with pagination meta.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.InvalidNestedArguments'
+      tags:
+      - Hotel Policies
+    post:
+      operationId: HotelPolicies_create
+      summary: Create a hotel policy
+      description: Create a hotel policy for a property. `property_id` must name a property the credentials can access; any other value is refused with `403 Forbidden`. The created policy is returned with `201 Created`.
+      parameters: []
+      responses:
+        '201':
+          description: 201 Created response wrapping a resource body.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/HotelPolicies.HotelPolicyResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Hotel Policies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelPolicies.HotelPolicyCreateRequest'
+  /hotel_policies/options:
+    get:
+      operationId: HotelPolicies_options
+      summary: List hotel policy options
+      description: List hotel policies as lightweight `id` + `title` items for selectors, optionally narrowed to one property with `filter[property_id]`. Not paginated.
+      parameters:
+      - $ref: '#/components/parameters/HotelPolicies.HotelPolicyOptionsParams'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - type
+                      - id
+                      - attributes
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - hotel_policy
+                        id:
+                          $ref: '#/components/schemas/Common.Scalars.id'
+                        attributes:
+                          $ref: '#/components/schemas/Common.JsonApi.OptionAttributes'
+                      description: A lightweight JSON:API resource returned by `/options` endpoints — id + title only, no relationships or pagination.
+                description: A plain data-array envelope without pagination — used by reference/dictionary endpoints.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Hotel Policies
+  /hotel_policies/{id}:
+    get:
+      operationId: HotelPolicies_read
+      summary: Retrieve a hotel policy
+      description: Retrieve a hotel policy by its identifier.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/HotelPolicies.HotelPolicyResource'
+                description: JSON:API document wrapping a single resource.
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Hotel Policies
+    put:
+      operationId: HotelPolicies_update
+      summary: Update a hotel policy
+      description: Update a hotel policy by its identifier. Attributes absent from the request are left unchanged. The updated policy is returned.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/HotelPolicies.HotelPolicyResource'
+                description: JSON:API document wrapping a single resource.
+        '400':
+          description: The request body could not be parsed as JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.UnparsableRequest'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                - $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+                - $ref: '#/components/schemas/Common.Errors.ValidationError'
+      tags:
+      - Hotel Policies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelPolicies.HotelPolicyUpdateRequest'
+    delete:
+      operationId: HotelPolicies_delete
+      summary: Delete a hotel policy
+      description: Delete a hotel policy by its identifier. A property that points at the policy through `hotel_policy_id` has the reference cleared to `null`.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Common.Scalars.id'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.JsonApi.SuccessMessage'
+        '401':
+          description: Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Unauthorized'
+        '403':
+          description: The authenticated user lacks permission to perform this action.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.Forbidden'
+        '404':
+          description: The requested resource does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.NotFound'
+        '422':
+          description: The request has missing or invalid arguments; `details` lists the messages per argument.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Common.Errors.InvalidArguments'
+      tags:
+      - Hotel Policies
+components:
+  schemas:
+    HotelPolicies.ParkingType:
+      type: string
+      enum:
+      - on_site
+      - nearby
+      - none
+      description: Type of parking available at the property.
+    Common.Errors.ValidationError:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.ValidationErrorObject'
+      description: The request body failed validation.
+    Common.Errors.UnparsableRequest:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.UnparsableRequestObject'
+      description: The request body could not be parsed as JSON.
+    HotelPolicies.HotelPolicyResource:
+      type: object
+      required:
+      - type
+      - id
+      - attributes
+      properties:
+        type:
+          type: string
+          enum:
+          - hotel_policy
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        attributes:
+          $ref: '#/components/schemas/HotelPolicies.HotelPolicy'
+      description: A hotel policy resource. Carries attributes only — no relationships block.
+    Common.Scalars.nonNegativeInt:
+      type: integer
+      format: int32
+      minimum: 0
+    Common.Scalars.positiveInt:
+      type: integer
+      format: int32
+      minimum: 1
+    HotelPolicies.PetsPolicy:
+      type: string
+      enum:
+      - allowed
+      - not_allowed
+      - by_arrangements
+      - assistive_only
+      description: Policy towards pets.
+    HotelPolicies.HotelPolicyCreate:
+      type: object
+      required:
+      - title
+      - currency
+      - max_count_of_guests
+      - internet_access_type
+      - parking_type
+      - parking_reservation
+      - pets_policy
+      - smoking_policy
+      - checkin_from_time
+      - checkin_to_time
+      - checkout_from_time
+      - checkout_to_time
+      - property_id
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Hotel policy title.
+          examples:
+          - Hotel Policy
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Policy currency (ISO 4217).
+        max_count_of_guests:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Maximum number of guests that can stay at the property at the same time. Greater than zero.
+        internet_access_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessType'
+          description: Type of internet access available at the property. `none` clears `internet_access_coverage` and `internet_access_cost`; `wifi` and `wired` require `internet_access_coverage`.
+        parking_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingType'
+          description: Type of parking available at the property. `none` sets `parking_reservation` to `not_available`.
+        parking_reservation:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingReservation'
+          description: Whether parking must be reserved in advance. Stored as `not_available` when `parking_type` is `none`, whatever value is sent.
+        pets_policy:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.PetsPolicy'
+          description: Policy towards pets. `not_allowed` clears `pets_non_refundable_fee` and `pets_refundable_deposit`.
+        smoking_policy:
+          $ref: '#/components/schemas/HotelPolicies.SmokingPolicy'
+        checkin_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-in time.
+          examples:
+          - '14:00'
+        checkin_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-in time.
+          examples:
+          - '23:30'
+        checkout_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-out time.
+          examples:
+          - '11:00'
+        checkout_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-out time.
+          examples:
+          - '12:00'
+        internet_access_coverage:
+          anyOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessCoverage'
+          - type: 'null'
+          description: Where internet access is available. Required when `internet_access_type` is `wifi` or `wired`; `null` when it is `none`.
+        internet_access_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of internet access as a decimal string, zero or greater, or `null` when access is free. Cleared when `internet_access_type` is `none`.
+        parking_is_private:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the parking is private, or null when not set.
+        parking_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of parking as a decimal string, zero or greater, or `null` when parking is free. Kept when `parking_type` is `none`.
+        pets_non_refundable_fee:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Non-refundable fee for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        pets_refundable_deposit:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Refundable deposit for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        is_adults_only:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property accepts adults only — `true` when children are not accommodated — or null when not set.
+        self_checkin_checkout:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether self check-in/check-out is available, or null when not set.
+        infant_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 10
+          description: Maximum age at which a guest counts as an infant, at most 10, or null when not set.
+        children_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 21
+          description: Maximum age at which a guest counts as a child, at most 21, or null when not set.
+        enhanced_cleaning_practices:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property follows enhanced cleaning practices, or null when not set.
+        cleaning_practices_description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Description of the property's cleaning practices, or null when not set.
+        partner_hygiene_link:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Link to the partner's hygiene guidelines, or null when not set. Must be an absolute URL carrying a scheme and a host.
+          examples:
+          - https://example.com/hygiene
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the Property the policy belongs to. Cannot be changed after the policy is created: a different value is refused, the same value is accepted.'
+      description: Hotel policy attributes accepted when creating a hotel policy.
+    HotelPolicies.SmokingPolicy:
+      type: string
+      enum:
+      - no_smoking
+      - permitted_areas_only
+      - allowed
+      description: Policy towards smoking.
+    HotelPolicies.HotelPolicyUpdateRequest:
+      type: object
+      required:
+      - hotel_policy
+      properties:
+        hotel_policy:
+          $ref: '#/components/schemas/HotelPolicies.HotelPolicyUpdate'
+      description: Request body accepted when updating a hotel policy.
+    HotelPolicies.HotelPolicy:
+      type: object
+      required:
+      - id
+      - title
+      - currency
+      - max_count_of_guests
+      - internet_access_type
+      - parking_type
+      - parking_reservation
+      - pets_policy
+      - smoking_policy
+      - checkin_from_time
+      - checkin_to_time
+      - checkout_from_time
+      - checkout_to_time
+      - internet_access_coverage
+      - internet_access_cost
+      - parking_is_private
+      - parking_cost
+      - pets_non_refundable_fee
+      - pets_refundable_deposit
+      - is_adults_only
+      - self_checkin_checkout
+      - infant_max_age
+      - children_max_age
+      - enhanced_cleaning_practices
+      - cleaning_practices_description
+      - partner_hygiene_link
+      properties:
+        id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: Unique hotel policy identifier.
+          examples:
+          - cfe101bf-126c-4031-8d73-27739929329a
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Hotel policy title.
+          examples:
+          - Hotel Policy
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Policy currency (ISO 4217).
+        max_count_of_guests:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Maximum number of guests that can stay at the property at the same time. Greater than zero.
+        internet_access_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessType'
+          description: Type of internet access available at the property. `none` clears `internet_access_coverage` and `internet_access_cost`; `wifi` and `wired` require `internet_access_coverage`.
+        parking_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingType'
+          description: Type of parking available at the property. `none` sets `parking_reservation` to `not_available`.
+        parking_reservation:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingReservation'
+          description: Whether parking must be reserved in advance. Stored as `not_available` when `parking_type` is `none`, whatever value is sent.
+        pets_policy:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.PetsPolicy'
+          description: Policy towards pets. `not_allowed` clears `pets_non_refundable_fee` and `pets_refundable_deposit`.
+        smoking_policy:
+          $ref: '#/components/schemas/HotelPolicies.SmokingPolicy'
+        checkin_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-in time.
+          examples:
+          - '14:00'
+        checkin_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-in time.
+          examples:
+          - '23:30'
+        checkout_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-out time.
+          examples:
+          - '11:00'
+        checkout_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-out time.
+          examples:
+          - '12:00'
+        internet_access_coverage:
+          anyOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessCoverage'
+          - type: 'null'
+          description: Where internet access is available. Required when `internet_access_type` is `wifi` or `wired`; `null` when it is `none`.
+        internet_access_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of internet access as a decimal string, zero or greater, or `null` when access is free. Cleared when `internet_access_type` is `none`.
+        parking_is_private:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the parking is private, or null when not set.
+        parking_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of parking as a decimal string, zero or greater, or `null` when parking is free. Kept when `parking_type` is `none`.
+        pets_non_refundable_fee:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Non-refundable fee for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        pets_refundable_deposit:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Refundable deposit for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        is_adults_only:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property accepts adults only — `true` when children are not accommodated — or null when not set.
+        self_checkin_checkout:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether self check-in/check-out is available, or null when not set.
+        infant_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 10
+          description: Maximum age at which a guest counts as an infant, at most 10, or null when not set.
+        children_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 21
+          description: Maximum age at which a guest counts as a child, at most 21, or null when not set.
+        enhanced_cleaning_practices:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property follows enhanced cleaning practices, or null when not set.
+        cleaning_practices_description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Description of the property's cleaning practices, or null when not set.
+        partner_hygiene_link:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Link to the partner's hygiene guidelines, or null when not set. Must be an absolute URL carrying a scheme and a host.
+          examples:
+          - https://example.com/hygiene
+      description: 'A hotel policy as returned in responses: every attribute is present.'
+    Common.Errors.InvalidArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid argument to the list of validation messages for that argument.
+          examples:
+          - id:
+            - can't be blank
+      description: Error object for invalid request arguments, adding per-argument messages.
+    HotelPolicies.HotelPolicyUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Hotel policy title.
+          examples:
+          - Hotel Policy
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.currency'
+          description: Policy currency (ISO 4217).
+        max_count_of_guests:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Maximum number of guests that can stay at the property at the same time. Greater than zero.
+        internet_access_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessType'
+          description: Type of internet access available at the property. `none` clears `internet_access_coverage` and `internet_access_cost`; `wifi` and `wired` require `internet_access_coverage`.
+        parking_type:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingType'
+          description: Type of parking available at the property. `none` sets `parking_reservation` to `not_available`.
+        parking_reservation:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.ParkingReservation'
+          description: Whether parking must be reserved in advance. Stored as `not_available` when `parking_type` is `none`, whatever value is sent.
+        pets_policy:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.PetsPolicy'
+          description: Policy towards pets. `not_allowed` clears `pets_non_refundable_fee` and `pets_refundable_deposit`.
+        smoking_policy:
+          $ref: '#/components/schemas/HotelPolicies.SmokingPolicy'
+        checkin_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-in time.
+          examples:
+          - '14:00'
+        checkin_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-in time.
+          examples:
+          - '23:30'
+        checkout_from_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Earliest check-out time.
+          examples:
+          - '11:00'
+        checkout_to_time:
+          allOf:
+          - $ref: '#/components/schemas/HotelPolicies.clockTime'
+          description: Latest check-out time.
+          examples:
+          - '12:00'
+        internet_access_coverage:
+          anyOf:
+          - $ref: '#/components/schemas/HotelPolicies.InternetAccessCoverage'
+          - type: 'null'
+          description: Where internet access is available. Required when `internet_access_type` is `wifi` or `wired`; `null` when it is `none`.
+        internet_access_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of internet access as a decimal string, zero or greater, or `null` when access is free. Cleared when `internet_access_type` is `none`.
+        parking_is_private:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the parking is private, or null when not set.
+        parking_cost:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Cost of parking as a decimal string, zero or greater, or `null` when parking is free. Kept when `parking_type` is `none`.
+        pets_non_refundable_fee:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Non-refundable fee for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        pets_refundable_deposit:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.decimalString'
+          - type: 'null'
+          description: Refundable deposit for pets accommodation as a decimal string, or `null` when not charged. Cleared when `pets_policy` is `not_allowed`.
+        is_adults_only:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property accepts adults only — `true` when children are not accommodated — or null when not set.
+        self_checkin_checkout:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether self check-in/check-out is available, or null when not set.
+        infant_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 10
+          description: Maximum age at which a guest counts as an infant, at most 10, or null when not set.
+        children_max_age:
+          anyOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          - type: 'null'
+          maximum: 21
+          description: Maximum age at which a guest counts as a child, at most 21, or null when not set.
+        enhanced_cleaning_practices:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether the property follows enhanced cleaning practices, or null when not set.
+        cleaning_practices_description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Description of the property's cleaning practices, or null when not set.
+        partner_hygiene_link:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Link to the partner's hygiene guidelines, or null when not set. Must be an absolute URL carrying a scheme and a host.
+          examples:
+          - https://example.com/hygiene
+        property_id:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.id'
+          description: 'UUID of the Property the policy belongs to. Cannot be changed after the policy is created: a different value is refused, the same value is accepted.'
+      description: Hotel policy attributes accepted when updating a hotel policy. Every attribute is optional; attributes absent from the request are left unchanged. `property_id` cannot be changed — send the current value or leave it out.
+    Common.Errors.NotFound:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - resource_not_found
+            title:
+              type: string
+              enum:
+              - Resource Not Found
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The requested resource does not exist.
+    Common.Errors.UnparsableRequestObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            type: string
+          description: Maps the part of the request that could not be parsed to the reason.
+          examples:
+          - body: malformed JSON
+      description: Error object for an unparsable request body, naming the malformed part.
+    Common.Scalars.currency:
+      type: string
+      minLength: 3
+      maxLength: 3
+      description: ISO 4217 alphabetic currency code. See the `/currencies` endpoint for supported values.
+      examples:
+      - USD
+    Common.Scalars.id:
+      type: string
+      format: uuid
+      examples:
+      - 716305c4-561a-4561-a187-7f5b8aeb5920
+    HotelPolicies.clockTime:
+      type: string
+      pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
+      description: A time of day as `HH:MM` on a 24-hour clock, e.g. `14:00`.
+      examples:
+      - '14:00'
+    Common.Pagination.PaginationMeta:
+      type: object
+      required:
+      - page
+      - limit
+      - total
+      - order_by
+      - order_direction
+      properties:
+        page:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          description: Page returned, counted from 1.
+          examples:
+          - 1
+        limit:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.positiveInt'
+          maximum: 100
+          description: Number of items per page. At most 100 — requests with `pagination[limit]` above 100 are rejected with `422 Unprocessable Entity`.
+          examples:
+          - 10
+        total:
+          allOf:
+          - $ref: '#/components/schemas/Common.Scalars.nonNegativeInt'
+          examples:
+          - 1
+        order_by:
+          type: string
+          description: Field the results are ordered by.
+          examples:
+          - inserted_at
+        order_direction:
+          allOf:
+          - $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+          description: Direction the results are ordered in.
+          examples:
+          - desc
+      description: Pagination and ordering metadata attached to list responses.
+    Common.Scalars.decimalString:
+      type: string
+      description: A decimal number as a string, e.g. `100.00`. Every monetary amount the API returns takes this form.
+      examples:
+      - '100.00'
+    Common.Errors.ValidationErrorObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - validation_error
+        title:
+          type: string
+          enum:
+          - Validation Error
+        details:
+          type: object
+          unevaluatedProperties:
+            type: array
+            items:
+              type: string
+          description: Maps each invalid field to the list of validation messages for that field.
+          examples:
+          - field_name:
+            - can't be blank
+      description: Error object for a failed validation, adding per-field messages.
+    Common.JsonApi.SuccessMessage:
+      type: object
+      required:
+      - meta
+      properties:
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              examples:
+              - Success
+          required:
+          - message
+      description: Success response carrying only a meta message (no resource body).
+    Common.Errors.Unauthorized:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - unauthorized
+            title:
+              type: string
+              enum:
+              - Unauthorized
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: Authentication credentials are missing or invalid.
+    Common.Errors.InvalidNestedArgumentsObject:
+      type: object
+      required:
+      - code
+      - title
+      - details
+      properties:
+        code:
+          type: string
+          enum:
+          - bad_request
+        title:
+          type: string
+          enum:
+          - Bad Request
+        details:
+          type: object
+          unevaluatedProperties:
+            anyOf:
+            - type: array
+              items:
+                type: string
+            - type: object
+              unevaluatedProperties:
+                type: array
+                items:
+                  type: string
+          description: 'Maps each invalid argument to its validation messages: a list of messages for a flat argument, and the messages per argument inside the group for a nested one.'
+          examples:
+          - filter:
+            - date must be specified
+            pagination:
+              limit:
+              - must be less than or equal to 100
+      description: Error object for invalid request arguments, adding per-argument messages and, for an argument that is a group, the messages inside it.
+    Common.Errors.InvalidArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidArgumentsObject'
+      description: The request has missing or invalid arguments; `details` lists the messages per argument.
+    Common.Errors.Forbidden:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          type: object
+          required:
+          - code
+          - title
+          properties:
+            code:
+              type: string
+              enum:
+              - forbidden
+            title:
+              type: string
+              enum:
+              - Forbidden
+          description: 'Shape of a single JSON:API error object: a stable machine code plus a human-readable title.'
+      description: The authenticated user lacks permission to perform this action.
+    HotelPolicies.InternetAccessCoverage:
+      type: string
+      enum:
+      - entire_property
+      - public_areas
+      - all_rooms
+      - some_rooms
+      - business_centre
+      description: Where internet access is available.
+    HotelPolicies.HotelPolicyCreateRequest:
+      type: object
+      required:
+      - hotel_policy
+      properties:
+        hotel_policy:
+          $ref: '#/components/schemas/HotelPolicies.HotelPolicyCreate'
+      description: Request body accepted when creating a hotel policy.
+    HotelPolicies.InternetAccessType:
+      type: string
+      enum:
+      - none
+      - wifi
+      - wired
+      description: Type of internet access available at the property.
+    Common.JsonApi.OptionAttributes:
+      type: object
+      required:
+      - id
+      - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Common.Scalars.id'
+        title:
+          type: string
+          examples:
+          - My Hotel
+      description: 'Attributes of a lightweight `/options` item: identifier and display title.'
+    HotelPolicies.ParkingReservation:
+      type: string
+      enum:
+      - not_available
+      - not_needed
+      - needed
+      description: Whether parking must be reserved in advance.
+    Common.Errors.InvalidNestedArguments:
+      type: object
+      required:
+      - errors
+      properties:
+        errors:
+          $ref: '#/components/schemas/Common.Errors.InvalidNestedArgumentsObject'
+      description: The request has invalid arguments; `details` lists the messages per argument, one level deeper for an argument that is itself a group.
+    Common.Pagination.OrderDirection:
+      type: string
+      enum:
+      - asc
+      - desc
+      description: Sort direction for list results.
+  parameters:
+    HotelPolicies.HotelPolicyListParams.orderTitle:
+      name: order[title]
+      in: query
+      required: false
+      description: Order policies by title. Applied by default, ascending.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    HotelPolicies.HotelPolicyOptionsParams:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only the policies of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    HotelPolicies.HotelPolicyListParams.orderInsertedAt:
+      name: order[inserted_at]
+      in: query
+      required: false
+      description: Order policies by creation time.
+      schema:
+        $ref: '#/components/schemas/Common.Pagination.OrderDirection'
+      explode: false
+    HotelPolicies.HotelPolicyListParams.propertyId:
+      name: filter[property_id]
+      in: query
+      required: false
+      description: Return only policies of this property.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.id'
+      explode: false
+    Common.Pagination.PaginationParams.page:
+      name: pagination[page]
+      in: query
+      required: false
+      description: Page to return, counted from 1.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+      explode: false
+    Common.Pagination.PaginationParams.limit:
+      name: pagination[limit]
+      in: query
+      required: false
+      description: Number of items per page. Maximum is 100.
+      schema:
+        $ref: '#/components/schemas/Common.Scalars.positiveInt'
+        maximum: 100
+      explode: false
+  securitySchemes:
+    UserApiKeyAuth:
+      type: apiKey
+      in: header
+      name: user-api-key
+      description: API key for programmatic access, sent in the `user-api-key` header.
