@@ -2335,3 +2335,9 @@ components:
       in: header
       name: user-api-key
       description: API key for programmatic access, sent in the `user-api-key` header.
+x-provenance:
+  method: harvested
+  publisher: Channex
+  source: https://openapi.channex.io/public/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
