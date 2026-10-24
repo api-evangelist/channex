@@ -232,6 +232,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Application
+  tags_raw:
   - Applications
   properties:
   - type: OpenAPI
@@ -571,6 +573,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Group
+  tags_raw:
   - Groups
   properties:
   - type: OpenAPI
@@ -808,6 +812,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Task
+  tags_raw:
   - Tasks
   properties:
   - type: OpenAPI
@@ -870,6 +876,8 @@ apis:
   humanURL: https://docs.channex.io/api-v.1-documentation/hotels-collection
   baseURL: https://secure.channex.io/api/v1
   tags:
+  - Tax
+  tags_raw:
   - Taxes
   properties:
   - type: OpenAPI
