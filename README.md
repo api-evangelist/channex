@@ -1,4 +1,4 @@
-# Channex (channex)
+# Channex
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,170 +66,130 @@
 
 Channex is a white-label hotel channel manager API that gives Property Management Systems and booking engines a single JSON-based REST integration to distribute availability, rates, and restrictions (ARI) to Booking.com, Airbnb, Expedia, and 50+ other OTAs, and to receive bookings back in real time via webhooks.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/channex/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/channex/refs/heads/main/apis.yml)
+**Areas:** Hospitality · Channel Manager · Hotel Distribution · OTA · Booking
 
-## Tags
+## Channex on APIs.io
 
-- Hospitality
-- Channel Manager
-- Hotel Distribution
-- OTA
-- Bookings
+Everything profiled for Channex is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/channex/](https://apis.io/providers/channex/)** — or go straight to one of the APIs or properties below.
 
-## Timestamps
+### APIs (7)
 
-- **Created:** 2026-06-25
-- **Modified:** 2026-06-25
+- [Channex ARI API](https://apis.io/apis/channex/channex-ari-api/) — Availability, Rates, and Inventory (restrictions).
+- [Channex Bookings API](https://apis.io/apis/channex/channex-bookings-api/) — Retrieve and manage bookings and booking revisions.
+- [Channex Channels API](https://apis.io/apis/channex/channex-channels-api/) — Manage OTA distribution channels.
+- [Channex Properties API](https://apis.io/apis/channex/channex-properties-api/) — Manage properties (hotels, apartments, vacation rentals).
+- [Channex Rate Plans API](https://apis.io/apis/channex/channex-rate-plans-api/) — Manage pricing plans for room types.
+- [Channex Room Types API](https://apis.io/apis/channex/channex-room-types-api/) — Manage room types under a property.
+- [Channex Webhooks API](https://apis.io/apis/channex/channex-webhooks-api/) — Manage event notification callbacks.
 
-## APIs
+### Published properties
 
-### Channex Properties API
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-Create, read, update, and delete properties (hotels, apartments, vacation rentals) including location, currency, content, photos, facilities, and settings.
+#### Agentic access (1)
 
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/hotels-collection](https://docs.channex.io/api-v.1-documentation/hotels-collection)
-- **Base URL:** `https://secure.channex.io/api/v1`
+Which operations an agent can call, which act, and which need a human in the loop.
 
-#### Tags
+- [Channex Agentic Access](https://apis.io/agentic-access/channex/channex-agentic-access/)
 
-- Properties
-- Hotels
-- Inventory
+#### Collections (8)
 
-#### Properties
+Postman and Open Collection request collections.
 
-- [Documentation](https://docs.channex.io/api-v.1-documentation/hotels-collection)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+- [Channex API](https://apis.io/collections/channex/open-channex/)
+- [Channex ARI API](https://apis.io/collections/channex/open-channex-ari-api/)
+- [Channex ARI Bookings API](https://apis.io/collections/channex/open-channex-bookings-api/)
+- [Channex ARI Channels API](https://apis.io/collections/channex/open-channex-channels-api/)
+- [Channex ARI Properties API](https://apis.io/collections/channex/open-channex-properties-api/)
+- [Channex ARI Rate Plans API](https://apis.io/collections/channex/open-channex-rate-plans-api/)
+- [Channex ARI Room Types API](https://apis.io/collections/channex/open-channex-room-types-api/)
+- [Channex ARI Webhooks API](https://apis.io/collections/channex/open-channex-webhooks-api/)
 
-### Channex Room Types API
+#### Security (2)
 
-Manage room types under a property, including counts of rooms, occupancy (adults, children, infants), default occupancy, room kind (room or dorm), and content.
+Authentication, trust centre, and vulnerability disclosure.
 
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/room-types-collection](https://docs.channex.io/api-v.1-documentation/room-types-collection)
-- **Base URL:** `https://secure.channex.io/api/v1`
+- [Channex Authentication](https://apis.io/security/channex/channex-authentication/)
+- [Channex Domain Security](https://apis.io/security/channex/channex-domain-security/)
 
-#### Tags
+#### Plans and pricing (2)
 
-- Room Types
-- Inventory
+Published plans, tiers and prices.
 
-#### Properties
+- [Channex Plans Pricing](https://apis.io/plans/channex/channex-plans-pricing/)
+- [Channex Price Estimates](https://apis.io/plans/channex/channex-price-estimates/)
 
-- [Documentation](https://docs.channex.io/api-v.1-documentation/room-types-collection)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+#### Rate limits (1)
 
-### Channex Rate Plans API
+Published request limits.
 
-Manage pricing plans for room types - sell mode (per room / per person), rate mode (manual, derived, auto, cascade), occupancy price options, meal types, and stay restrictions.
+- [Channex Rate Limits](https://apis.io/rate-limits/channex/channex-rate-limits/)
 
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/rate-plans-collection](https://docs.channex.io/api-v.1-documentation/rate-plans-collection)
-- **Base URL:** `https://secure.channex.io/api/v1`
+#### FinOps (1)
 
-#### Tags
+What the API costs to run, by operation.
 
-- Rate Plans
-- Pricing
+- [Channex Finops](https://apis.io/finops/channex/channex-finops/)
 
-#### Properties
+## Where to find this API
 
-- [Documentation](https://docs.channex.io/api-v.1-documentation/rate-plans-collection)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
-### Channex Availability and Restrictions (ARI) API
-
-Read and push Availability, Rates, and Inventory (ARI) - update room-type availability and rate-plan rates and restrictions (min/max stay, stop sell, closed to arrival/departure) by date or date range.
-
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/ari](https://docs.channex.io/api-v.1-documentation/ari)
-- **Base URL:** `https://secure.channex.io/api/v1`
-
-#### Tags
-
-- ARI
-- Availability
-- Restrictions
-
-#### Properties
-
-- [Documentation](https://docs.channex.io/api-v.1-documentation/ari)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Channex Bookings API
-
-Retrieve bookings and booking revisions, consume the revisions feed for PMS sync, acknowledge revisions, and report no-show or invalid-card outcomes.
-
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/bookings-collection](https://docs.channex.io/api-v.1-documentation/bookings-collection)
-- **Base URL:** `https://secure.channex.io/api/v1`
-
-#### Tags
-
-- Bookings
-- Reservations
-
-#### Properties
-
-- [Documentation](https://docs.channex.io/api-v.1-documentation/bookings-collection)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Channex Channels API
-
-List, add, configure, and remove distribution channels (OTA connections such as Booking.com, Airbnb, and Expedia) including channel settings and room/rate mappings. Available to white-label accounts.
-
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/channel-api](https://docs.channex.io/api-v.1-documentation/channel-api)
-- **Base URL:** `https://secure.channex.io/api/v1`
-
-#### Tags
-
-- Channels
-- OTA
-- Distribution
-
-#### Properties
-
-- [Documentation](https://docs.channex.io/api-v.1-documentation/channel-api)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-### Channex Webhooks API
-
-Register callback URLs to receive real-time event notifications (ari, booking, message, sync_error, channel, and review events) filtered by event mask and property, with custom headers and a test endpoint.
-
-- **Human URL:** [https://docs.channex.io/api-v.1-documentation/webhook-collection](https://docs.channex.io/api-v.1-documentation/webhook-collection)
-- **Base URL:** `https://secure.channex.io/api/v1`
-
-#### Tags
-
-- Webhooks
-- Events
-
-#### Properties
-
-- [Documentation](https://docs.channex.io/api-v.1-documentation/webhook-collection)
-- [OpenAPI](openapi/channex-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/channex.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/channex.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-
-## Common Properties
-
-- [GitHub Organization](https://github.com/ChannexIO)
-- [LinkedIn](https://www.linkedin.com/company/channex-io)
 - [Website](https://channex.io/)
 - [Documentation](https://docs.channex.io/)
-- [Plans](plans/channex-plans-pricing.yml)
-- [Rate Limits](rate-limits/channex-rate-limits.yml)
-- [Fin Ops](finops/channex-finops.yml)
+- [Pricing](https://channex.io/pricing)
+- [Blog](https://channex.io/blog)
+- [GitHub](https://github.com/ChannexIO)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 35.7** — thin · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 66.1 |
+| Contract quality | 49.8 |
+| Contract governance | 0.0 |
+| Operational transparency | 34.2 |
+| Developer ergonomics | 25.0 |
+| Access clarity | 42.1 |
+
+**Agent readiness 21.5** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 11.8** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/channex/](https://apis.io/providers/channex/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Channex: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/channex/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
